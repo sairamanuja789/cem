@@ -36,6 +36,7 @@ TEST_CASE("quantities are stored in SI units", "[COR-001]") {
              WithinRel(3.0 / 3600.0, 1e-15));
 
   const Area area = 2.0 * isq::area[mp_units::square(si::metre)];
+  const Volume volume = 1500.0 * isq::volume[mp_units::cubic(si::milli<si::metre>)];
   const Power power = 3.0 * isq::power[si::watt];
   const Density density = 1.2 * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)];
   const AngularVelocity omega = 300.0 * isq::angular_velocity[si::radian / si::second];
@@ -46,6 +47,7 @@ TEST_CASE("quantities are stored in SI units", "[COR-001]") {
   const Angle angle = 0.5 * isq::angular_measure[si::radian];
   const Ratio ratio = 0.5 * mp_units::one;
   CHECK(area.numerical_value_in(mp_units::square(si::metre)) == 2.0);
+  CHECK_THAT(volume.numerical_value_in(mp_units::cubic(si::metre)), WithinRel(1.5e-6, 1e-15));
   CHECK(power.numerical_value_in(si::watt) == 3.0);
   CHECK(density.numerical_value_in(si::kilogram / mp_units::cubic(si::metre)) == 1.2);
   CHECK(omega.numerical_value_in(si::radian / si::second) == 300.0);

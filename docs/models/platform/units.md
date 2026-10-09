@@ -26,6 +26,7 @@ Code: `kernel/cemkit/core/units.hpp`, `kernel/cemkit/core/quantity.hpp`. Library
 | --- | --- | --- | --- |
 | `Length` | `isq::length` | m | quantity |
 | `Area` | `isq::area` | m² | quantity |
+| `Volume` | `isq::volume` | m³ | quantity |
 | `VolumeFlowRate` | `units::volume_flow_rate` = volume / time | m³/s | quantity |
 | `Pressure` | `isq::pressure` | Pa | quantity (a pressure difference) |
 | `AbsolutePressure` | `isq::pressure` from `units::absolute_zero_pressure` | Pa | point |

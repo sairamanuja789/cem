@@ -74,6 +74,8 @@ def _call(check: dict[str, Any]) -> Any:
 
 
 def _numbers(result: Any) -> Any:
+    if isinstance(result, l0.FanDynamicPressure):
+        return result.pa
     if isinstance(result, l0.Derived):
         assert result.provenance == "derived"
         return result.value.pa
@@ -254,11 +256,37 @@ def test_free_delivery_converts_to_the_dynamic_pressure_alone() -> None:
     # Exact == because this copies the reference's operation order; the C++ port (T08) must keep
     # that order or compare with a tolerance. -0.0 is the same value as 0.0 and is accepted.
     flow, d_duct = 0.05, 0.12
-    velocity = flow / (math.pi * d_duct**2 / 4.0)
+    velocity = flow / (math.pi * (d_duct * d_duct) / 4.0)
     for zero in (0.0, -0.0):
         result = l0.fan_total_from_static(FanStaticPressure(zero), flow, d_duct, AIR)
         assert isinstance(result, l0.Derived)
-        assert result.value.pa == 0.5 * AIR.density * velocity**2
+        assert result.value.pa == 0.5 * AIR.density * (velocity * velocity)
+
+
+@pytest.mark.req("SPEC-004")
+def test_fan_dynamic_pressure_is_typed_and_equals_the_free_delivery_total() -> None:
+    # l0_010: Q = 0.05 m3/s, D_duct = 0.12 m gives p_d = 11.53153903 Pa, the free-delivery total.
+    dynamic = l0.conventional_dynamic_pressure(0.05, 0.12, AIR)
+    assert isinstance(dynamic, l0.FanDynamicPressure)
+    total = l0.fan_total_from_static(FanStaticPressure(0.0), 0.05, 0.12, AIR)
+    assert isinstance(total, l0.Derived)
+    assert dynamic.pa == total.value.pa
+    assert math.isclose(dynamic.pa, 11.53153903336792, rel_tol=1e-9)
+
+
+@pytest.mark.req("PHY-003")
+def test_fan_dynamic_pressure_outside_validity() -> None:
+    zero_flow = l0.conventional_dynamic_pressure(0.0, 0.12, AIR)
+    assert isinstance(zero_flow, Error) and zero_flow.subject == "flow"
+    bad_duct = l0.conventional_dynamic_pressure(0.05, -0.12, AIR)
+    assert isinstance(bad_duct, Error) and bad_duct.subject == "d_duct"
+    bad_air = l0.conventional_dynamic_pressure(0.05, 0.12, _air({"gamma": 0.0}))
+    assert isinstance(bad_air, Error) and bad_air.subject == "air.gamma"
+    # 1/2 rho v^2 > EPSILON gamma p1 needs v > 49 m/s: Q = 1 m3/s through D = 0.12 m is 88 m/s.
+    fast = l0.conventional_dynamic_pressure(1.0, 0.12, AIR)
+    assert isinstance(fast, Error)
+    assert (fast.code, fast.subject) == ("out_of_validity", "fan_dynamic_pressure")
+    assert fast.detail("bounds") == "(0, 1418.55]"
 
 
 @pytest.mark.req("PHY-003")

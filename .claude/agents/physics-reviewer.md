@@ -12,6 +12,9 @@ For each item report PASS, FAIL or N/A with file:line evidence.
 1. Units: every physical quantity uses mp-units types in the kernel; conversions are explicit and correct.
 2. Equations: each implemented equation matches its cited source and `docs/models/` page, including
    sign conventions, angle conventions (from axial or tangential) and static vs total quantities.
+   Pressure definitions follow ISO 5801: fan total, fan static (outlet static minus inlet total) and
+   fan dynamic pressure. Check that static-to-static is never accepted, that every function states
+   which pressure it takes, and that any static-to-total conversion is explicit and correct.
 3. Validity: every model declares its validity range; out-of-range inputs return an out-of-validity
    error, never a number (PHY-003).
 4. Sources: every empirical coefficient, limit or range has a citation. Flag any value that looks

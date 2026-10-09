@@ -29,6 +29,10 @@ added here.
 
   The result carries provenance **derived**. ISO 5801's Mach factor on the dynamic pressure is
   taken as 1 inside the incompressibility range of D3.
+- **Free delivery is accepted** (user decision, 2026-10-10). The conversion takes Δp_s ≥ 0, so
+  the free-delivery rating point Δp_s = 0 gives Δp_t = ½ ρ (Q / A_out)². Negative fan static
+  pressure, beyond free delivery, stays out of validity until a product needs it; extending the
+  range is recorded here.
 - **No static-pressure variant of ω_s.** The Cordier diagram is built on total pressure. If T08
   finds a dataset published only on a static basis, converting it is T08's decision, with its own
   ADR.
@@ -56,7 +60,9 @@ added here.
 
 Every L0 function returns out-of-validity, never a number, unless both of these hold:
 
-1. **Every input is finite and strictly positive.**
+1. **Every input is finite and strictly positive.** The one exception is the fan static pressure
+   in the conversion of D1, which is finite and ≥ 0 (bounds `[0, inf)`), so that free delivery
+   is valid.
 2. **The flow is incompressible within the project tolerance ε = 0.01.** Each criterion is applied
    wherever its inputs are available:
    - Δp_t / (γ p₁) ≤ ε. This is the isentropic density change from the pressure rise.
@@ -110,7 +116,7 @@ T08 then compares the C++ and Python results field for field.
 - **Out-of-validity tests.** Separate tests check that states outside the limits return
   out-of-validity.
 - **Hand calculations.** In addition to the planned cases, these include:
-  - a static-to-total conversion case;
+  - a static-to-total conversion case, and a free-delivery case (Δp_s = 0);
   - one case beyond each incompressibility limit;
   - the ideal-gas consistency check.
 

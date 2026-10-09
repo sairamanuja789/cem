@@ -1,0 +1,84 @@
+# 120 mm ducted axial fan: the v1 product spec (requirements section 7).
+# Schemas: schemas/cemkit/v1/spec.schema.json (this document) and
+# schemas/products/fans/v1/spec.schema.json (the "product" block).
+# Every value is a field object: value, unit, provenance, and optional tolerance, confidence (image
+# only), provisional flag and note. The duty point is unknown: it must be supplied before the first
+# campaign (AX-003, AX-004). AX-013 (noise proxies), AX-016 (deliverables) and AX-017 (validation)
+# describe outputs, not inputs, so they have no field here.
+# Load with cemkit.schemas.load_yaml (rejects .nan/.inf) and validate with SchemaSet.spec_errors.
+schema_version: "1.0.0"
+spec_id: axial-120
+revision: 1
+parent: null
+family: fans.axial_ducted
+title: 120 mm ducted axial fan
+
+air:  # AX-005
+  density: {value: 1.18, unit: kg/m3, provenance: default}
+  temperature: {value: 298.15, unit: K, provenance: default}
+
+manufacturing:  # AX-006, AX-007
+  process: {value: FDM, provenance: user}
+  material:
+    value: PETG
+    provenance: default
+    provisional: true
+    note: Replace with the material actually used; strength values need coupon tests.
+
+envelope:  # AX-015
+  width: {value: 120, unit: mm, provenance: default, provisional: true}
+  height: {value: 120, unit: mm, provenance: default, provisional: true}
+  depth_min: {value: 25, unit: mm, provenance: default, provisional: true, note: proposed; confirm}
+  depth_max: {value: 40, unit: mm, provenance: default, provisional: true, note: proposed; confirm}
+
+objectives:  # AX-011: "balanced" read as a Pareto front over three objectives
+  - {quantity: total_to_static_efficiency, sense: maximize, provenance: derived}
+  - {quantity: tip_speed, sense: minimize, provenance: derived}
+  - {quantity: rotor_mass, sense: minimize, provenance: derived}
+
+product:
+  duty:
+    flow: {value: null, unit: m3/s, provenance: unknown, note: "Essential (AX-003)."}
+    pressure:
+      value: null
+      unit: Pa
+      provenance: unknown
+      note: "Essential (AX-004). Must state fan_static or fan_total; static is expected for a ducted fan."
+  nominal_size: {value: 120, unit: mm, provenance: user}  # AX-001
+  size_reference:
+    value: duct_inner_diameter
+    provenance: default
+    provisional: true
+    note: "Confirm: PC fans use 120 mm as the frame size."
+  rotational_speed:  # AX-002
+    value: 2000
+    unit: rpm
+    provenance: default
+    provisional: true
+    note: Starting assumption, not a requirement; may become a design variable.
+  wall_thickness_min:  # AX-008
+    value: 0.8
+    unit: mm
+    provenance: default
+    provisional: true
+    note: Assumes a 0.4 mm nozzle and two perimeters.
+  tip_clearance_min:  # AX-009
+    value: 0.5
+    unit: mm
+    provenance: default
+    provisional: true
+    note: Set by print accuracy and assembly; measure on the first print.
+  pressure_margin:  # AX-012
+    value: 0.10
+    unit: "1"
+    provenance: derived
+    provisional: true
+    note: Proposed (AX-012); changed only by a logged decision.
+  safety_factor:  # AX-014
+    factor: {value: 2.0, unit: "1", provenance: default, provisional: true, note: proposed}
+    at_speed_ratio: {value: 1.2, unit: "1", provenance: default, provisional: true, note: proposed}
+  scope: {value: [rotor, hub, blades, duct], provenance: user}  # AX-010
+  motor:
+    bore_diameter: {value: null, unit: mm, provenance: unknown, note: Ask the user.}
+    speed_min: {value: null, unit: rpm, provenance: unknown, note: Ask the user.}
+    speed_max: {value: null, unit: rpm, provenance: unknown, note: Ask the user.}

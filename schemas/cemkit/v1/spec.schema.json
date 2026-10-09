@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cemkit:schema:v1:spec",
+  "title": "cemkit spec",
+  "description": "A requirement set (spec) for one product family, schema version 1.x (MAINT-005). Every value is a field object (SPEC-001). The 'product' block is validated separately against the family's own schema (for fans.axial_ducted: urn:cemkit:schema:products:fans:v1:spec); this platform schema never references product schemas (ADR-009). Specs are immutable: an edit is a new revision linked to its parent (SPEC-009). See schemas/README.md.",
+  "type": "object",
+  "required": ["schema_version", "spec_id", "revision", "parent", "family", "product"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "Version of this schema the document was written against; major version 1.",
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "spec_id": { "$ref": "#/$defs/spec_id" },
+    "revision": { "$ref": "#/$defs/revision" },
+    "parent": {
+      "description": "The revision this one was edited from; null for revision 1 of a new spec.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/spec_ref" }]
+    },
+    "family": {
+      "description": "Product family, '<product>.<family>' (for example fans.axial_ducted).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+    },
+    "title": { "type": "string" },
+    "air": {
+      "description": "Working-fluid conditions.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "density": { "$ref": "#/$defs/density" },
+        "temperature": { "$ref": "#/$defs/temperature" },
+        "dynamic_viscosity": { "$ref": "#/$defs/dynamic_viscosity" }
+      }
+    },
+    "manufacturing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "process": { "$ref": "#/$defs/text" },
+        "material": { "$ref": "#/$defs/text" }
+      }
+    },
+    "envelope": {
+      "description": "Space the product must fit in.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "depth_min", "depth_max"],
+      "properties": {
+        "width": { "$ref": "#/$defs/length" },
+        "height": { "$ref": "#/$defs/length" },
+        "depth_min": { "$ref": "#/$defs/length" },
+        "depth_max": { "$ref": "#/$defs/length" }
+      }
+    },
+    "objectives": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/objective" }
+    },
+    "product": {
+      "description": "Family-specific block, validated against the family's schema.",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "spec_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "spec_ref": {
+      "description": "An exact spec revision.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spec_id", "revision"],
+      "properties": {
+        "spec_id": { "$ref": "#/$defs/spec_id" },
+        "revision": { "$ref": "#/$defs/revision" }
+      }
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "provenance": {
+      "description": "Provenance class (requirements section 2).",
+      "enum": ["user", "image", "derived", "default", "unknown"]
+    },
+    "tolerance": {
+      "description": "Either an absolute band {minus, plus} in the field's own unit, or {relative: r}, a fraction of |value| (0.05 means 5 %, also when the unit is '%'). An absolute band is a difference: for an offset unit such as degC it converts with the scale factor only, never the offset. A zero-width band is allowed and means the value is exact as stated.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minus", "plus"],
+          "properties": {
+            "minus": { "type": "number", "minimum": 0 },
+            "plus": { "type": "number", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["relative"],
+          "properties": {
+            "relative": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      ]
+    },
+    "field_rules": {
+      "description": "Rules shared by every field object: an unknown field has a null value and no tolerance or confidence, a known field has a value; a confidence is present exactly when the provenance is image (IN-003, IN-004).",
+      "allOf": [
+        {
+          "if": { "required": ["provenance"], "properties": { "provenance": { "const": "unknown" } } },
+          "then": {
+            "properties": { "value": { "type": "null" } },
+            "not": { "anyOf": [{ "required": ["tolerance"] }, { "required": ["confidence"] }] }
+          },
+          "else": { "properties": { "value": { "not": { "type": "null" } } } }
+        },
+        {
+          "if": { "required": ["provenance"], "properties": { "provenance": { "const": "image" } } },
+          "then": { "required": ["confidence"] },
+          "else": { "not": { "required": ["confidence"] } }
+        }
+      ]
+    },
+    "field_core": {
+      "description": "Members every field object may carry. Not closed: each concrete field type adds its value and unit rules and closes itself with unevaluatedProperties.",
+      "type": "object",
+      "required": ["value", "provenance"],
+      "properties": {
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "provisional": {
+          "description": "A default or assumption that must be confirmed; listed first in reports (SPEC-007).",
+          "type": "boolean"
+        },
+        "note": { "type": "string" }
+      },
+      "$ref": "#/$defs/field_rules"
+    },
+    "quantity_core": {
+      "description": "A numeric field: value in the stated unit, optional tolerance (SPEC-001).",
+      "$ref": "#/$defs/field_core",
+      "required": ["unit"],
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "unit": { "type": "string" },
+        "tolerance": { "$ref": "#/$defs/tolerance" }
+      }
+    },
+    "text": {
+      "description": "A non-numeric field (for example a material name); no unit.",
+      "$ref": "#/$defs/field_core",
+      "properties": { "value": { "type": ["string", "null"] } },
+      "unevaluatedProperties": false
+    },
+    "length_unit": { "enum": ["m", "mm", "cm", "in"] },
+    "volume_flow_rate_unit": { "enum": ["m3/s", "m3/min", "m3/h", "L/s", "CFM"] },
+    "pressure_unit": { "enum": ["Pa", "kPa", "inH2O", "mmH2O"] },
+    "angular_velocity_unit": { "enum": ["rad/s", "rpm"] },
+    "density_unit": { "enum": ["kg/m3"] },
+    "temperature_unit": { "enum": ["K", "degC"] },
+    "dynamic_viscosity_unit": { "enum": ["Pa*s"] },
+    "ratio_unit": { "enum": ["1", "%"] },
+    "si_unit": {
+      "description": "Coherent SI unit strings used by candidates and results (values in the kernel are SI; '1' is dimensionless).",
+      "enum": ["1", "m", "m2", "m3", "s", "kg", "K", "rad", "m/s", "rad/s", "m3/s", "kg/s", "kg/m3", "Pa", "Pa*s", "N", "N*m", "W", "J"]
+    },
+    "positive": {
+      "description": "The quantity is positive by definition (a size, a density, a flow through the fan, a speed magnitude); zero and negative values are rejected. A null (unknown) value is not affected.",
+      "properties": { "value": { "exclusiveMinimum": 0 } }
+    },
+    "length": {
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/length_unit" } },
+      "unevaluatedProperties": false
+    },
+    "volume_flow_rate": {
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/volume_flow_rate_unit" } },
+      "unevaluatedProperties": false
+    },
+    "angular_velocity": {
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/angular_velocity_unit" } },
+      "unevaluatedProperties": false
+    },
+    "density": {
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/density_unit" } },
+      "unevaluatedProperties": false
+    },
+    "temperature": {
+      "description": "A temperature in K must be positive. A degC value is checked after conversion by the spec compiler.",
+      "$ref": "#/$defs/quantity_core",
+      "properties": { "unit": { "$ref": "#/$defs/temperature_unit" } },
+      "if": { "required": ["unit"], "properties": { "unit": { "const": "K" } } },
+      "then": { "$ref": "#/$defs/positive" },
+      "unevaluatedProperties": false
+    },
+    "dynamic_viscosity": {
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/dynamic_viscosity_unit" } },
+      "unevaluatedProperties": false
+    },
+    "ratio": {
+      "description": "A non-negative dimensionless value (a margin, a factor).",
+      "$ref": "#/$defs/quantity_core",
+      "properties": { "unit": { "$ref": "#/$defs/ratio_unit" }, "value": { "minimum": 0 } },
+      "unevaluatedProperties": false
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quantity", "sense", "provenance"],
+      "properties": {
+        "quantity": {
+          "description": "Snake-case metric name. Efficiency must state its type (requirements section 2): total_efficiency, total_to_static_efficiency or overall_efficiency.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "if": { "pattern": "efficiency" },
+          "then": { "enum": ["total_efficiency", "total_to_static_efficiency", "overall_efficiency"] }
+        },
+        "sense": { "enum": ["maximize", "minimize"] },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "provisional": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

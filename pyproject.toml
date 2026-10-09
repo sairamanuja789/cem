@@ -9,6 +9,7 @@ description = "cemkit: CEM platform orchestration layer"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "jsonschema",
+  "pyyaml",
   "typer",
 ]
 
@@ -21,6 +22,7 @@ dev = [
   "pytest-cov",
   "ruff",
   "types-jsonschema",
+  "types-pyyaml",
 ]
 
 [tool.hatch.build.targets.wheel]

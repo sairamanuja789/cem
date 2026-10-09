@@ -141,9 +141,10 @@ in `docs/models/platform/error-codes.md` and `schemas/cemkit/v1/error-codes.json
 **Requirements:** SPEC-001, SPEC-004, SPEC-009, MAINT-005
 
 **Deliverables**
-- `schemas/spec.schema.json` (v1.0): field object = value, unit, tolerance?, provenance, confidence?
+- `schemas/cemkit/v1/spec.schema.json` (v1.0, ADR-009 layout): field object = value, unit, tolerance?, provenance, confidence?
   (image only), note?; shared fields from requirements section 5; family-specific extension block.
-- `schemas/candidate.schema.json`, `schemas/result.schema.json`.
+- `schemas/cemkit/v1/candidate.schema.json`, `schemas/cemkit/v1/result.schema.json`; the fan block in
+  `schemas/products/fans/v1/spec.schema.json`.
 - Pressure inputs are fan total or fan static pressure as defined in ISO 5801 (fan static = outlet static
   minus inlet total, i.e. total-to-static by construction); the schema rejects static-to-static.
 - `examples/axial_120.yaml` matching requirements section 7 (unknown duty point left as unknown).

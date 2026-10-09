@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cemkit:schema:products:fans:v1:spec",
+  "title": "fan spec extension (fans.axial_ducted)",
+  "description": "The 'product' block of a fans.axial_ducted spec (requirements section 7). Field objects come from the platform spec schema. Pressures state their ISO 5801 kind (SPEC-004); a known duty point carries tolerances (SPEC-011).",
+  "x-cemkit-families": ["fans.axial_ducted"],
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["duty", "nominal_size", "size_reference", "rotational_speed"],
+  "properties": {
+    "duty": {
+      "description": "Duty point (AX-003, AX-004). Essential: must be known before a campaign.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flow", "pressure"],
+      "properties": {
+        "flow": {
+          "$ref": "urn:cemkit:schema:v1:spec#/$defs/volume_flow_rate",
+          "$comment": "SPEC-011: a known duty flow carries a tolerance.",
+          "if": { "$ref": "#/$defs/known" },
+          "then": { "required": ["tolerance"] }
+        },
+        "pressure": {
+          "$ref": "#/$defs/fan_pressure",
+          "$comment": "SPEC-011: a known duty pressure carries a tolerance.",
+          "if": { "$ref": "#/$defs/known" },
+          "then": { "required": ["tolerance"] }
+        }
+      }
+    },
+    "nominal_size": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/length" },
+    "size_reference": {
+      "description": "What the nominal size measures (AX-001).",
+      "$ref": "urn:cemkit:schema:v1:spec#/$defs/field_core",
+      "properties": {
+        "value": { "enum": ["frame", "duct_inner_diameter", "rotor_tip_diameter", null] }
+      },
+      "unevaluatedProperties": false
+    },
+    "rotational_speed": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/angular_velocity" },
+    "wall_thickness_min": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/length" },
+    "tip_clearance_min": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/length" },
+    "pressure_margin": {
+      "description": "Required margin on the duty pressure at the duty flow (AX-012).",
+      "$ref": "urn:cemkit:schema:v1:spec#/$defs/ratio"
+    },
+    "safety_factor": {
+      "description": "Structural safety factor at a stated fraction of design speed (AX-014).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factor", "at_speed_ratio"],
+      "properties": {
+        "factor": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/ratio" },
+        "at_speed_ratio": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/ratio" }
+      }
+    },
+    "scope": {
+      "description": "Parts to design (AX-010).",
+      "$ref": "urn:cemkit:schema:v1:spec#/$defs/field_core",
+      "properties": {
+        "value": {
+          "type": ["array", "null"],
+          "items": { "enum": ["rotor", "hub", "blades", "duct"] },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "motor": {
+      "description": "Motor interface; the motor itself is not designed (AX-010).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bore_diameter": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/length" },
+        "speed_min": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/angular_velocity" },
+        "speed_max": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/angular_velocity" }
+      }
+    }
+  },
+  "$defs": {
+    "known": {
+      "required": ["provenance"],
+      "properties": { "provenance": { "not": { "const": "unknown" } } }
+    },
+    "fan_pressure": {
+      "description": "A fan pressure (ISO 5801; docs/models/fans/pressure-kinds.md). fan_total = p_t2 - p_t1; fan_static = p_s2 - p_t1 (total-to-static). Any other kind, including static-to-static, is rejected; a known value must state its kind (SPEC-004).",
+      "$ref": "urn:cemkit:schema:v1:spec#/$defs/quantity_core",
+      "properties": {
+        "unit": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/pressure_unit" },
+        "kind": { "enum": ["fan_total", "fan_static"] }
+      },
+      "if": { "$ref": "#/$defs/known" },
+      "then": { "required": ["kind"] },
+      "unevaluatedProperties": false
+    }
+  }
+}

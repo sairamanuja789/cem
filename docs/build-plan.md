@@ -2,6 +2,11 @@
 
 Each task is sized for one Claude Code session. Run it with `/task T04` (for example).
 Tasks are in dependency order; T03 can run in parallel with T02–T05.
+
+ADR numbering: 000 hardware budget (T03) · 001 language and stack · 002 v1 scope and validation target ·
+003 requirement semantics (002 and 003 are defined in `docs/architecture.md` section 12) ·
+004 OpenCascade backend (T10) · 005 job resource limits (T13) · 006 toolchain pins and OpenFOAM version (T01) ·
+007 compilers, standard library and warnings (T01/T02) · 008 CI execution (T02).
 Requirement IDs refer to `docs/requirements.md`. "Human" marks steps Claude Code cannot do for you.
 
 The base is done when every box in **T15** is ticked. The ducted axial L1 model, CFD, optimizer
@@ -28,37 +33,74 @@ and vision intake come after the base, in a later plan.
 **Requirements:** REPRO-002, PORT-001, LIFE-001
 
 **Deliverables**
-- `docker/Dockerfile`: Ubuntu 24.04; GCC 13 and Clang 18 (+ clang-format, clang-tidy); CMake ≥ 3.28; Ninja;
-  ccache; vcpkg (pinned commit); uv; Python 3.13 (uv-managed); OpenFOAM v2606; CalculiX; Gmsh 4.15.2; jq.
+- `docker/Dockerfile`: Ubuntu 24.04; GCC 13 and Clang 20 (+ clang-format, clang-tidy, libclang-rt, llvm for the sanitizer symbolizer); CMake ≥ 3.28; Ninja;
+  ccache; vcpkg (pinned commit); uv; Python 3.13 (uv-managed); OpenFOAM v2512 (final release, official
+  apt repository, 2512.0-2); CalculiX; Gmsh 4.15.2 (pip wheel, installed once); jq. Named stages
+  `base`, `toolchain`, `ci` (toolchain only, no solvers; ADR-008) and `dev` (toolchain plus solvers); OpenFOAM in its own layer. Base image pinned by digest; Ubuntu apt
+  packages installed from one fixed Ubuntu snapshot timestamp.
+- One pins file read by the Dockerfile and checked by `scripts/versions.sh` (no pin lives anywhere else;
+  T02 reuses the Gmsh install rather than pinning a second copy).
 - `scripts/dev.sh` (start a shell in the container with the repo mounted), `scripts/versions.sh`
-  (print every tool version), `docs/toolchain.md` (generated version table).
+  (print every tool version), `docs/toolchain.md` (generated version table; log each snapshot refresh here).
 
 **Done when**
 - `docker build` succeeds from a clean cache.
 - `scripts/versions.sh` prints all versions and they match the Dockerfile pins.
 - The image digest is recorded in `docs/toolchain.md`.
 
-**Notes:** check the exact OpenFOAM v2606 install route (official image or apt repository) on openfoam.com
-before writing the Dockerfile; do not guess package names.
+**Notes:** OpenFOAM is v2512 (see `docs/adr/006-toolchain-pins-openfoam-version.md`): v2606's apt packages
+are release-candidate only. Upgrading to v2606 is a deliberate later change. Pin rule: nothing published in
+the last 14 days at pin time. Verify Gmsh headless inside the container (`gmsh -version` and
+`python -c "import gmsh; gmsh.initialize()"`), adding only system libraries proven missing.
+Report the final image size.
 
 ---
 
 ## T02 — Build skeleton, quality gates and CI
 
 **Requirements:** MAINT-001, MAINT-002, MAINT-003, SEC-001, REPRO-002
+**Decisions:** ADR-007 (compilers, standard library, warnings), ADR-008 (CI execution)
 
 **Deliverables**
-- `CMakeLists.txt`, `CMakePresets.json` with presets `gcc-debug`, `clang-debug`, `clang-asan`
-  (AddressSanitizer + UBSan), `release`; `-std=c++23 -Wall -Wextra -Wpedantic -Werror`.
-- `vcpkg.json` with a pinned `builtin-baseline`: mp-units, nlohmann-json, catch2.
-  (OpenCascade is added in T10.)
-- Empty `libfancem` with one trivial Catch2 test; `.clang-format`, `.clang-tidy`.
-- `pyproject.toml` + `uv.lock`: pytest, hypothesis, jsonschema, typer, ruff, mypy; pytest marker `req` registered.
-- `scripts/check.sh` running: both compilers, the sanitizer preset, ctest, pytest, ruff, mypy --strict,
-  coverage report, and a secret scan.
-- `.github/workflows/ci.yml` running `scripts/check.sh` inside the T01 container.
+- `CMakeLists.txt` (minimum 3.28, Ninja, `CMAKE_CXX_STANDARD 23` required, extensions off,
+  `compile_commands.json`, ccache launcher, vcpkg toolchain) and `CMakePresets.json` with presets
+  `gcc-debug`, `clang-debug`, `clang-asan` (`-fsanitize=address,undefined -fno-omit-frame-pointer
+  -fno-sanitize-recover=all`, halt on error), `gcc-coverage` (`--coverage`, for gcovr) and `release`
+  (GCC, `-O2`, tests run). GCC 13 and Clang 20, both on libstdc++ 13.
+- Warning flags on project targets only (third-party headers as SYSTEM): `-Wall -Wextra -Wpedantic -Werror
+  -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast -Wnon-virtual-dtor -Woverloaded-virtual
+  -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough`. A flag that proves unworkable is
+  removed only with a written reason in ADR-007.
+- `vcpkg.json` with `builtin-baseline` equal to `VCPKG_COMMIT` in `docker/pins.env`: mp-units, nlohmann-json,
+  catch2. (OpenCascade is added in T10.) If the pinned port of mp-units fails with GCC 13 or Clang 20,
+  stop and report; feature options may change, the version may not.
+- Empty `libfancem` with one trivial Catch2 test; a toolchain test compiling a `std::expected` example under
+  every preset; `.clang-format` (100 columns) and `.clang-tidy` (bugprone, performance, modernize, selected
+  cppcoreguidelines, readability without magic-numbers; every disabled check commented; WarningsAsErrors;
+  project sources only).
+- `pyproject.toml` + `uv.lock`: `requires-python ">=3.13,<3.14"`; pytest, pytest-cov, hypothesis,
+  jsonschema, typer, ruff, mypy, gcovr; `uv sync --locked`; hatchling backend for now (T11 moves to
+  scikit-build-core); package `python/fancem` with `py.typed`. Ruff line length 100, rules E, F, W, I, B, UP,
+  SIM, RUF, `ruff format --check`; mypy strict; pytest `--strict-markers --strict-config`, warnings as
+  errors, marker `req` registered. Reuse the Gmsh install from T01; no second pin.
+- Gates that prove they work (negative tests tagged with their requirement ID): an unused variable fails to
+  compile under the project flags; under `clang-asan` a deliberate heap-buffer overflow is caught; gitleaks
+  detects a fake secret built by concatenation at test runtime in a temp directory (never commit a
+  secret-like string).
+- Coverage (MAINT-003): gcovr reports on `kernel/src/core`, `spec`, `physics` with a 90% floor; the floor
+  applies once those directories contain code. In T02, show that the report runs. No trivial code to game it.
+- `scripts/check.sh`: refuses to run outside the container; runs every stage even after a failure; prints a
+  pass/fail summary; exits non-zero if anything failed. Stages: all presets (configure, build, ctest),
+  clang-tidy, clang-format check, ruff, ruff format check, mypy, pytest with coverage, gcovr report, gitleaks,
+  the negative tests, and the REPRO-002 check (vcpkg baseline equals the pinned SHA; `uv lock --check`).
+- `.github/workflows/ci.yml`: job named `check`; runner `ubuntu-24.04`; every action pinned by full commit SHA;
+  `permissions: contents: read`; a timeout; concurrency cancelling superseded runs; builds the `ci` image
+  target (no OpenFOAM or CalculiX) with BuildKit's GitHub Actions cache; caches vcpkg binaries keyed on
+  `vcpkg.json`, baseline, triplet and compiler; triggers `pull_request` and push to `main`.
+  No registry until M3 (nightly CFD needs the solver image).
 
-**Done when:** CI is green on a pull request; a deliberately introduced warning fails the build.
+**Done when:** PR 1 with T02 goes green and is merged. PR 2 adds a deliberate warning, CI goes red, the run
+link is recorded in the T02 report, and PR 2 is closed unmerged.
 
 ---
 
@@ -100,6 +142,8 @@ in `docs/models/error-codes.md` for reuse by Python.
 - `schemas/spec.schema.json` (v1.0): field object = value, unit, tolerance?, provenance, confidence?
   (image only), note?; shared fields from requirements section 5; family-specific extension block.
 - `schemas/candidate.schema.json`, `schemas/result.schema.json`.
+- Pressure inputs are fan total or fan static pressure as defined in ISO 5801 (fan static = outlet static
+  minus inlet total, i.e. total-to-static by construction); the schema rejects static-to-static.
 - `examples/axial_120.yaml` matching requirements section 7 (unknown duty point left as unknown).
 - Python tests validating examples and rejecting malformed ones (pressure without type, bare numbers).
 
@@ -110,6 +154,10 @@ in `docs/models/error-codes.md` for reuse by Python.
 ## T06 — Python reference implementation of L0 physics
 
 **Requirements:** PHY-001, PHY-002, PHY-005, SEL-001
+
+**Prerequisite:** `docs/architecture.md` must be in the repo (human, T00). The specific-speed and
+specific-diameter formulas come from its section 6. Do not start T06 without it, and do not write the
+formulas from memory.
 
 **Deliverables**
 - `python/fancem/reference/l0.py`: air properties at the default state, fan laws, flow coefficient,
@@ -136,6 +184,8 @@ in `docs/models/error-codes.md` for reuse by Python.
   precedence user > image > derived > default, essential-field check (asks the family plugin;
   stubbed until T09), question generation, immutable versioning with parent link,
   contradiction checks (start with: required air power exceeds a stated power limit).
+- Pressure semantics: accept only fan total or fan static pressure per ISO 5801; reject static-to-static
+  with a message naming the field. "Total-to-static" is an efficiency type only, not a pressure type.
 
 **Done when:** each SPEC requirement has at least one tagged passing test; error messages name the field.
 
@@ -143,7 +193,11 @@ in `docs/models/error-codes.md` for reuse by Python.
 
 ## T08 — L0 physics in the kernel and feasibility gate
 
-**Requirements:** SEL-001, SEL-002, SEL-004, PHY-001 to PHY-005, PERF-001
+**Requirements:** SEL-001, SEL-002, SEL-004, PHY-001 to PHY-005 (PHY-005 for L0 only)
+
+**Scope note:** the base has only L0 models. PHY-005 is covered here for L0 (Python reference vs kernel).
+PERF-001 is written for the ducted axial L1 model and is **deferred to the axial L1 milestone**; do not
+build an L1 model in T08.
 
 **Deliverables**
 - `kernel/include/fancem/physics/` and `kernel/src/physics/`: port of T06 using mp-units and
@@ -152,7 +206,6 @@ in `docs/models/error-codes.md` for reuse by Python.
   verified source stay `UNSOURCED`, and the feasibility gate reports "range unsourced" for them.
   **Do not invent ranges.**
 - Feasibility check returning the violated limit and the nearest feasible duty where computable.
-- Micro-benchmark for PERF-001.
 
 **Human step:** supply sources for the family ranges (for example a Cordier diagram dataset from a fan textbook).
 
@@ -182,7 +235,7 @@ in `docs/models/error-codes.md` for reuse by Python.
 
 **Deliverables**
 - Add OpenCascade 8.0.x: use the vcpkg port if it already offers 8.0.x, otherwise build OCCT 8.0.1 from
-  source inside the container (limit to `-j 6`). Record the choice in an ADR.
+  source inside the container (limit to `-j 6`). Record the choice in `docs/adr/004-opencascade-backend.md`.
 - `kernel/include/fancem/geometry/backend.hpp` (interface), `kernel/src/geometry/occt_backend.cpp`:
   build a test solid (cylinder hub plus a lofted plate from 3 sections), validity checks
   (closed, manifold, no self-intersection), mass properties, STEP and STL export,
@@ -200,7 +253,8 @@ input produces `geometry_failed` with a reason; exports open in FreeCAD (human c
 **Deliverables**
 - `kernel/capi/fancem.h` + implementation: ABI version, spec compile, feasibility, batch L0 evaluation,
   geometry smoke; JSON in and out; `fancem_free`; no exceptions cross the boundary.
-- `bindings/python/`: nanobind module `fancem._kernel` built with scikit-build-core.
+- `bindings/python/`: nanobind module `fancem._kernel` built with scikit-build-core (the Python project
+  moves from hatchling to scikit-build-core here).
 - Python tests comparing kernel batch results with the reference on 10,000 random inputs; benchmark.
 
 **Done when:** the batch API evaluates 10,000 inputs with one Python call; results match the reference.
@@ -230,7 +284,7 @@ duplicate artifacts are stored once.
 - `python/fancem/orchestration/`: durable job states (queued, running, done, failed) with leases and
   heartbeats; one heavy job at a time by default; retries with a recorded reason; failure codes shared
   with the kernel; resource limits for child processes (memory, cores, wall time) using cgroups via
-  `systemd-run --user --scope` or `docker run` limits — decide in an ADR.
+  `systemd-run --user --scope` or `docker run` limits — decide in `docs/adr/005-job-resource-limits.md`.
 - Structured JSON logs with peak RAM, CPU and wall time.
 - Failure-injection tests: killed worker, out-of-memory child, timeout, disk full (simulated).
 

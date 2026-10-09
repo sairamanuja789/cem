@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"  # T11 moves to scikit-build-core for the nanobind module
+
+[project]
+name = "fancem"
+version = "0.0.0"
+description = "Fan CEM orchestration layer"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "jsonschema",
+  "typer",
+]
+
+[dependency-groups]
+dev = [
+  "gcovr",
+  "hypothesis",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "types-jsonschema",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/fancem"]
+
+[tool.uv]
+default-groups = ["dev"]
+# REPRO-002 / 14-day rule: resolve only versions published before this date (see docs/toolchain.md).
+exclude-newer = "2026-09-25T00:00:00Z"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["python", "tests"]
+extend-exclude = [".cache", "build", "vcpkg_installed"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fancem"]
+
+[tool.mypy]
+strict = true
+mypy_path = "python"
+files = ["python", "tests/python"]
+explicit_package_bases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+addopts = "--strict-markers --strict-config"
+filterwarnings = ["error"]
+markers = ["req(id): the requirement ID this test verifies (for example SPEC-004)"]
+pythonpath = ["python"]
+
+[tool.coverage.run]
+source = ["python/fancem"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true

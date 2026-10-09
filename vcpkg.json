@@ -1,0 +1,10 @@
+{
+  "name": "fancem",
+  "version": "0.0.0",
+  "builtin-baseline": "9e593bb18ea69cc5095e012465dcd675a822ed0d",
+  "dependencies": [
+    "mp-units",
+    "nlohmann-json",
+    "catch2"
+  ]
+}

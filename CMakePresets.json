@@ -59,7 +59,7 @@
       "displayName": "Clang 20 ASan+UBSan",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FANCEM_ENABLE_SANITIZERS": "ON"
+        "CEMKIT_ENABLE_SANITIZERS": "ON"
       }
     },
     {
@@ -68,7 +68,7 @@
       "displayName": "GCC 13 coverage (gcovr)",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FANCEM_ENABLE_COVERAGE": "ON"
+        "CEMKIT_ENABLE_COVERAGE": "ON"
       }
     },
     {

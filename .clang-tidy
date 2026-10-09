@@ -24,7 +24,7 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -readability-function-cognitive-complexity
 WarningsAsErrors: '*'
-HeaderFilterRegex: '^.*/kernel/(include|src)/.*'
+HeaderFilterRegex: '^.*/kernel/(cemkit|products|testing)/.*'
 SystemHeaders: false
 # Disabled checks, with reasons:
 #  readability-magic-numbers        : the sourcing rule and physics-reviewer cover constants; named

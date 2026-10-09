@@ -1,9 +1,9 @@
-add_library(fancem STATIC
-  src/core/version.cpp)
-target_include_directories(fancem PUBLIC include)
-target_compile_definitions(fancem PRIVATE FANCEM_KERNEL_VERSION="${PROJECT_VERSION}")
-target_link_libraries(fancem
-  PUBLIC mp-units::mp-units nlohmann_json::nlohmann_json
-  PRIVATE fancem_warnings fancem_instrumentation)
+set(CEMKIT_KERNEL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+include(cmake/cemkit.cmake)
 
-add_subdirectory(tests)
+# Platform modules (ADR-009). Products are added under products/ as they arrive.
+add_subdirectory(cemkit/core)
+
+add_subdirectory(testing)
+
+cemkit_write_module_manifest()

@@ -8,4 +8,4 @@ while IFS='=' read -r key value; do
   case "$key" in ''|\#*) continue ;; esac
   args+=(--build-arg "$key=$value")
 done < <(grep -E '^[A-Z_0-9]+=' "$pins")
-exec docker build --target "${FANCEM_TARGET:-dev}" --progress=plain "${args[@]}" -f "$root/docker/Dockerfile" -t "fancem-${FANCEM_TARGET:-dev}:latest" "$@" "$root"
+exec docker build --target "${CEMKIT_TARGET:-dev}" --progress=plain "${args[@]}" -f "$root/docker/Dockerfile" -t "cemkit-${CEMKIT_TARGET:-dev}:latest" "$@" "$root"

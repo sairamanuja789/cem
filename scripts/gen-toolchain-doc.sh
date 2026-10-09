@@ -4,7 +4,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 out="$root/docs/toolchain.md"
-image="${1:-fancem-dev:latest}"
+image="${1:-cemkit-dev:latest}"
 # shellcheck disable=SC1091
 . "$root/docker/pins.env"
 

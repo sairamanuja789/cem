@@ -1,8 +1,8 @@
 """Regression tests for scripts/check.sh helpers (MAINT-003).
 
-Bug fixed in T02: the coverage floor was silently skipped when some of
-kernel/src/{core,spec,physics} did not exist yet, because a failing `find` under `pipefail`
-was read as "no code".
+Bug fixed in T02: the coverage floor was silently skipped when some covered directories did not
+exist yet, because a failing `find` under `pipefail` was read as "no code".
+Scope (spec v1.2): kernel/cemkit/{core,spec,physics}, products/*/common and each family's L1 model.
 """
 
 import subprocess
@@ -39,22 +39,38 @@ def _write(root: Path, relative: str) -> None:
 def test_floor_applies_when_only_core_exists_and_spec_and_physics_are_missing(
     tmp_path: Path,
 ) -> None:
-    _write(tmp_path, "kernel/src/core/version.cpp")
+    _write(tmp_path, "kernel/cemkit/core/version.cpp")
     assert _floor_args(tmp_path) == "--fail-under-line 90"
 
 
 @pytest.mark.req("MAINT-003")
-@pytest.mark.parametrize("directory", ["core", "spec", "physics"])
-def test_floor_applies_when_any_one_covered_directory_has_code(
-    tmp_path: Path, directory: str
-) -> None:
-    _write(tmp_path, f"kernel/src/{directory}/x.cpp")
+@pytest.mark.parametrize(
+    "source",
+    [
+        "kernel/cemkit/core/x.cpp",
+        "kernel/cemkit/spec/x.cpp",
+        "kernel/cemkit/physics/x.cpp",
+        "kernel/products/fans/common/pressure.cpp",
+        "kernel/products/fans/families/axial_ducted/l1_model.cpp",
+    ],
+)
+def test_floor_applies_when_any_covered_module_has_code(tmp_path: Path, source: str) -> None:
+    _write(tmp_path, source)
     assert _floor_args(tmp_path) == "--fail-under-line 90"
 
 
 @pytest.mark.req("MAINT-003")
-def test_floor_ignores_code_outside_the_covered_directories(tmp_path: Path) -> None:
-    _write(tmp_path, "kernel/src/geometry/occt.cpp")
+@pytest.mark.parametrize(
+    "source",
+    [
+        "kernel/cemkit/geometry/occt/occt_backend.cpp",
+        "kernel/cemkit/core/tests/test_version.cpp",
+        "kernel/products/fans/families/axial_ducted/geometry_recipe.cpp",
+        "kernel/testing/toolchain/test_toolchain.cpp",
+    ],
+)
+def test_floor_ignores_code_outside_the_covered_scope(tmp_path: Path, source: str) -> None:
+    _write(tmp_path, source)
     assert _floor_args(tmp_path) == ""
 
 

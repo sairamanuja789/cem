@@ -34,9 +34,13 @@ preset_stage() { # preset: configure, build, ctest
 }
 
 
-kernel_sources() { # project C++ sources; the gate sources are meant not to compile cleanly
+kernel_sources() { # project C++ sources; gate and compile-fail sources are meant not to compile
   find kernel/cemkit kernel/products kernel/testing -name "$1" -not -path '*/testing/gates/*' \
-    2>/dev/null | sort
+    -not -path '*/compile_fail/*' 2>/dev/null | sort
+}
+
+negative_sources() { # sources that must fail to compile: format-checked, not clang-tidied
+  find kernel -name '*.cpp' \( -path '*/testing/gates/*' -o -path '*/compile_fail/*' \) | sort
 }
 
 clang_tidy() {
@@ -52,7 +56,7 @@ boundaries() { # ADR-009 dependency rules: include scan, link graph, Python impo
 }
 
 clang_format_check() {
-  { kernel_sources '*.cpp'; kernel_sources '*.hpp'; find kernel/testing/gates -name '*.cpp'; } \
+  { kernel_sources '*.cpp'; kernel_sources '*.hpp'; negative_sources; } \
     | xargs clang-format --dry-run --Werror
 }
 

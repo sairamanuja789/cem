@@ -63,6 +63,30 @@ function(cemkit_add_module)
   endif()
 endfunction()
 
+# cemkit_add_compile_fail_test(NAME <name> SOURCE <file> DEPS <targets...> LABEL <requirement ID>)
+# A negative compile test with a paired control (COR-001, COR-003). <file> must build cleanly as
+# written and must fail to build with CEMKIT_EXPECT_COMPILE_ERROR defined. Two ctest entries:
+# compile_fail.<name>.control (build must succeed) and compile_fail.<name>.rejected (build must
+# fail). Compiler message text is never matched: the control build is what shows the failure comes
+# from the guarded line and not from a broken file. Both targets are outside "all"; the tests share a
+# lock because they drive the same build tree.
+function(cemkit_add_compile_fail_test)
+  cmake_parse_arguments(C "" "NAME;SOURCE;LABEL" "DEPS" ${ARGN})
+  foreach(variant control rejected)
+    set(target compile_fail_${C_NAME}_${variant})
+    add_library(${target} OBJECT EXCLUDE_FROM_ALL ${C_SOURCE})
+    target_link_libraries(${target} PRIVATE ${C_DEPS} cemkit_warnings)
+    if(variant STREQUAL "rejected")
+      target_compile_definitions(${target} PRIVATE CEMKIT_EXPECT_COMPILE_ERROR)
+    endif()
+    add_test(NAME compile_fail.${C_NAME}.${variant}
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${target})
+    set_tests_properties(compile_fail.${C_NAME}.${variant} PROPERTIES
+      LABELS "${C_LABEL};compile_fail" RESOURCE_LOCK cemkit_build_tree)
+  endforeach()
+  set_tests_properties(compile_fail.${C_NAME}.rejected PROPERTIES WILL_FAIL TRUE)
+endfunction()
+
 # Writes <build>/cemkit_modules.txt ("path=target" per line, sorted) for scripts/check_boundaries.py.
 function(cemkit_write_module_manifest)
   get_property(modules GLOBAL PROPERTY CEMKIT_MODULES)

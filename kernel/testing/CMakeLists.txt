@@ -7,6 +7,17 @@ target_link_libraries(cemkit_testing_toolchain_tests PRIVATE
   cemkit_warnings cemkit_instrumentation)
 catch_discover_tests(cemkit_testing_toolchain_tests PROPERTIES LABELS "testing/toolchain")
 
+# --- Compile-fail tests (COR-001, COR-003): misuse of units and labelled values must not compile ----
+foreach(case pressure_plus_flow_rate length_assigned_to_pressure raw_double_as_pressure
+             torque_as_energy absolute_pressure_plus_absolute_pressure angle_as_ratio)
+  cemkit_add_compile_fail_test(NAME ${case} SOURCE compile_fail/${case}.cpp DEPS cemkit_core
+    LABEL COR-001)
+endforeach()
+foreach(case labelled_without_fidelity labelled_arithmetic l2_verified_without_uncertainty)
+  cemkit_add_compile_fail_test(NAME ${case} SOURCE compile_fail/${case}.cpp DEPS cemkit_core
+    LABEL COR-003)
+endforeach()
+
 # --- Gate tests: the quality gates must prove they work (MAINT-001) -------------------------------
 
 # An unused variable must fail to compile under the project flags. The target is excluded from "all";
@@ -16,7 +27,7 @@ target_link_libraries(neg_unused_variable PRIVATE cemkit_warnings)
 add_test(NAME negative_unused_variable_fails_to_compile
   COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target neg_unused_variable)
 set_tests_properties(negative_unused_variable_fails_to_compile PROPERTIES
-  PASS_REGULAR_EXPRESSION "unused-variable" LABELS "testing/gates")
+  PASS_REGULAR_EXPRESSION "unused-variable" LABELS "testing/gates" RESOURCE_LOCK cemkit_build_tree)
 
 # Under the sanitizer preset a deliberate heap-buffer overflow must be caught.
 if(CEMKIT_ENABLE_SANITIZERS)

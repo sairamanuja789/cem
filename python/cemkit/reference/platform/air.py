@@ -16,12 +16,12 @@ from cemkit.reference.validity import require_positive
 
 MODEL = "platform.air@1.0.0"
 
-# U.S. Standard Atmosphere, 1976 (NOAA, NASA, USAF; NOAA-S/T 76-1562), adopted constants.
-# Section and table numbers: docs/models/platform/air-properties.md.
-UNIVERSAL_GAS_CONSTANT = 8.31432e3  # R*, J/(kmol K)
-MOLAR_MASS_AIR = 28.9644  # M0, kg/kmol, sea-level mean molar mass of air
-SEA_LEVEL_PRESSURE = 101325.0  # P0, Pa
-GAMMA = 1.40  # ratio of specific heats of air
+# U.S. Standard Atmosphere, 1976 (NOAA, NASA, USAF; NOAA-S/T 76-1562; NTRS 19770009539).
+# Page references: docs/models/platform/air-properties.md.
+UNIVERSAL_GAS_CONSTANT = 8.31432e3  # R*, J/(kmol K); p. 3 (Table 2 A on p. 2 misprints 10^-3)
+MOLAR_MASS_AIR = 28.9644  # M0, kg/kmol, sea-level mean molar mass; section 1.2.4, eq. (21), p. 9
+SEA_LEVEL_PRESSURE = 101325.0  # P0, Pa; Table 2 B, p. 2
+GAMMA = 1.40  # ratio of specific heats of air; Table 2 B, p. 2, and p. 4
 GAS_CONSTANT_AIR = UNIVERSAL_GAS_CONSTANT / MOLAR_MASS_AIR  # R = R*/M0, J/(kg K); never rounded
 
 # Requirements AX-005 (the spec's own defaults, provenance "default").

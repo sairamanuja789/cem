@@ -66,11 +66,19 @@ A function returns an `out_of_validity` error, never a number, unless both of th
    The pressure criterion on a converted total pressure also bounds the outlet Mach number,
    because the dynamic pressure is part of Δp_t.
 
-**Source of the criteria.** These are the linearised isentropic relations. From p/ρ^γ = const,
-Δρ/ρ ≈ Δp/(γ p). From ρ₀/ρ = (1 + (γ−1)/2 · M²)^(1/(γ−1)), ρ₀/ρ ≈ 1 + M²/2. See Anderson, J. D.,
-*Modern Compressible Flow: With Historical Perspective*, 3rd ed., McGraw-Hill, 2003, the chapter
-on one-dimensional isentropic flow. **The chapter and equation numbers are to be confirmed by the
-user** together with the hand calculations.
+**Source of the criteria.** These are the linearised isentropic relations of a perfect gas, from
+Ames Research Staff, *Equations, Tables, and Charts for Compressible Flow*, NACA Report 1135
+(1953), p. 616. NASA NTRS document 19930091059, public domain. Read from the scan on 2026-10-10.
+
+| Relation | Source equation | Linearised form |
+| --- | --- | --- |
+| p/ρ^γ = const = p_t/ρ_t^γ | (34) [isen, perf] | Δρ/ρ ≈ Δp/(γ p), the pressure criterion |
+| ρ/ρ_t = (1 + (γ−1)/2 · M²)^(−1/(γ−1)) | (45) [isen, perf] | ρ_t/ρ ≈ 1 + M²/2, the tip-Mach criterion |
+| a = √(γ R T) | (29b) [therm perf] | speed of sound |
+| q = ½ ρV² = (γ/2) p M² | (31a), (31b) | outlet Mach bounded by the pressure criterion |
+
+NACA Report 1135 replaces the earlier Anderson citation, whose chapter and equation numbers could
+not be verified.
 
 **Recorded assumption, not checked:** the fan laws hold for geometrically similar fans in the same
 Reynolds-number regime. L0 has no viscosity, so it cannot check this.

@@ -9,19 +9,23 @@ follows in T08. Decisions: ADR-003 D2.
 | --- | --- | --- | --- |
 | ρ (default) | 1.18 | kg/m³ | Requirements AX-005 and section 2 (the spec's default air) |
 | T₁ (default) | 298.15 | K | Requirements AX-005 |
-| p₁ | 101 325 | Pa | U.S. Standard Atmosphere, 1976: sea-level pressure P₀ |
-| R* | 8.31432 × 10³ | J/(kmol·K) | U.S. Standard Atmosphere, 1976: universal gas constant |
-| M₀ | 28.9644 | kg/kmol | U.S. Standard Atmosphere, 1976: sea-level mean molar mass of air |
+| p₁ | 101 325 | Pa | USSA 1976, Table 2 B (Category II constants), p. 2: P₀ = 1.013250 × 10⁵ N/m²; discussed on p. 3 |
+| R* | 8.31432 × 10³ | J/(kmol·K) | USSA 1976, p. 3, discussion of the Category I constants (see the erratum below) |
+| M₀ | 28.9644 | kg/kmol | USSA 1976, section 1.2.4 "Mean molecular weight", eq. (21) with table 3, p. 9 |
 | R | R*/M₀ = 287.0531 | J/(kg·K) | Computed in code from R* and M₀, never typed as a rounded value |
-| γ | 1.40 | – | U.S. Standard Atmosphere, 1976: ratio of specific heats of air |
+| γ | 1.40 | – | USSA 1976, Table 2 B (Category II constants), p. 2 ("1.40 (dimensionless)"); p. 4 ("an adopted value γ = 1.400") |
 
 **Document:** *U.S. Standard Atmosphere, 1976*. National Oceanic and Atmospheric Administration,
 National Aeronautics and Space Administration and United States Air Force. NOAA-S/T 76-1562, U.S.
-Government Printing Office, Washington, D.C., October 1976. Public domain.
+Government Printing Office, Washington, D.C., October 1976. Public domain. NASA NTRS document
+19770009539. Page numbers are those printed on the document.
 
-**To confirm (user):** the section and table numbers for R*, M₀, P₀ and γ are not given here yet.
-They are to be read from the document when the hand calculations are verified, and added to this
-page. Until then the constants are cited to the document as a whole.
+The page references were read from the NTRS scan on 2026-10-10:
+- **R\*:** Table 2 A on p. 2 prints R* as "8.31432 × 10⁻³ N·m/(kmol·K)". That is a misprint of the
+  exponent, recorded in the errata sheet appended to the NTRS PDF. The correct value,
+  8.31432 × 10³, is stated in the text on p. 3, so that is the citation.
+- **M₀:** not in Table 2. It follows from the sea-level composition in table 3:
+  Σ F_i M_i = 28.96443. Section 1.2.4 states "M₀ is found to be 28.9644 kg/kmol".
 
 ## Functions
 

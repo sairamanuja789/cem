@@ -16,6 +16,7 @@ Assumptions:
 - Geometrically similar fans in the same Reynolds-number regime (fan laws). This is recorded,
   not checked: L0 has no viscosity.
 - Incompressible flow within the project tolerance EPSILON (ADR-003 D3).
+  Linearised isentropic relations: NACA Report 1135 (1953), p. 616, eqs. (34) and (45).
 
 Validity: every input is finite and strictly positive, Delta p_t / (gamma p1) <= EPSILON and
 M_tip^2 / 2 <= EPSILON, each applied where its inputs are available. Outside these limits a

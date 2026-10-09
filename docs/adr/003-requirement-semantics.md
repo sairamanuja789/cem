@@ -43,9 +43,10 @@ added here.
 | Gas constant of air R | R*/M₀ = 8.31432×10³ / 28.9644 = 287.0531 J/(kg·K) | Same document: universal gas constant R* and sea-level mean molar mass M₀. **R is computed in code from these two constants, never typed as a rounded value** |
 | Ratio of specific heats γ | 1.40 | Same document |
 
-- **Section and table numbers** in the 1976 document are given in
-  `docs/models/platform/air-properties.md`. The user checks the values against the document before
-  verifying the hand calculations.
+- **Page and table numbers** in the 1976 document were read from the NASA NTRS scan on 2026-10-10
+  and are given in
+  `docs/models/platform/air-properties.md`. Note that Table 2 A misprints R* as × 10⁻³; the text
+  on p. 3 gives the correct × 10³.
 - **Consistency check:** the ideal-gas density at the defaults, p₁/(R T₁) = 1.1839 kg/m³, must be
   within 0.5 % of 1.18 kg/m³. It is 0.33 % today, and a test enforces the 0.5 % bound.
 - **No viscosity in T06.** Nothing in L0 needs it. It arrives with the Reynolds number in the L1
@@ -63,7 +64,10 @@ Every L0 function returns out-of-validity, never a number, unless both of these 
      blade tip.
 
 The relations themselves are the standard isentropic-flow results: Δρ/ρ ≈ Δp/(γp) from p/ρ^γ =
-const, and ρ₀/ρ ≈ 1 + M²/2. The textbook citation is in `docs/models/fans/l0-similarity.md`.
+const, and ρ₀/ρ ≈ 1 + M²/2. They are cited to NACA Report 1135 (1953), p. 616, eqs. (34) and
+(45). That report is public domain and its equations were read from the scan. It replaces the
+Anderson textbook citation, whose chapter and equation numbers could not be verified
+(`docs/models/fans/l0-similarity.md`).
 **ε = 0.01 is a project decision, not a standard value.**
 
 At the default state the limits are:

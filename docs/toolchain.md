@@ -8,9 +8,9 @@ refresh log. Decision record: `docs/adr/006-toolchain-pins-openfoam-version.md`.
 | Item | Value |
 |---|---|
 | Local image | `cemkit-dev:latest` |
-| Image ID (config digest) | `sha256:fe98a63eaf86725631006663996763d037d5e607b3b09d38dcf68cb0f602ba3b` |
+| Image ID (config digest) | `sha256:06de9d23b3355baa16bc63215498593b907aedb8f2943e3e857d383fe41f2b2d` |
 | Size | 4.02 GB |
-| Built | 2026-10-09T16:44:23.09607097+05:30 |
+| Built | 2026-10-10T00:00:06.209526182+05:30 |
 | Base image | `ubuntu:noble-20260911@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3` |
 | Ubuntu snapshot | `20260920T000000Z` |
 
@@ -44,6 +44,7 @@ differ because layer timestamps differ.
 | ccache | OK | 4.9.1-1 | 4.9.1-1 |
 | jq | OK | 1.7.1-3ubuntu0.24.04.2 | 1.7.1-3ubuntu0.24.04.2 |
 | calculix-ccx | OK | 2.21-1 | 2.21-1 |
+| time | OK | 1.9-0.2build1 | 1.9-0.2build1 |
 | libglu1-mesa | OK | 9.0.2-1.1build1 | 9.0.2-1.1build1 |
 | libgl1 | OK | 1.7.0-1build1 | 1.7.0-1build1 |
 | libxrender1 | OK | 1:0.9.10-1.1build1 | 1:0.9.10-1.1build1 |

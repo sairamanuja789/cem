@@ -1,0 +1,62 @@
+# ADR-008: CI builds the `ci` image target (no OpenFOAM or CalculiX) with the GitHub Actions layer cache
+# and runs scripts/check.sh inside it. No registry until M3.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0   # gitleaks scans the history
+          persist-credentials: false
+
+      - name: Read build arguments from docker/pins.env
+        id: pins
+        run: |
+          {
+            echo "args<<PINS_EOF"
+            grep -E '^[A-Z_0-9]+=' docker/pins.env
+            echo "PINS_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build the ci image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: ci
+          load: true
+          tags: fancem-ci:latest
+          build-args: ${{ steps.pins.outputs.args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # vcpkg binary cache keyed on vcpkg.json, the baseline (in vcpkg.json and pins.env), the triplet
+      # (x64-linux, fixed in CMakePresets.json) and the compilers (pins.env and the chainload files).
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/vcpkg/binary
+          key: vcpkg-x64-linux-${{ hashFiles('vcpkg.json', 'docker/pins.env', 'cmake/toolchains/*.cmake', 'CMakePresets.json') }}
+
+      - name: scripts/check.sh in the ci image
+        env:
+          FANCEM_TARGET: ci
+        run: |
+          mkdir -p .cache/vcpkg/binary
+          scripts/dev.sh scripts/check.sh

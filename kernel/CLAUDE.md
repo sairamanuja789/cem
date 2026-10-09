@@ -1,10 +1,10 @@
 # Kernel rules (C++23, libfancem)
 
 ## Language subset
-Compile with `-std=c++23`, but use only features that both GCC 13 and Clang 18 implement:
+Compile with `-std=c++23`, but use only features that both GCC 13 and Clang 20 implement (both on libstdc++ 13; ADR-007):
 concepts, ranges, `std::expected`, `std::span`, `std::format`, `std::optional`, `std::variant`,
 designated initializers, `constexpr`/`consteval`.
-Do not use: modules, `std::print`, `std::mdspan`, deducing `this`, coroutines. CI builds with both compilers.
+Do not use: modules, `std::print`, `std::mdspan`, deducing `this`, coroutines. CI builds with both compilers. Clang 18 is not used: it cannot see libstdc++ 13's `<expected>`.
 
 ## Error handling
 - Physics and spec functions return `std::expected<T, fancem::Error>`.

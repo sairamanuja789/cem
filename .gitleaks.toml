@@ -1,0 +1,13 @@
+title = "fancem secret scan (SEC-001)"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated and third-party directories"
+paths = [
+  '''^\.cache/''',
+  '''^build/''',
+  '''^\.venv/''',
+  '''^vcpkg_installed/''',
+]

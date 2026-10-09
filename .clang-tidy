@@ -1,0 +1,52 @@
+# clang-tidy 20, project sources only (see scripts/check.sh). All warnings are errors.
+# Check set: bugprone, performance, modernize, a selected part of cppcoreguidelines, readability
+# without magic-numbers (the physics-reviewer and the sourcing rule cover constants instead).
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  cppcoreguidelines-avoid-goto,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-interfaces-global-init,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-no-malloc,
+  cppcoreguidelines-owning-memory,
+  cppcoreguidelines-prefer-member-initializer,
+  cppcoreguidelines-pro-type-member-init,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-special-member-functions,
+  readability-*,
+  -readability-magic-numbers,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -readability-identifier-length,
+  -bugprone-easily-swappable-parameters,
+  -readability-function-cognitive-complexity
+WarningsAsErrors: '*'
+HeaderFilterRegex: '^.*/kernel/(include|src)/.*'
+SystemHeaders: false
+# Disabled checks, with reasons:
+#  readability-magic-numbers        : the sourcing rule and physics-reviewer cover constants; named
+#                                     constants for every literal would only add noise.
+#  modernize-use-trailing-return-type: style preference; the project uses leading return types.
+#  modernize-use-nodiscard          : [[nodiscard]] is applied by hand on result-bearing functions.
+#  readability-identifier-length    : short names are normal in equations (p, Q, D, U).
+#  bugprone-easily-swappable-parameters: physics functions take several same-type quantities; strong
+#                                     mp-units types, not parameter order warnings, guard against swaps.
+#  readability-function-cognitive-complexity: revisit with the first real physics code.
+CheckOptions:
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstexprVariablePrefix
+    value: k_
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: lower_case

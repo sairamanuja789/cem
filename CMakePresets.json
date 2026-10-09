@@ -1,0 +1,148 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=${sourceDir}/.cache/vcpkg/buildtrees;--downloads-root=${sourceDir}/.cache/vcpkg/downloads;--x-packages-root=${sourceDir}/.cache/vcpkg/packages"
+      }
+    },
+    {
+      "name": "gcc",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/gcc-13.cmake",
+        "CMAKE_CXX_COMPILER": "g++-13"
+      }
+    },
+    {
+      "name": "clang",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/clang-20.cmake",
+        "CMAKE_CXX_COMPILER": "clang++-20"
+      }
+    },
+    {
+      "name": "gcc-debug",
+      "inherits": "gcc",
+      "displayName": "GCC 13 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "clang-debug",
+      "inherits": "clang",
+      "displayName": "Clang 20 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "clang-asan",
+      "inherits": "clang",
+      "displayName": "Clang 20 ASan+UBSan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FANCEM_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "gcc-coverage",
+      "inherits": "gcc",
+      "displayName": "GCC 13 coverage (gcovr)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FANCEM_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "gcc",
+      "displayName": "GCC 13 Release -O2",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "gcc-debug",
+      "configurePreset": "gcc-debug"
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug"
+    },
+    {
+      "name": "clang-asan",
+      "configurePreset": "clang-asan"
+    },
+    {
+      "name": "gcc-coverage",
+      "configurePreset": "gcc-coverage"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "gcc-debug",
+      "configurePreset": "gcc-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang-asan",
+      "configurePreset": "clang-asan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "environment": {
+        "ASAN_OPTIONS": "halt_on_error=1:abort_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1:symbolize=1",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1",
+        "ASAN_SYMBOLIZER_PATH": "/usr/bin/llvm-symbolizer-20"
+      }
+    },
+    {
+      "name": "gcc-coverage",
+      "configurePreset": "gcc-coverage",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

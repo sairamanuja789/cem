@@ -1,0 +1,16 @@
+id: l0_008
+title: Ideal-gas density at the default state agrees with the AX-005 density within 0.5 %
+requirements: [PHY-005]
+model: platform.air@1.0.0
+status: proposed
+source: ADR-003 D2; U.S. Standard Atmosphere 1976 (R*, M0, P0); requirements AX-005 (rho, T1)
+working: |
+  R   = R*/M0 = 8314.32 / 28.9644            = 287.0530720 J/(kg K)
+  R T = 287.0530720 x 298.15                 = 85584.87343 J/kg
+  rho = p1 / (R T) = 101325 / 85584.87343    = 1.183912483 kg/m3
+  deviation from 1.18 = (1.183912483 - 1.18) / 1.18 = 0.003316 = 0.33 %  (<= 0.5 %)
+checks:
+  - function: ideal_gas_density
+    args: {pressure: 101325.0, temperature: 298.15}
+    expected: 1.1839124828745407
+    rel_tol: 1.0e-9

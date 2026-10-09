@@ -1,0 +1,19 @@
+id: l0_007
+title: Tip speed beyond the incompressibility limit returns out_of_validity
+requirements: [PHY-003, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D3 (M_tip^2 / 2 <= epsilon, M_tip = U / sqrt(gamma R T1))
+working: |
+  R = R*/M0 = 8314.32 / 28.9644 = 287.0530720 J/(kg K)
+  a1 = sqrt(gamma R T1) = sqrt(1.40 x 287.0530720 x 298.15) = sqrt(119818.8228) = 346.1485560 m/s
+  U_max = sqrt(2 epsilon) a1 = 0.1414213562 x 346.1485560 = 48.95279825 m/s
+  D = 0.5 m, omega = 200 rad/s: U = 200 x 0.5 / 2 = 50 m/s > 48.95 m/s, so out_of_validity.
+  (Q = 1 m3/s is illustrative; the tip check fails first.)
+checks:
+  - function: flow_coefficient
+    args: {flow: 1.0, d_tip: 0.5, omega: 200.0}
+    expected_error:
+      code: out_of_validity
+      subject: tip_speed
+      details: {value: "50", bounds: "(0, 48.952798245486484]", model: fans.l0@1.0.0}

@@ -1,0 +1,17 @@
+id: l0_005
+title: Fan static to fan total pressure (ISO 5801 conventional dynamic pressure)
+requirements: [SPEC-004, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D1 (ISO 5801 definitions; Mach factor 1 within the incompressible range)
+working: |
+  dp_s = 120 Pa (illustrative);  Q = 0.05 m3/s;  D_duct = 0.120 m (AX-001);  rho = 1.18 kg/m3
+  A_out = pi D_duct^2 / 4 = 3.141592654 x 0.0144 / 4 = 0.01130973355 m2
+  v     = Q / A_out = 0.05 / 0.01130973355           = 4.420970641 m/s
+  p_d   = 1/2 rho v^2 = 0.5 x 1.18 x 19.54498141     = 11.53153903 Pa
+  dp_t  = dp_s + p_d = 120 + 11.53153903              = 131.5315390 Pa   (provenance: derived)
+checks:
+  - function: fan_total_from_static
+    args: {fan_static_pressure: 120.0, flow: 0.05, d_duct: 0.12}
+    expected: 131.53153903336792
+    rel_tol: 1.0e-9

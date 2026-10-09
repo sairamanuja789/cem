@@ -1,0 +1,29 @@
+id: l0_001
+title: Tip speed, flow coefficient and pressure coefficient at the reference point
+requirements: [SEL-001, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: docs/architecture.md section 6; ADR-003 D4 (U = omega D / 2, D = rotor tip diameter)
+working: |
+  omega = 2000 rpm = 2000 x 2 pi / 60 = 209.4395102 rad/s
+  D = 0.119 m;  Q = 0.05 m3/s (illustrative);  dp_t = 150 Pa (illustrative);  rho = 1.18 kg/m3
+  U   = omega D / 2 = 209.4395102 x 0.119 / 2                 = 12.46165086 m/s
+  A   = (pi/4) D^2   = 0.7853981634 x 0.014161                 = 0.01112202339 m2
+  phi = Q / (A U)    = 0.05 / (0.01112202339 x 12.46165086)
+                     = 0.05 / 0.1385987724                     = 0.3607535561
+  psi = 2 dp_t / (rho U^2) = 300 / (1.18 x 155.2927421)
+                     = 300 / 183.2454357                       = 1.637148553
+  Validity: U = 12.46 m/s <= 48.95 m/s (M_tip limit); dp_t = 150 Pa <= 1418.55 Pa.
+checks:
+  - function: tip_speed
+    args: {omega: 209.43951023931953, d_tip: 0.119}
+    expected: 12.461650859239512
+    rel_tol: 1.0e-9
+  - function: flow_coefficient
+    args: {flow: 0.05, d_tip: 0.119, omega: 209.43951023931953}
+    expected: 0.36075355610599763
+    rel_tol: 1.0e-9
+  - function: pressure_coefficient
+    args: {fan_total_pressure: 150.0, d_tip: 0.119, omega: 209.43951023931953}
+    expected: 1.6371485533454382
+    rel_tol: 1.0e-9

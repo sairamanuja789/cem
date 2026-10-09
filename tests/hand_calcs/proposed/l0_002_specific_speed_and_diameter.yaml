@@ -1,0 +1,25 @@
+id: l0_002
+title: Specific speed and specific diameter at the reference point
+requirements: [SEL-001, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: docs/architecture.md section 6
+working: |
+  omega = 209.4395102 rad/s;  D = 0.119 m;  Q = 0.05 m3/s;  dp_t = 150 Pa;  rho = 1.18 kg/m3
+  e = dp_t / rho = 150 / 1.18 = 127.1186441 J/kg
+  e^(3/4) = 37.85793653      (ln e = 4.845121, x 0.75 = 3.633841, exp = 37.85794)
+  e^(1/4) = 3.357780579      (exp(4.845121 / 4) = exp(1.211280) = 3.357781)
+  sqrt(Q) = 0.2236067977
+  omega_s = omega sqrt(Q) / e^(3/4) = 209.4395102 x 0.2236067977 / 37.85793653
+          = 46.83209 / 37.85793653 = 1.237048358
+  delta_s = D e^(1/4) / sqrt(Q)     = 0.119 x 3.357780579 / 0.2236067977
+          = 0.3995759 / 0.2236067977 = 1.786957700
+checks:
+  - function: specific_speed
+    args: {omega: 209.43951023931953, flow: 0.05, fan_total_pressure: 150.0}
+    expected: 1.2370483575363835
+    rel_tol: 1.0e-9
+  - function: specific_diameter
+    args: {d_tip: 0.119, flow: 0.05, fan_total_pressure: 150.0}
+    expected: 1.7869576997691965
+    rel_tol: 1.0e-9

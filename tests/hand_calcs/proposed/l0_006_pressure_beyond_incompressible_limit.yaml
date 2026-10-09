@@ -1,0 +1,16 @@
+id: l0_006
+title: Fan total pressure beyond the incompressibility limit returns out_of_validity
+requirements: [PHY-003, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D3 (dp_t / (gamma p1) <= epsilon, epsilon = 0.01)
+working: |
+  Limit: epsilon gamma p1 = 0.01 x 1.40 x 101325 = 1418.55 Pa.
+  dp_t = 1500 Pa > 1418.55 Pa, so out_of_validity (no number).
+checks:
+  - function: specific_speed
+    args: {omega: 209.43951023931953, flow: 0.05, fan_total_pressure: 1500.0}
+    expected_error:
+      code: out_of_validity
+      subject: fan_total_pressure
+      details: {value: "1500", bounds: "(0, 1418.55]", model: fans.l0@1.0.0}

@@ -7,5 +7,5 @@ tty_args=(); [ -t 0 ] && tty_args=(-it)
 exec docker run --rm "${tty_args[@]}" \
   --user "$(id -u):$(id -g)" \
   -v "$root":/workspace -w /workspace \
-  -e HOME=/home/dev -e CCACHE_DIR=/workspace/.cache/ccache -e UV_CACHE_DIR=/workspace/.cache/uv \
-  fancem-dev:latest "${@:-bash}"
+  -e HOME=/home/dev -e CCACHE_DIR=/workspace/.cache/ccache -e VCPKG_DEFAULT_BINARY_CACHE=/workspace/.cache/vcpkg/binary -e UV_CACHE_DIR=/workspace/.cache/uv \
+  "fancem-${FANCEM_TARGET:-dev}:latest" "${@:-bash}"

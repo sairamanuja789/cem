@@ -2,8 +2,9 @@
 # check=skip=InvalidDefaultArgInFrom
 # Fan CEM development container (T01; REPRO-002, PORT-001, LIFE-001; ADR-006).
 # Every pin comes from docker/pins.env via scripts/docker-build.sh (--build-arg); there are no defaults here.
-# Stage order keeps OpenFOAM in its own early layer so toolchain changes do not re-download it:
-#   base -> solvers -> toolchain -> dev. Named stages make a later split easy.
+# Stages: base -> toolchain -> ci            (compilers, vcpkg, gitleaks; what T02 checks need; ADR-008)
+#         base -> toolchain -> dev           (ci plus OpenFOAM, CalculiX, Gmsh)
+# In dev, OpenFOAM is its own layer; a toolchain change rebuilds the layers after it.
 
 ARG UBUNTU_BASE
 
@@ -43,7 +44,68 @@ RUN curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/
  && chmod -R a+rX /opt/python
 
 # ---------------------------------------------------------------------------------------------
-FROM base AS solvers
+FROM base AS toolchain
+ARG APT_GIT
+ARG APT_XZ_UTILS
+ARG APT_ZIP
+ARG APT_UNZIP
+ARG APT_TAR
+ARG APT_PKG_CONFIG
+ARG APT_MAKE
+ARG APT_GCC_13
+ARG APT_GPP_13
+ARG APT_CLANG_20
+ARG APT_CLANG_FORMAT_20
+ARG APT_CLANG_TIDY_20
+ARG APT_LIBCLANG_RT_20_DEV
+ARG APT_LLVM_20
+ARG APT_CMAKE
+ARG APT_NINJA_BUILD
+ARG APT_CCACHE
+ARG APT_JQ
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      "git=${APT_GIT}" "xz-utils=${APT_XZ_UTILS}" "zip=${APT_ZIP}" "unzip=${APT_UNZIP}" "tar=${APT_TAR}" \
+      "pkg-config=${APT_PKG_CONFIG}" "make=${APT_MAKE}" \
+      "gcc-13=${APT_GCC_13}" "g++-13=${APT_GPP_13}" \
+      "clang-20=${APT_CLANG_20}" "clang-format-20=${APT_CLANG_FORMAT_20}" "clang-tidy-20=${APT_CLANG_TIDY_20}" \
+      "libclang-rt-20-dev=${APT_LIBCLANG_RT_20_DEV}" "llvm-20=${APT_LLVM_20}" \
+      "cmake=${APT_CMAKE}" "ninja-build=${APT_NINJA_BUILD}" "ccache=${APT_CCACHE}" "jq=${APT_JQ}" \
+ && rm -rf /var/lib/apt/lists/*
+
+ARG VCPKG_TAG
+ARG VCPKG_COMMIT
+ENV VCPKG_ROOT=/opt/vcpkg \
+    VCPKG_DISABLE_METRICS=1
+RUN git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}" \
+ && git -C "${VCPKG_ROOT}" checkout "${VCPKG_COMMIT}" \
+ && test "$(git -C "${VCPKG_ROOT}" rev-parse "${VCPKG_TAG}^{commit}")" = "${VCPKG_COMMIT}" \
+ && git config --system --add safe.directory "${VCPKG_ROOT}" \
+ && "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics \
+ && chmod -R a+rX "${VCPKG_ROOT}"
+
+RUN for t in clang clang++ clang-format clang-tidy run-clang-tidy; do ln -s "/usr/bin/$t-20" "/usr/local/bin/$t"; done
+
+ARG GITLEAKS_VERSION
+ARG GITLEAKS_SHA256
+RUN curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz \
+ && echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c - \
+ && tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks \
+ && rm /tmp/gitleaks.tgz
+
+# ---------------------------------------------------------------------------------------------
+FROM toolchain AS ci
+COPY docker/pins.env /opt/fancem/pins.env
+RUN mkdir -p /home/dev /workspace && chmod 1777 /home/dev
+ENV HOME=/home/dev \
+    CC=gcc-13 \
+    CXX=g++-13 \
+    FANCEM_IMAGE_TARGET=ci
+WORKDIR /workspace
+CMD ["bash"]
+
+# ---------------------------------------------------------------------------------------------
+FROM toolchain AS dev
 ARG OPENFOAM_VERSION
 ARG OPENFOAM_DEB_VERSION
 ARG OPENFOAM_REPO_URL
@@ -96,51 +158,13 @@ RUN uv venv /opt/gmsh-venv --python "${PYTHON_VERSION}" \
  && chmod 0755 /usr/local/bin/gmsh \
  && chmod -R a+rX /opt/gmsh-venv
 
-# ---------------------------------------------------------------------------------------------
-FROM solvers AS toolchain
-ARG APT_GIT
-ARG APT_XZ_UTILS
-ARG APT_ZIP
-ARG APT_UNZIP
-ARG APT_TAR
-ARG APT_PKG_CONFIG
-ARG APT_MAKE
-ARG APT_GCC_13
-ARG APT_GPP_13
-ARG APT_CLANG_18
-ARG APT_CLANG_FORMAT_18
-ARG APT_CLANG_TIDY_18
-ARG APT_CMAKE
-ARG APT_NINJA_BUILD
-ARG APT_CCACHE
-ARG APT_JQ
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      "git=${APT_GIT}" "xz-utils=${APT_XZ_UTILS}" "zip=${APT_ZIP}" "unzip=${APT_UNZIP}" "tar=${APT_TAR}" \
-      "pkg-config=${APT_PKG_CONFIG}" "make=${APT_MAKE}" \
-      "gcc-13=${APT_GCC_13}" "g++-13=${APT_GPP_13}" \
-      "clang-18=${APT_CLANG_18}" "clang-format-18=${APT_CLANG_FORMAT_18}" "clang-tidy-18=${APT_CLANG_TIDY_18}" \
-      "cmake=${APT_CMAKE}" "ninja-build=${APT_NINJA_BUILD}" "ccache=${APT_CCACHE}" "jq=${APT_JQ}" \
- && rm -rf /var/lib/apt/lists/*
 
-ARG VCPKG_TAG
-ARG VCPKG_COMMIT
-ENV VCPKG_ROOT=/opt/vcpkg \
-    VCPKG_DISABLE_METRICS=1
-RUN git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}" \
- && git -C "${VCPKG_ROOT}" checkout "${VCPKG_COMMIT}" \
- && test "$(git -C "${VCPKG_ROOT}" rev-parse "${VCPKG_TAG}^{commit}")" = "${VCPKG_COMMIT}" \
- && git config --system --add safe.directory "${VCPKG_ROOT}" \
- && "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics \
- && chmod -R a+rX "${VCPKG_ROOT}"
-
-# ---------------------------------------------------------------------------------------------
-FROM toolchain AS dev
 COPY docker/pins.env /opt/fancem/pins.env
 RUN mkdir -p /home/dev /workspace && chmod 1777 /home/dev \
  && echo '[ -f /usr/lib/openfoam/openfoam*/etc/bashrc ] && . /usr/lib/openfoam/openfoam*/etc/bashrc' >> /etc/bash.bashrc
 ENV HOME=/home/dev \
     CC=gcc-13 \
-    CXX=g++-13
+    CXX=g++-13 \
+    FANCEM_IMAGE_TARGET=dev
 WORKDIR /workspace
 CMD ["bash"]

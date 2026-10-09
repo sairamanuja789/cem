@@ -8,9 +8,9 @@ refresh log. Decision record: `docs/adr/006-toolchain-pins-openfoam-version.md`.
 | Item | Value |
 |---|---|
 | Local image | `fancem-dev:latest` |
-| Image ID (config digest) | `sha256:6a8b5d1b5e01ae609b7aeb2db1b2f72c52d5d1014c1dbafe18e861e00f595af6` |
-| Size | 3.95 GB |
-| Built | 2026-10-09T15:03:18.638131867+05:30 |
+| Image ID (config digest) | `sha256:f182b4bde19c787e10a63cf47dcb398672820c856c88dcc4ea55fa90fd94acb0` |
+| Size | 4.02 GB |
+| Built | 2026-10-09T15:53:40.159366401+05:30 |
 | Base image | `ubuntu:noble-20260911@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3` |
 | Ubuntu snapshot | `20260920T000000Z` |
 
@@ -34,9 +34,11 @@ differ because layer timestamps differ.
 | make | OK | 4.3-4.1build2 | 4.3-4.1build2 |
 | gcc-13 | OK | 13.3.0-6ubuntu2~24.04.1 | 13.3.0-6ubuntu2~24.04.1 |
 | g++-13 | OK | 13.3.0-6ubuntu2~24.04.1 | 13.3.0-6ubuntu2~24.04.1 |
-| clang-18 | OK | 1:18.1.3-1ubuntu1 | 1:18.1.3-1ubuntu1 |
-| clang-format-18 | OK | 1:18.1.3-1ubuntu1 | 1:18.1.3-1ubuntu1 |
-| clang-tidy-18 | OK | 1:18.1.3-1ubuntu1 | 1:18.1.3-1ubuntu1 |
+| clang-20 | OK | 1:20.1.2-0ubuntu1~24.04.3 | 1:20.1.2-0ubuntu1~24.04.3 |
+| clang-format-20 | OK | 1:20.1.2-0ubuntu1~24.04.3 | 1:20.1.2-0ubuntu1~24.04.3 |
+| clang-tidy-20 | OK | 1:20.1.2-0ubuntu1~24.04.3 | 1:20.1.2-0ubuntu1~24.04.3 |
+| libclang-rt-20-dev | OK | 1:20.1.2-0ubuntu1~24.04.3 | 1:20.1.2-0ubuntu1~24.04.3 |
+| llvm-20 | OK | 1:20.1.2-0ubuntu1~24.04.3 | 1:20.1.2-0ubuntu1~24.04.3 |
 | cmake | OK | 3.28.3-1build7 | 3.28.3-1build7 |
 | ninja-build | OK | 1.11.1-2 | 1.11.1-2 |
 | ccache | OK | 4.9.1-1 | 4.9.1-1 |
@@ -51,10 +53,11 @@ differ because layer timestamps differ.
 | libfontconfig1 | OK | 2.15.0-1.1ubuntu2 | 2.15.0-1.1ubuntu2 |
 | libxinerama1 | OK | 2:1.1.4-3build1 | 2:1.1.4-3build1 |
 | openfoam2512 | OK | 2512.0-2 | 2512.0-2 |
-| uv | OK | 0.12.18 | 0.12.18 |
-| python | OK | 3.13.15 | 3.13.15 |
 | gmsh (cli) | OK | 4.15.2 | 4.15.2 |
 | gmsh (python) | OK | 4.15.2 | 4.15.2 |
+| gitleaks | OK | 8.30.1 | 8.30.1 |
+| uv | OK | 0.12.18 | 0.12.18 |
+| python | OK | 3.13.15 | 3.13.15 |
 | vcpkg commit | OK | 9e593bb18ea69cc5095e012465dcd675a822ed0d | 9e593bb18ea69cc5095e012465dcd675a822ed0d |
 | snapshot | OK | 20260920T000000Z | 20260920T000000Z |
 

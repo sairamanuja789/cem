@@ -6,7 +6,13 @@ All database access in cemkit goes through this package (python/CLAUDE.md). See 
 from __future__ import annotations
 
 from cemkit.store.artifacts import ArtifactStore, StoredArtifact
-from cemkit.store.errors import ArtifactCorrupt, DocumentRejected, MigrationError, StoreError
+from cemkit.store.errors import (
+    ArtifactCorrupt,
+    DocumentRejected,
+    LeaseLost,
+    MigrationError,
+    StoreError,
+)
 from cemkit.store.port import Store
 from cemkit.store.provenance import (
     CONTAINER_DIGEST_ENV,
@@ -17,14 +23,21 @@ from cemkit.store.provenance import (
 from cemkit.store.records import (
     UNKNOWN,
     ArtifactRecord,
+    AttemptRecord,
     CandidateRecord,
+    Claim,
+    ExpiredLease,
     FailureRecord,
     JobEvent,
     JobRecord,
+    JobSpec,
+    Lease,
+    PublishedFile,
     ResultRecord,
     Run,
     RunMetadata,
     SpecRecord,
+    Usage,
 )
 from cemkit.store.sqlite import SqliteStore, open_store
 
@@ -34,12 +47,19 @@ __all__ = [
     "ArtifactCorrupt",
     "ArtifactRecord",
     "ArtifactStore",
+    "AttemptRecord",
     "CandidateRecord",
+    "Claim",
     "DocumentRejected",
+    "ExpiredLease",
     "FailureRecord",
     "JobEvent",
     "JobRecord",
+    "JobSpec",
+    "Lease",
+    "LeaseLost",
     "MigrationError",
+    "PublishedFile",
     "ResultRecord",
     "Run",
     "RunMetadata",
@@ -48,6 +68,7 @@ __all__ = [
     "Store",
     "StoreError",
     "StoredArtifact",
+    "Usage",
     "capture_run_metadata",
     "input_hash",
     "open_store",

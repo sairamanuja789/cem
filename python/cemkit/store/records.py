@@ -183,3 +183,91 @@ class ArtifactRecord:
     name: str
     media_type: str | None
     recorded_at: str
+
+
+# --- job queue (T13; ORC-001..004) -------------------------------------------------------------
+
+RESOURCE_CLASSES: Final = ("light", "heavy")
+ATTEMPT_OUTCOMES: Final = ("done", "failed", "lost", "handed_over")
+ARTIFACT_ROLES: Final = ("output", "manifest", "log")
+
+
+@dataclass(frozen=True, slots=True)
+class JobSpec:
+    """What a job runs: its resource class, retry budget and handler payload."""
+
+    job_pk: int
+    kind: str
+    resource_class: str
+    max_retries: int
+    input_hash: str
+    payload_json: str
+
+    def payload(self) -> Any:
+        return json.loads(self.payload_json)
+
+
+@dataclass(frozen=True, slots=True)
+class Lease:
+    """A worker's claim on one attempt of a job, valid until `expires_at` unless renewed.
+
+    Times are seconds since the Unix epoch (time.time()).
+    """
+
+    lease_pk: int
+    job_pk: int
+    worker_id: str
+    attempt: int
+    acquired_at: float
+    expires_at: float
+
+
+@dataclass(frozen=True, slots=True)
+class Claim:
+    job: JobRecord
+    spec: JobSpec
+    lease: Lease
+
+
+@dataclass(frozen=True, slots=True)
+class ExpiredLease:
+    """A lease whose worker stopped renewing it while the job was running or publishing."""
+
+    lease: Lease
+    spec: JobSpec
+    status: str
+    expired_at: float
+
+
+@dataclass(frozen=True, slots=True)
+class Usage:
+    """Resources an attempt used (OBS-001). None where nothing was measured."""
+
+    peak_rss_bytes: int | None = None
+    cpu_seconds: float | None = None
+    wall_seconds: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AttemptRecord:
+    attempt_pk: int
+    lease_pk: int
+    job_pk: int
+    run_pk: int
+    attempt: int
+    outcome: str
+    code: str | None
+    reason: str | None
+    usage: Usage
+    recorded_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class PublishedFile:
+    """A file already in the artifact store, to be linked to a job when it completes."""
+
+    name: str
+    sha256: str
+    size_bytes: int
+    role: str
+    media_type: str | None = None

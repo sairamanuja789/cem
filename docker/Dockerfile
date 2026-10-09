@@ -135,6 +135,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends "calculix-ccx=${APT_CALCULIX_CCX}" \
  && rm -rf /var/lib/apt/lists/*
 
+# GNU time (/usr/bin/time -v) for the T03 memory measurement (scripts/measure_openfoam_memory.sh).
+ARG APT_TIME
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends "time=${APT_TIME}" \
+ && rm -rf /var/lib/apt/lists/*
+
 # Gmsh is installed once, here. T02's Python project must reuse /opt/gmsh-venv, not pin a second copy.
 # The wheel's libgmsh needs these shared libraries even headless (each was proven missing with ldd).
 ARG APT_LIBGLU1_MESA

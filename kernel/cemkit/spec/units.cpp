@@ -15,6 +15,12 @@ struct UnitDefinition {
   double offset;  // for temperature (value_si = (value * factor) + offset)
 };
 
+// Conversion factors to SI. Source: NIST SP 811 (2008), "Guide for the Use of the International
+// System of Units (SI)", Sec. B.8: in = 2.54 E-02 m and ft = 3.048 E-01 m (exact), so
+// ft3/min = 0.3048^3 / 60 m3/s; mmH2O (conventional) = 9.806 65 Pa, the standard acceleration of
+// gravity g_n = 9.806 65 m/s2 exactly (same document); inH2O (conventional) = 25.4 mm x g_n x
+// 1000 kg/m3 = 249.08891 Pa (SP 811 lists 2.490 889 E+02). rpm = 2 pi / 60 rad/s. SI prefixes and
+// the Celsius offset 273.15 K are SI definitions. See docs/models/platform/units.md and ADR-003 D8.
 inline constexpr std::array k_unit_table{
     // Length
     UnitDefinition{.unit = "m", .kind = QuantityKind::length, .factor = 1.0, .offset = 0.0},

@@ -28,7 +28,11 @@ D4 diameters, D6 errors). Requirements: SEL-001, PHY-001, PHY-002, PHY-003, PHY-
 | `fan_total_from_static` | Δp_t = Δp_s + ½ ρ (Q / A_out)², A_out = π D_duct² / 4 | ISO 5801 definitions (ADR-003 D1) |
 
 `fan_total_from_static` returns its result with provenance **derived** and records the rule it
-applied.
+applied. It accepts Δp_s = 0, the free-delivery rating point, where Δp_t is the dynamic pressure
+alone (ADR-003 D1). Negative static pressure is out of validity. The converted total must also be
+strictly positive: at free delivery a vanishingly small flow underflows the dynamic pressure to 0,
+and that returns `out_of_validity` with subject `fan_total_pressure`, checked before the pressure
+limit.
 
 ISO 5801's conventional fan dynamic pressure is built from the mass flow, the mean *outlet*
 density and the fan outlet area, with a Mach factor. Here it is simplified, and every result is
@@ -41,7 +45,9 @@ inside the incompressible range below, where these simplifications hold:
 
 A function returns an `out_of_validity` error, never a number, unless both of these hold:
 
-1. **Every input is finite and strictly positive.** The bounds are written `(0, inf)`.
+1. **Every input is finite and strictly positive.** The bounds are written `(0, inf)`. The one
+   exception is the fan static pressure of `fan_total_from_static`, which is finite and ≥ 0,
+   written `[0, inf)`, so that free delivery is valid.
 2. **The flow is incompressible within ε = 0.01.** ε is a project decision (ADR-003 D3), not a
    standard value. Each criterion applies where its inputs are available:
 
@@ -106,8 +112,8 @@ point.
 
 ## Evidence
 
-- Hand calculations `tests/hand_calcs/proposed/l0_001` … `l0_009`, with the working shown. They
-  move to `verified/` once a human has checked them.
+- Hand calculations `tests/hand_calcs/verified/l0_001` … `l0_009`, checked by a human, and
+  `tests/hand_calcs/proposed/l0_010` (free delivery), awaiting that check. All show the working.
 - Hypothesis properties in `tests/python/test_reference_l0.py`:
   - the fan-law ratios are exact;
   - doubling the speed doubles the flow at a fixed diameter;

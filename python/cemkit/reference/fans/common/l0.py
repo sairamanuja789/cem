@@ -18,7 +18,8 @@ Assumptions:
 - Incompressible flow within the project tolerance EPSILON (ADR-003 D3).
   Linearised isentropic relations: NACA Report 1135 (1953), p. 616, eqs. (34) and (45).
 
-Validity: every input is finite and strictly positive, Delta p_t / (gamma p1) <= EPSILON and
+Validity: every input is finite and strictly positive (fan static pressure in
+fan_total_from_static may be 0, free delivery), Delta p_t / (gamma p1) <= EPSILON and
 M_tip^2 / 2 <= EPSILON, each applied where its inputs are available. Outside these limits a
 function returns an out_of_validity Error, never a number.
 """
@@ -31,7 +32,7 @@ from typing import Literal
 
 from cemkit.errors import Error
 from cemkit.reference.platform.air import Air
-from cemkit.reference.validity import require_at_most, require_positive
+from cemkit.reference.validity import require_at_most, require_non_negative, require_positive
 
 MODEL = "fans.l0@1.0.0"
 
@@ -221,18 +222,22 @@ def fan_total_from_static(
 ) -> Derived[FanTotalPressure] | Error:
     """Delta p_t = Delta p_s + 1/2 rho (Q / A_out)^2, A_out = pi D_duct^2 / 4 (ADR-003 D1).
 
-    The result has provenance "derived". The pressure criterion of ADR-003 D3 is applied to the
-    result; it also bounds the outlet Mach number, because the dynamic pressure is part of it.
+    Fan static pressure may be 0 (free delivery); negative values are out of validity (ADR-003
+    D1). The result has provenance "derived". The pressure criterion of ADR-003 D3 is applied to
+    the result; it also bounds the outlet Mach number, because the dynamic pressure is part of it.
     """
     failure = _first(
-        _positive(("fan_static_pressure", pressure.pa), ("flow", flow), ("d_duct", d_duct)),
+        require_non_negative("fan_static_pressure", pressure.pa, MODEL),
+        _positive(("flow", flow), ("d_duct", d_duct)),
         _air_valid(air),
     )
     if failure is not None:
         return failure
     area = math.pi * d_duct**2 / 4.0
     total = FanTotalPressure(pressure.pa + 0.5 * air.density * (flow / area) ** 2)
-    failure = _pressure_valid(total, air)
+    # At free delivery a tiny flow can underflow the dynamic pressure to 0; a total of 0 is
+    # outside (0, limit], so it is rejected rather than returned.
+    failure = require_positive("fan_total_pressure", total.pa, MODEL) or _pressure_valid(total, air)
     if failure is not None:
         return failure
     return Derived(value=total, rule=DYNAMIC_PRESSURE_RULE)

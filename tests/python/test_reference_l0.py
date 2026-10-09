@@ -226,7 +226,7 @@ def test_coefficients_and_specific_values_are_invariant_under_fan_law_scaling(
 
 @pytest.mark.req("SPEC-004")
 @given(
-    st.floats(min_value=1.0, max_value=500.0),
+    st.floats(min_value=0.0, max_value=500.0),  # 0 is free delivery (ADR-003 D1)
     st.floats(min_value=0.001, max_value=0.2),
     st.floats(min_value=0.1, max_value=1.0),
 )
@@ -245,6 +245,39 @@ def test_static_to_total_adds_the_conventional_dynamic_pressure(
     # Compare the total, not total - static: the difference loses digits to cancellation when the
     # dynamic pressure is tiny next to the static pressure.
     assert math.isclose(result.value.pa, static + dynamic, rel_tol=1e-12)
+
+
+@pytest.mark.req("SPEC-004")
+def test_free_delivery_converts_to_the_dynamic_pressure_alone() -> None:
+    # ADR-003 D1: fan static pressure 0 is the free-delivery rating point; the total is exactly
+    # the conventional fan dynamic pressure.
+    # Exact == because this copies the reference's operation order; the C++ port (T08) must keep
+    # that order or compare with a tolerance. -0.0 is the same value as 0.0 and is accepted.
+    flow, d_duct = 0.05, 0.12
+    velocity = flow / (math.pi * d_duct**2 / 4.0)
+    for zero in (0.0, -0.0):
+        result = l0.fan_total_from_static(FanStaticPressure(zero), flow, d_duct, AIR)
+        assert isinstance(result, l0.Derived)
+        assert result.value.pa == 0.5 * AIR.density * velocity**2
+
+
+@pytest.mark.req("PHY-003")
+def test_free_delivery_with_an_underflowing_dynamic_pressure_is_out_of_validity() -> None:
+    # Q = 1e-300 m3/s squares to 0, so the total would be 0, outside (0, limit].
+    result = l0.fan_total_from_static(FanStaticPressure(0.0), 1e-300, 0.12, AIR)
+    assert isinstance(result, Error)
+    assert (result.code, result.subject) == ("out_of_validity", "fan_total_pressure")
+    assert result.detail("bounds") == "(0, inf)"
+
+
+@pytest.mark.req("PHY-003")
+@pytest.mark.parametrize("bad", [-1e-300, -1.0, math.nan, math.inf, -math.inf])
+def test_negative_or_non_finite_static_pressure_is_out_of_validity(bad: float) -> None:
+    result = l0.fan_total_from_static(FanStaticPressure(bad), 0.05, 0.12, AIR)
+    assert isinstance(result, Error)
+    assert (result.code, result.subject) == ("out_of_validity", "fan_static_pressure")
+    assert result.detail("bounds") == "[0, inf)"
+    assert result.detail("model") == l0.MODEL
 
 
 # --- outside the limits -------------------------------------------------------------------------

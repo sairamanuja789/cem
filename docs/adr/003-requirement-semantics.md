@@ -153,6 +153,13 @@ temperature must be stated with inH₂O.
   `product.duty.flow` and `product.duty.pressure`. Every essential unknown produces a question
   naming the field, unit and why it matters. A campaign cannot start with unresolved essential
   unknowns unless autonomous mode is set and a default exists (marked provisional).
+- **Defaults** come only from the injected family default resolver. The compiler has no built-in
+  default values. A resolver default is applied only when it carries a value in the field's
+  coherent SI unit and a non-empty source note (citation); otherwise the field stays an essential
+  unknown with a question. Applied defaults get provenance `default` and are provisional.
+- **Not covered by the kernel compiler yet:** SPEC-011's operating range / system curve (only a
+  single duty point with tolerances is compiled; HI-006) and IN-001's YAML input (the kernel reads
+  JSON; YAML is parsed in Python orchestration; HI-007).
 
 ## Consequences
 

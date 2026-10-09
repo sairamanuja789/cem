@@ -29,13 +29,15 @@ enum class QuantityKind {
 
 // Converts value in `unit` to coherent SI unit for `kind` (SPEC-002, SPEC-003).
 // If unit is not known at all: returns unknown_unit error with field named in subject.
-// If unit is known but has wrong dimension: returns unit_mismatch error with field named in subject.
+// If unit is known but has wrong dimension: returns unit_mismatch error with field named in
+// subject.
 [[nodiscard]] core::Result<double> convert_to_si(QuantityKind kind, std::string_view unit,
                                                  double value, std::string_view field_name = {});
 
-// Converts tolerance value (delta or difference). For offset units like degC, delta does not add 273.15.
-[[nodiscard]] core::Result<double> convert_tolerance_to_si(QuantityKind kind,
-                                                           std::string_view unit, double value,
+// Converts tolerance value (delta or difference). For offset units like degC, delta does not add
+// 273.15.
+[[nodiscard]] core::Result<double> convert_tolerance_to_si(QuantityKind kind, std::string_view unit,
+                                                           double value,
                                                            std::string_view field_name = {});
 
 }  // namespace cemkit::spec

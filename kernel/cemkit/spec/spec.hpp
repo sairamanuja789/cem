@@ -2,12 +2,11 @@
 
 #include <cstdint>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 #include "cemkit/core/provenance.hpp"
 #include "cemkit/core/result.hpp"
@@ -58,8 +57,7 @@ class Spec {
   [[nodiscard]] core::Result<void> check_contradictions() const;
 
   // Derives a new immutable revision linked to this one as parent (SPEC-009).
-  [[nodiscard]] core::Result<Spec> derive_new_revision(
-      const nlohmann::json& modifications) const;
+  [[nodiscard]] core::Result<Spec> derive_new_revision(const nlohmann::json& modifications) const;
 
   [[nodiscard]] const nlohmann::json& raw_document() const noexcept { return raw_document_; }
   [[nodiscard]] nlohmann::json to_json() const;

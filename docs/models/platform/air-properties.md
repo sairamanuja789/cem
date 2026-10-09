@@ -1,7 +1,8 @@
 # Air properties (platform physics, L0)
 
-Reference: `python/cemkit/reference/platform/air.py` (model `platform.air@1.0.0`). The kernel port
-follows in T08. Decisions: ADR-003 D2.
+Kernel: `kernel/cemkit/physics/air.hpp` (model `platform.air@1.0.0`, results labelled L0 predicted).
+Reference: `python/cemkit/reference/platform/air.py`. The two agree bit for bit on every hand
+calculation and 10 000 random states (ctest `fans_l0_crosscheck`, T08). Decisions: ADR-003 D2.
 
 ## Values
 

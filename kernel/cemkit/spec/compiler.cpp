@@ -141,10 +141,15 @@ core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j
       return core::fail(core::ErrorCode::spec_rejected, "text field value must be string or array",
                         path);
     }
+    if (j.contains("unit") || j.contains("tolerance")) {
+      return core::fail(core::ErrorCode::spec_rejected,
+                        "text field cannot carry a unit or tolerance", path);
+    }
     if (j["value"].is_string()) {
       f.text_value = j["value"].get<std::string>();
     } else {
-      f.text_value = j["value"].dump();
+      // replace: invalid UTF-8 in a caller-built document must not throw (no exceptions).
+      f.text_value = j["value"].dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     }
     return f;
   }
@@ -437,9 +442,19 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
     if (is_unknown) {
       bool resolved_by_default = false;
       if (options_.autonomous_mode && options_.default_resolver) {
-        auto def_opt = options_.default_resolver(spec.family_, ess_path);
-        if (def_opt.has_value()) {
-          Field f = std::move(*def_opt);
+        std::optional<Field> def_opt = options_.default_resolver(spec.family_, ess_path);
+        // A default must be a value with its source (CLAUDE.md rule 7): an uncited or valueless
+        // default is not applied, and the field stays an essential unknown with a question.
+        Field f = def_opt.value_or(Field{});
+        // A numeric default must also be in the field's coherent SI unit.
+        const auto def_kind = expected_field_kind(ess_path);
+        const bool cited = !f.note.value_or("").empty();
+        const bool has_value = def_kind.has_value()
+                                   ? (f.si_value.has_value() &&
+                                      f.si_unit.value_or("") ==
+                                          coherent_si_unit(def_kind.value_or(QuantityKind::ratio)))
+                                   : f.text_value.has_value();
+        if (def_opt.has_value() && cited && has_value) {
           f.path = ess_path;
           f.provenance = core::Provenance::default_value;
           f.provisional = true;

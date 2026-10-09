@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 #include <nlohmann/json.hpp>
 
 #include "cemkit/core/error.hpp"
@@ -10,6 +11,15 @@ using json = nlohmann::json;
 using namespace cemkit::spec;
 
 namespace {
+
+// A missing optional becomes NaN, which never matches an expected number, so a CHECK on
+// value_or(k_nan) still fails when the value is absent (repo pattern, see core tests).
+constexpr double k_nan = std::numeric_limits<double>::quiet_NaN();
+
+// Returns the field or an empty Field. Callers REQUIRE presence first.
+Field field_or_empty(const Spec& spec, std::string_view path) {
+  return spec.field(path).value_or(Field{});
+}
 
 json base_valid_spec() {
   return json{
@@ -109,21 +119,21 @@ TEST_CASE("inputs are converted to SI keeping original value and unit", "[SPEC-0
   const auto res = compiler.compile(base_valid_spec());
   REQUIRE(res.has_value());
 
-  const auto width = res->field("envelope.width");
-  REQUIRE(width.has_value());
-  REQUIRE(width->si_value.has_value());
-  CHECK(width->original_value == 120.0);
-  CHECK(width->original_unit == "mm");
-  CHECK_THAT(*width->si_value, WithinRel(0.12, 1e-12));
-  CHECK(width->si_unit == "m");
+  REQUIRE(res->field("envelope.width").has_value());
+  const Field width = field_or_empty(*res, "envelope.width");
+  REQUIRE(width.si_value.has_value());
+  CHECK(width.original_value == 120.0);
+  CHECK(width.original_unit == "mm");
+  CHECK_THAT(width.si_value.value_or(k_nan), WithinRel(0.12, 1e-12));
+  CHECK(width.si_unit == "m");
 
-  const auto rpm = res->field("product.rotational_speed");
-  REQUIRE(rpm.has_value());
-  REQUIRE(rpm->si_value.has_value());
-  CHECK(rpm->original_value == 2000.0);
-  CHECK(rpm->original_unit == "rpm");
-  CHECK_THAT(*rpm->si_value, WithinRel(209.43951023931953, 1e-12));
-  CHECK(rpm->si_unit == "rad/s");
+  REQUIRE(res->field("product.rotational_speed").has_value());
+  const Field rpm = field_or_empty(*res, "product.rotational_speed");
+  REQUIRE(rpm.si_value.has_value());
+  CHECK(rpm.original_value == 2000.0);
+  CHECK(rpm.original_unit == "rpm");
+  CHECK_THAT(rpm.si_value.value_or(k_nan), WithinRel(209.43951023931953, 1e-12));
+  CHECK(rpm.si_unit == "rad/s");
 }
 
 TEST_CASE("dimensionally inconsistent input is rejected naming the field", "[SPEC-003]") {
@@ -177,9 +187,8 @@ TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject stat
     doc["product"]["duty"]["pressure"]["kind"] = "fan_total";
     const auto res = compiler.compile(doc);
     REQUIRE(res.has_value());
-    const auto p = res->field("product.duty.pressure");
-    REQUIRE(p.has_value());
-    CHECK(p->pressure_kind == "fan_total");
+    REQUIRE(res->field("product.duty.pressure").has_value());
+    CHECK(field_or_empty(*res, "product.duty.pressure").pressure_kind == "fan_total");
   }
 }
 
@@ -195,12 +204,16 @@ TEST_CASE("precedence rule: user > image > derived > default", "[SPEC-005]") {
   updates["envelope"] = json{{"width", {{"value", 140.0}, {"unit", "mm"}, {"provenance", "user"}}}};
   auto derived = res->derive_new_revision(updates);
   REQUIRE(derived.has_value());
-  const auto env_w = derived->field("envelope.width");
-  REQUIRE(env_w.has_value());
-  REQUIRE(env_w->si_value.has_value());
-  CHECK(env_w->provenance == cemkit::core::Provenance::user);
-  CHECK(*env_w->si_value == 0.14);
-  CHECK(!derived->conflicts().empty());
+  REQUIRE(derived->field("envelope.width").has_value());
+  const Field env_w = field_or_empty(*derived, "envelope.width");
+  REQUIRE(env_w.si_value.has_value());
+  CHECK(env_w.provenance == cemkit::core::Provenance::user);
+  CHECK_THAT(env_w.si_value.value_or(k_nan), WithinRel(0.14, 1e-12));
+  // Higher rank wins; the conflict records the winner and the overridden default.
+  REQUIRE(derived->conflicts().size() == 1);
+  CHECK(derived->conflicts()[0].field == "envelope.width");
+  CHECK(derived->conflicts()[0].winning == cemkit::core::Provenance::user);
+  CHECK(derived->conflicts()[0].overridden == cemkit::core::Provenance::default_value);
 }
 
 TEST_CASE("essential fields are declared by family plugin stub", "[SPEC-006]") {
@@ -271,15 +284,12 @@ TEST_CASE("specs are immutable and versioned with parent link", "[SPEC-009]") {
   mods["title"] = "Updated axial fan title";
   auto rev2 = res->derive_new_revision(mods);
   REQUIRE(rev2.has_value());
-  if (rev2) {
-    CHECK(rev2->revision() == 2);
-    REQUIRE(rev2->parent().has_value());
-    if (rev2->parent()) {
-      CHECK(rev2->parent()->spec_id == res->spec_id());
-      CHECK(rev2->parent()->revision == 1);
-    }
-    CHECK(rev2->title() == "Updated axial fan title");
-  }
+  CHECK(rev2->revision() == 2);
+  REQUIRE(rev2->parent().has_value());
+  const SpecRef parent = rev2->parent().value_or(SpecRef{.spec_id = "", .revision = 0});
+  CHECK(parent.spec_id == res->spec_id());
+  CHECK(parent.revision == 1);
+  CHECK(rev2->title() == "Updated axial fan title");
 }
 
 TEST_CASE("physically contradictory requirements are rejected", "[SPEC-010]") {
@@ -588,11 +598,12 @@ TEST_CASE("SPEC-005: lower rank patch loses and records conflict", "[SPEC-005]")
 
   auto rev2 = res->derive_new_revision(patch);
   REQUIRE(rev2.has_value());
-  const auto sz = rev2->field("product.nominal_size");
-  REQUIRE(sz.has_value());
-  REQUIRE(sz->si_value.has_value());
-  CHECK(*sz->si_value == 0.12);
-  CHECK(sz->provenance == cemkit::core::Provenance::user);
+  REQUIRE(rev2->field("product.nominal_size").has_value());
+  const Field sz = field_or_empty(*rev2, "product.nominal_size");
+  REQUIRE(sz.si_value.has_value());
+  CHECK_THAT(sz.si_value.value_or(k_nan), WithinRel(0.12, 1e-12));
+  CHECK(sz.original_value == 120.0);
+  CHECK(sz.provenance == cemkit::core::Provenance::user);
 
   REQUIRE(rev2->conflicts().size() == 1);
   CHECK(rev2->conflicts()[0].field == "product.nominal_size");
@@ -630,6 +641,7 @@ TEST_CASE(
       f.original_unit = "m3/s";
       f.si_value = 0.04;
       f.si_unit = "m3/s";
+      f.note = "test fixture source: injected by this test, not engineering data";
       f.tolerance = Tolerance{.type = Tolerance::Type::relative,
                               .minus = 0.05,
                               .plus = 0.05,
@@ -651,12 +663,12 @@ TEST_CASE(
 
   auto res = compiler.compile(doc);
   REQUIRE(res.has_value());
-  const auto flow_f = res->field("product.duty.flow");
-  REQUIRE(flow_f.has_value());
-  REQUIRE(flow_f->si_value.has_value());
-  CHECK(*flow_f->si_value == 0.04);
-  CHECK(flow_f->provenance == cemkit::core::Provenance::default_value);
-  CHECK(flow_f->provisional);
+  REQUIRE(res->field("product.duty.flow").has_value());
+  const Field flow_f = field_or_empty(*res, "product.duty.flow");
+  REQUIRE(flow_f.si_value.has_value());
+  CHECK(flow_f.si_value.value_or(k_nan) == 0.04);
+  CHECK(flow_f.provenance == cemkit::core::Provenance::default_value);
+  CHECK(flow_f.provisional);
 
   // Pressure had no default, so questions exists and unresolved flag is true
   CHECK(res->has_unresolved_essential_unknowns());
@@ -949,4 +961,76 @@ TEST_CASE("SPEC-010: contradiction check examines all stated power limits", "[SP
   REQUIRE(!res.has_value());
   CHECK(res.error().code() == cemkit::core::ErrorCode::infeasible_requirement);
   CHECK(res.error().subject() == "product.motor.power_limit");
+}
+
+TEST_CASE("SPEC-007: an uncited default from the resolver is not applied", "[SPEC-007]") {
+  CompilerOptions opts;
+  opts.autonomous_mode = true;
+  opts.default_resolver = [](std::string_view, std::string_view path) -> std::optional<Field> {
+    Field f;
+    f.path = std::string(path);
+    f.si_value = 0.04;
+    f.si_unit = "m3/s";  // no note: no citation
+    return f;
+  };
+  SpecCompiler compiler(opts);
+  json doc = base_valid_spec();
+  doc["product"].erase("duty");
+  const auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  CHECK(!res->field("product.duty.flow").has_value());
+  CHECK(res->has_unresolved_essential_unknowns());
+  CHECK(res->questions().size() == 2);
+}
+
+TEST_CASE("SPEC-008: questions carry a specific reason per essential field", "[SPEC-008]") {
+  SpecCompiler compiler;
+  json doc = base_valid_spec();
+  doc["product"].erase("duty");
+  const auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  REQUIRE(res->questions().size() == 2);
+  CHECK(res->questions()[0].reason.find("flow") != std::string::npos);
+  CHECK(res->questions()[0].reason.find("AX-003") != std::string::npos);
+  CHECK(res->questions()[1].reason.find("pressure") != std::string::npos);
+  CHECK(res->questions()[1].reason.find("AX-004") != std::string::npos);
+}
+
+TEST_CASE("derive_new_revision keeps the injected essential resolver", "[SPEC-009]") {
+  CompilerOptions opts;
+  opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
+    return {"product.motor.bore_diameter"};
+  };
+  SpecCompiler compiler(opts);
+  const auto res = compiler.compile(base_valid_spec());
+  REQUIRE(res.has_value());
+  REQUIRE(res->questions().size() == 1);
+
+  json patch = json::object();
+  patch["title"] = "Rev 2";
+  const auto rev2 = res->derive_new_revision(patch);
+  REQUIRE(rev2.has_value());
+  // A default-constructed compiler would ask about duty flow and pressure instead.
+  REQUIRE(rev2->questions().size() == 1);
+  CHECK(rev2->questions()[0].field == "product.motor.bore_diameter");
+  CHECK(rev2->questions()[0].unit == "m");
+}
+
+TEST_CASE("a text field carrying a unit is rejected naming the field", "[SPEC-001]") {
+  SpecCompiler compiler;
+  json doc = base_valid_spec();
+  doc["manufacturing"]["process"]["unit"] = "mm";
+  const auto res = compiler.compile(doc);
+  REQUIRE(!res.has_value());
+  CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+  CHECK(res.error().subject() == "manufacturing.process");
+}
+
+TEST_CASE("invalid UTF-8 in a text array does not throw", "[SPEC-001]") {
+  SpecCompiler compiler;
+  json doc = base_valid_spec();
+  doc["product"]["scope"]["value"] = json::array({std::string("rotor\xff")});
+  const auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  CHECK(res->field("product.scope").has_value());
 }

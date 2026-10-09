@@ -1,0 +1,17 @@
+# Feasible specific-speed ranges per fan family (SEL-002; docs/models/fans/feasibility.md).
+#
+# omega_s = omega sqrt(Q) / (Delta p_t / rho)^(3/4), dimensionless, fan total pressure basis
+# (ADR-003 D1), with omega in rad/s, Q in m3/s, Delta p_t in Pa and rho in kg/m3. Cordier sigma or
+# rpm-based specific speeds (n_q, N_s) are different numbers: convert them explicitly, and record
+# the conversion, before entering a range here. Every range must cite a primary source (CLAUDE.md rule 7; architecture section 6:
+# "encode the boundaries from a published Cordier dataset ... do not hard-code numbers from memory").
+#
+# A range without a verified citation stays UNSOURCED with null bounds. The feasibility gate then
+# reports "range unsourced" for that family instead of passing or failing the duty. Open item
+# HI-003: the owner supplies the source (for example a Cordier diagram dataset from a fan textbook).
+schema_version: 1
+families:
+  - family: fans.axial_ducted
+    specific_speed_min: null
+    specific_speed_max: null
+    source: UNSOURCED

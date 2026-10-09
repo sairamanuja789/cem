@@ -56,6 +56,13 @@ class FanStaticPressure:
 
 
 @dataclass(frozen=True)
+class FanDynamicPressure:
+    """Conventional fan dynamic pressure 1/2 rho (Q / A_out)^2 (ISO 5801), Pa."""
+
+    pa: float
+
+
+@dataclass(frozen=True)
 class Derived[T]:
     """A value computed from other fields by a documented rule (provenance class "derived")."""
 
@@ -75,6 +82,10 @@ class FanPoint:
     power: float  # W, shaft power
     air: Air
 
+
+# Squares are written x * x, never x**2: x * x is correctly rounded on every platform, while x**2
+# calls the C library's pow, which is not always correctly rounded and which compilers replace by
+# x * x in the kernel. Both sides then agree bit for bit (T08 cross-check).
 
 # --- validity --------------------------------------------------------------------------------
 
@@ -165,7 +176,7 @@ def flow_coefficient(flow: float, d_tip: float, omega: float, air: Air) -> float
     if failure is not None:
         return failure
     u = omega * d_tip / 2.0
-    return flow / (math.pi / 4.0 * d_tip**2 * u)
+    return flow / (math.pi / 4.0 * (d_tip * d_tip) * u)
 
 
 def pressure_coefficient(
@@ -180,7 +191,7 @@ def pressure_coefficient(
     if failure is not None:
         return failure
     u = omega * d_tip / 2.0
-    return 2.0 * pressure.pa / (air.density * u**2)
+    return 2.0 * pressure.pa / (air.density * (u * u))
 
 
 def specific_speed(
@@ -217,6 +228,36 @@ DYNAMIC_PRESSURE_RULE = (
 )
 
 
+def _dynamic_pa(flow: float, d_duct: float, air: Air) -> float:
+    # Operation order fixed for the kernel port (T08): area = pi D^2 / 4; 1/2 rho (Q / area)^2.
+    area = math.pi * (d_duct * d_duct) / 4.0
+    velocity = flow / area
+    return 0.5 * air.density * (velocity * velocity)
+
+
+def conventional_dynamic_pressure(
+    flow: float, d_duct: float, air: Air
+) -> FanDynamicPressure | Error:
+    """p_d = 1/2 rho (Q / A_out)^2, A_out = pi D_duct^2 / 4 (ISO 5801 conventional fan dynamic
+    pressure, Mach factor 1; ADR-003 D1).
+
+    The pressure criterion of ADR-003 D3 is applied to p_d: p_d / (gamma p1) = M_out^2 / 2 (NACA
+    Report 1135, eq. (31b)), so p_d <= EPSILON gamma p1 is the outlet-Mach form of the same limit.
+    """
+    failure = _first(_positive(("flow", flow), ("d_duct", d_duct)), _air_valid(air))
+    if failure is not None:
+        return failure
+    dynamic = _dynamic_pa(flow, d_duct, air)
+    failure = require_at_most(
+        "fan_dynamic_pressure",
+        dynamic,
+        _max_pressure(air),
+        MODEL,
+        "fan dynamic pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+    )
+    return failure if failure is not None else FanDynamicPressure(dynamic)
+
+
 def fan_total_from_static(
     pressure: FanStaticPressure, flow: float, d_duct: float, air: Air
 ) -> Derived[FanTotalPressure] | Error:
@@ -233,8 +274,7 @@ def fan_total_from_static(
     )
     if failure is not None:
         return failure
-    area = math.pi * d_duct**2 / 4.0
-    total = FanTotalPressure(pressure.pa + 0.5 * air.density * (flow / area) ** 2)
+    total = FanTotalPressure(pressure.pa + _dynamic_pa(flow, d_duct, air))
     # At free delivery a tiny flow can underflow the dynamic pressure to 0; a total of 0 is
     # outside (0, limit], so it is rejected rather than returned.
     failure = require_positive("fan_total_pressure", total.pa, MODEL) or _pressure_valid(total, air)
@@ -276,7 +316,7 @@ def scale_fan_laws(point: FanPoint, omega: float, d_tip: float, air: Air) -> Fan
         omega=omega,
         d_tip=d_tip,
         flow=point.flow * n * d**3,
-        pressure=FanTotalPressure(point.pressure.pa * r * n**2 * d**2),
+        pressure=FanTotalPressure(point.pressure.pa * r * (n * n) * (d * d)),
         power=point.power * r * n**3 * d**5,
         air=air,
     )

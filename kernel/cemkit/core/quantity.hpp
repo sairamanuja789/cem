@@ -23,6 +23,7 @@ using mp_units::square;
 
 using Length = mp_units::quantity<detail::isq::length[detail::si::metre], double>;
 using Area = mp_units::quantity<detail::isq::area[detail::square(detail::si::metre)], double>;
+using Volume = mp_units::quantity<detail::isq::volume[detail::cubic(detail::si::metre)], double>;
 using VolumeFlowRate = mp_units::quantity<
     units::volume_flow_rate[detail::cubic(detail::si::metre) / detail::si::second], double>;
 using Pressure = mp_units::quantity<detail::isq::pressure[detail::si::pascal], double>;

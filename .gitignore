@@ -1,0 +1,13 @@
+.cache/
+build/
+out/
+vcpkg_installed/
+.venv/
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.gcda
+*.gcno
+coverage/
+.coverage

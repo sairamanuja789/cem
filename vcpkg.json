@@ -5,6 +5,12 @@
   "dependencies": [
     "mp-units",
     "nlohmann-json",
-    "catch2"
-  ]
+    "catch2",
+    "opencascade"
+  ],
+  "vcpkg-configuration": {
+    "overlay-ports": [
+      "./cmake/vcpkg-ports"
+    ]
+  }
 }

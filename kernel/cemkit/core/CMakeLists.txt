@@ -1,6 +1,6 @@
 cemkit_add_module(
   PATH cemkit/core
-  SOURCES error.cpp version.cpp
+  SOURCES error.cpp sha256.cpp version.cpp
   DEPS mp-units::mp-units
   DEFINES CEMKIT_KERNEL_VERSION="${PROJECT_VERSION}"
   TESTS
@@ -8,6 +8,7 @@ cemkit_add_module(
     tests/test_fidelity.cpp
     tests/test_labelled.cpp
     tests/test_provenance.cpp
+    tests/test_sha256.cpp
     tests/test_units.cpp
     tests/test_version.cpp
   TEST_DEFINES CEMKIT_EXPECTED_VERSION="${PROJECT_VERSION}")

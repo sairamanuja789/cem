@@ -111,21 +111,19 @@ TEST_CASE("inputs are converted to SI keeping original value and unit", "[SPEC-0
 
   const auto width = res->field("envelope.width");
   REQUIRE(width.has_value());
-  if (width && width->si_value) {
-    CHECK(width->original_value == 120.0);
-    CHECK(width->original_unit == "mm");
-    CHECK_THAT(*width->si_value, WithinRel(0.12, 1e-12));
-    CHECK(width->si_unit == "m");
-  }
+  REQUIRE(width->si_value.has_value());
+  CHECK(width->original_value == 120.0);
+  CHECK(width->original_unit == "mm");
+  CHECK_THAT(*width->si_value, WithinRel(0.12, 1e-12));
+  CHECK(width->si_unit == "m");
 
   const auto rpm = res->field("product.rotational_speed");
   REQUIRE(rpm.has_value());
-  if (rpm && rpm->si_value) {
-    CHECK(rpm->original_value == 2000.0);
-    CHECK(rpm->original_unit == "rpm");
-    CHECK_THAT(*rpm->si_value, WithinRel(209.43951023931953, 1e-12));
-    CHECK(rpm->si_unit == "rad/s");
-  }
+  REQUIRE(rpm->si_value.has_value());
+  CHECK(rpm->original_value == 2000.0);
+  CHECK(rpm->original_unit == "rpm");
+  CHECK_THAT(*rpm->si_value, WithinRel(209.43951023931953, 1e-12));
+  CHECK(rpm->si_unit == "rad/s");
 }
 
 TEST_CASE("dimensionally inconsistent input is rejected naming the field", "[SPEC-003]") {
@@ -170,6 +168,7 @@ TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject stat
     REQUIRE(!res.has_value());
     CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
     CHECK(res.error().subject() == "product.duty.pressure");
+    CHECK(res.error().message().find("efficiency type") != std::string::npos);
   }
 
   // fan_total accepted
@@ -180,15 +179,11 @@ TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject stat
     REQUIRE(res.has_value());
     const auto p = res->field("product.duty.pressure");
     REQUIRE(p.has_value());
-    if (p) {
-      CHECK(p->pressure_kind == "fan_total");
-    }
+    CHECK(p->pressure_kind == "fan_total");
   }
 }
 
 TEST_CASE("precedence rule: user > image > derived > default", "[SPEC-005]") {
-  // Check provenance precedence ranking
-  CHECK(cemkit::core::Provenance::user < cemkit::core::Provenance::default_value);  // enum values
   // Our compiler resolves precedence: user overrides image/derived/default
   SpecCompiler compiler;
   json doc = base_valid_spec();
@@ -200,15 +195,12 @@ TEST_CASE("precedence rule: user > image > derived > default", "[SPEC-005]") {
   updates["envelope"] = json{{"width", {{"value", 140.0}, {"unit", "mm"}, {"provenance", "user"}}}};
   auto derived = res->derive_new_revision(updates);
   REQUIRE(derived.has_value());
-  if (derived) {
-    const auto env_w = derived->field("envelope.width");
-    REQUIRE(env_w.has_value());
-    if (env_w && env_w->si_value) {
-      CHECK(env_w->provenance == cemkit::core::Provenance::user);
-      CHECK(*env_w->si_value == 0.14);
-    }
-    CHECK(!derived->conflicts().empty());
-  }
+  const auto env_w = derived->field("envelope.width");
+  REQUIRE(env_w.has_value());
+  REQUIRE(env_w->si_value.has_value());
+  CHECK(env_w->provenance == cemkit::core::Provenance::user);
+  CHECK(*env_w->si_value == 0.14);
+  CHECK(!derived->conflicts().empty());
 }
 
 TEST_CASE("essential fields are declared by family plugin stub", "[SPEC-006]") {
@@ -243,20 +235,12 @@ TEST_CASE("spec with unresolved essential unknowns cannot start campaign unless 
   CHECK(res1->has_unresolved_essential_unknowns());
   CHECK(res1->questions().size() == 2);
 
-  // Autonomous mode resolves unknowns using provisional defaults if available
-  SpecCompiler auto_compiler(CompilerOptions{.autonomous_mode = true});
-  auto res2 = auto_compiler.compile(doc);
+  // Autonomous mode without default resolver still has unresolved unknowns
+  SpecCompiler auto_compiler_no_defaults(CompilerOptions{.autonomous_mode = true});
+  auto res2 = auto_compiler_no_defaults.compile(doc);
   REQUIRE(res2.has_value());
-  if (res2) {
-    const auto flow_f = res2->field("product.duty.flow");
-    const auto press_f = res2->field("product.duty.pressure");
-    REQUIRE(flow_f.has_value());
-    REQUIRE(press_f.has_value());
-    if (flow_f && press_f) {
-      CHECK(flow_f->provisional);
-      CHECK(press_f->provisional);
-    }
-  }
+  CHECK(res2->has_unresolved_essential_unknowns());
+  CHECK(res2->questions().size() == 2);
 }
 
 TEST_CASE("compiler produces questions for essential unknowns", "[SPEC-008]") {
@@ -511,7 +495,7 @@ TEST_CASE("field validation error branches", "[SPEC-004]") {
   }
 }
 
-TEST_CASE("pressure kind validation error paths", "[SPEC-007]") {
+TEST_CASE("pressure kind validation error paths", "[SPEC-004]") {
   SpecCompiler compiler;
 
   // Pressure missing kind
@@ -586,7 +570,383 @@ TEST_CASE("Spec helpers and derivation", "[SPEC-005]") {
       json{{"width", json{{"value", 140.0}, {"unit", "mm"}, {"provenance", "user"}}}};
   const auto ok_rev = res->derive_new_revision(override_mod);
   REQUIRE(ok_rev.has_value());
-  if (ok_rev) {
-    CHECK(!ok_rev->conflicts().empty());
+  CHECK(!ok_rev->conflicts().empty());
+}
+
+TEST_CASE("SPEC-005: lower rank patch loses and records conflict", "[SPEC-005]") {
+  SpecCompiler compiler;
+  json doc = base_valid_spec();
+  // Base has nominal_size with provenance user (120 mm)
+  doc["product"]["nominal_size"] = json{{"value", 120.0}, {"unit", "mm"}, {"provenance", "user"}};
+  auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+
+  // Patch with default provenance (100 mm)
+  json patch = json::object();
+  patch["product"] =
+      json{{"nominal_size", {{"value", 100.0}, {"unit", "mm"}, {"provenance", "default"}}}};
+
+  auto rev2 = res->derive_new_revision(patch);
+  REQUIRE(rev2.has_value());
+  const auto sz = rev2->field("product.nominal_size");
+  REQUIRE(sz.has_value());
+  REQUIRE(sz->si_value.has_value());
+  CHECK(*sz->si_value == 0.12);
+  CHECK(sz->provenance == cemkit::core::Provenance::user);
+
+  REQUIRE(rev2->conflicts().size() == 1);
+  CHECK(rev2->conflicts()[0].field == "product.nominal_size");
+  CHECK(rev2->conflicts()[0].winning == cemkit::core::Provenance::user);
+  CHECK(rev2->conflicts()[0].overridden == cemkit::core::Provenance::default_value);
+}
+
+TEST_CASE("SPEC-006: compiler calls injected essential resolver", "[SPEC-006]") {
+  bool resolver_called = false;
+  CompilerOptions opts;
+  opts.essential_resolver = [&](std::string_view family) -> std::vector<std::string> {
+    resolver_called = true;
+    CHECK(family == "fans.axial_ducted");
+    return {"envelope.width"};
+  };
+  SpecCompiler compiler(opts);
+  json doc = base_valid_spec();
+  auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  CHECK(resolver_called);
+}
+
+TEST_CASE(
+    "SPEC-007: autonomous mode with injected default resolver applies default value with "
+    "provisional",
+    "[SPEC-007]") {
+  CompilerOptions opts;
+  opts.autonomous_mode = true;
+  opts.default_resolver = [](std::string_view /*family*/,
+                             std::string_view path) -> std::optional<Field> {
+    if (path == "product.duty.flow") {
+      Field f;
+      f.path = std::string(path);
+      f.original_value = 0.04;
+      f.original_unit = "m3/s";
+      f.si_value = 0.04;
+      f.si_unit = "m3/s";
+      f.tolerance = Tolerance{.type = Tolerance::Type::relative,
+                              .minus = 0.05,
+                              .plus = 0.05,
+                              .original_minus = 0.05,
+                              .original_plus = 0.05,
+                              .unit = ""};
+      return f;
+    }
+    return std::nullopt;
+  };
+  SpecCompiler compiler(opts);
+
+  json doc = base_valid_spec();
+  doc["product"]["duty"]["flow"] =
+      json{{"value", nullptr}, {"unit", "m3/s"}, {"provenance", "unknown"}};
+  // pressure has no default in our resolver, so it will remain unknown question
+  doc["product"]["duty"]["pressure"] =
+      json{{"value", nullptr}, {"unit", "Pa"}, {"provenance", "unknown"}};
+
+  auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  const auto flow_f = res->field("product.duty.flow");
+  REQUIRE(flow_f.has_value());
+  REQUIRE(flow_f->si_value.has_value());
+  CHECK(*flow_f->si_value == 0.04);
+  CHECK(flow_f->provenance == cemkit::core::Provenance::default_value);
+  CHECK(flow_f->provisional);
+
+  // Pressure had no default, so questions exists and unresolved flag is true
+  CHECK(res->has_unresolved_essential_unknowns());
+  REQUIRE(res->questions().size() == 1);
+  CHECK(res->questions()[0].field == "product.duty.pressure");
+}
+
+TEST_CASE(
+    "SPEC-007: autonomous mode without defaults when product.duty is deleted generates questions "
+    "and keeps unresolved true",
+    "[SPEC-007]") {
+  CompilerOptions opts;
+  opts.autonomous_mode = true;
+  // default_resolver is empty (no defaults)
+  SpecCompiler compiler(opts);
+
+  json doc = base_valid_spec();
+  doc["product"].erase("duty");
+
+  auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  CHECK(res->has_unresolved_essential_unknowns());
+  REQUIRE(res->questions().size() == 2);
+  CHECK(res->questions()[0].field == "product.duty.flow");
+  CHECK(res->questions()[1].field == "product.duty.pressure");
+}
+
+TEST_CASE("SPEC-008: Question::unit has coherent SI unit and text essential field is known",
+          "[SPEC-008]") {
+  CompilerOptions opts;
+  opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
+    return {"product.duty.flow", "product.duty.pressure", "manufacturing.process"};
+  };
+  SpecCompiler compiler(opts);
+
+  json doc = base_valid_spec();
+  doc["product"]["duty"]["flow"] =
+      json{{"value", nullptr}, {"unit", "m3/s"}, {"provenance", "unknown"}};
+  doc["product"]["duty"]["pressure"] =
+      json{{"value", nullptr}, {"unit", "Pa"}, {"provenance", "unknown"}};
+  // manufacturing.process is text field ("FDM") in base_valid_spec()
+
+  auto res = compiler.compile(doc);
+  REQUIRE(res.has_value());
+  // manufacturing.process has text_value and is known, so only flow and pressure produce questions
+  REQUIRE(res->questions().size() == 2);
+  CHECK(res->questions()[0].field == "product.duty.flow");
+  CHECK(res->questions()[0].unit == "m3/s");
+  CHECK(res->questions()[1].field == "product.duty.pressure");
+  CHECK(res->questions()[1].unit == "Pa");
+}
+
+TEST_CASE("SPEC-009: derive_new_revision leaves base spec completely unchanged", "[SPEC-009]") {
+  SpecCompiler compiler;
+  auto base_res = compiler.compile(base_valid_spec());
+  REQUIRE(base_res.has_value());
+
+  const auto orig_rev = base_res->revision();
+  const auto orig_parent = base_res->parent();
+  const auto orig_doc = base_res->raw_document();
+
+  json patch = json::object();
+  patch["title"] = "New Revision Title";
+  auto rev2 = base_res->derive_new_revision(patch);
+  REQUIRE(rev2.has_value());
+
+  CHECK(base_res->revision() == orig_rev);
+  CHECK(base_res->parent() == orig_parent);
+  CHECK(base_res->raw_document() == orig_doc);
+  CHECK(base_res->title() == "120 mm ducted axial fan");
+}
+
+TEST_CASE("exceptions do not escape from derive_new_revision or empty essential_resolver",
+          "[SPEC-001]") {
+  // derive_new_revision with non-object json
+  SpecCompiler compiler;
+  auto res = compiler.compile(base_valid_spec());
+  REQUIRE(res.has_value());
+
+  auto fail_arr = res->derive_new_revision(json::array({1, 2, 3}));
+  REQUIRE(!fail_arr.has_value());
+  CHECK(fail_arr.error().code() == cemkit::core::ErrorCode::invalid_input);
+  CHECK(fail_arr.error().subject() == "modifications");
+
+  // empty essential_resolver
+  CompilerOptions bad_opts;
+  bad_opts.essential_resolver = nullptr;
+  SpecCompiler bad_compiler(bad_opts);
+  auto empty_res = bad_compiler.compile(base_valid_spec());
+  REQUIRE(!empty_res.has_value());
+  CHECK(empty_res.error().code() == cemkit::core::ErrorCode::invalid_input);
+  CHECK(empty_res.error().subject() == "essential_resolver");
+}
+
+TEST_CASE("derive_new_revision preserves CompilerOptions", "[SPEC-009]") {
+  CompilerOptions opts;
+  opts.autonomous_mode = true;
+  opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
+    return {"envelope.width"};
+  };
+  SpecCompiler compiler(opts);
+  auto res = compiler.compile(base_valid_spec());
+  REQUIRE(res.has_value());
+  CHECK(res->compiler_options().autonomous_mode == true);
+
+  json patch = json::object();
+  patch["title"] = "Rev 2";
+  auto rev2 = res->derive_new_revision(patch);
+  REQUIRE(rev2.has_value());
+  CHECK(rev2->compiler_options().autonomous_mode == true);
+}
+
+TEST_CASE("revision number and parent validation", "[SPEC-001]") {
+  SpecCompiler compiler;
+
+  // revision 0
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = 0;
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(res.error().subject() == "revision");
   }
+
+  // revision -1
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = -1;
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(res.error().subject() == "revision");
+  }
+
+  // revision UINT32_MAX
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = static_cast<std::int64_t>(std::numeric_limits<std::uint32_t>::max());
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(res.error().subject() == "revision");
+  }
+
+  // malformed parent: non-object
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = 2;
+    doc["parent"] = "parent_string";
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(res.error().subject() == "parent");
+  }
+
+  // malformed parent: parent.revision >= revision
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = 2;
+    doc["parent"] = json{{"spec_id", "axial-120"}, {"revision", 2}};
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(res.error().subject() == "parent");
+  }
+
+  // derive_new_revision overflow check
+  {
+    json doc = base_valid_spec();
+    doc["revision"] = static_cast<std::int64_t>(std::numeric_limits<std::uint32_t>::max() - 1);
+    auto res = compiler.compile(doc);
+    REQUIRE(res.has_value());
+    json patch = json::object();
+    patch["title"] = "Overflow";
+    auto overflow_res = res->derive_new_revision(patch);
+    REQUIRE(!overflow_res.has_value());
+    CHECK(overflow_res.error().code() == cemkit::core::ErrorCode::invalid_input);
+    CHECK(overflow_res.error().subject() == "revision");
+  }
+}
+
+TEST_CASE("offset units and value range checks", "[SPEC-003]") {
+  SpecCompiler compiler;
+
+  // relative tolerance on degC is rejected
+  {
+    json doc = base_valid_spec();
+    doc["air"]["temperature"]["unit"] = "degC";
+    doc["air"]["temperature"]["value"] = 25.0;
+    doc["air"]["temperature"]["tolerance"] = json{{"relative", 0.10}};
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "air.temperature");
+  }
+
+  // Temperature < 0 K
+  {
+    json doc = base_valid_spec();
+    doc["air"]["temperature"]["unit"] = "degC";
+    doc["air"]["temperature"]["value"] = -300.0;  // below absolute zero
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "air.temperature");
+  }
+
+  // Non-positive flow
+  {
+    json doc = base_valid_spec();
+    doc["product"]["duty"]["flow"]["value"] = 0.0;
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "product.duty.flow");
+  }
+
+  // Non-positive density
+  {
+    json doc = base_valid_spec();
+    doc["air"]["density"]["value"] = -1.0;
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "air.density");
+  }
+
+  // Non-positive dynamic viscosity
+  {
+    json doc = base_valid_spec();
+    doc["air"]["dynamic_viscosity"] =
+        json{{"value", 0.0}, {"unit", "Pa*s"}, {"provenance", "default"}};
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "air.dynamic_viscosity");
+  }
+}
+
+TEST_CASE("unknown fields and misspelt paths are rejected naming the field", "[SPEC-001]") {
+  SpecCompiler compiler;
+
+  // Bare top-level power_limit: 20
+  {
+    json doc = base_valid_spec();
+    doc["power_limit"] = 20;
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "power_limit");
+  }
+
+  // Misspelt path product.duty.flw
+  {
+    json doc = base_valid_spec();
+    doc["product"]["duty"]["flw"] = json{{"value", 0.05},
+                                         {"unit", "m3/s"},
+                                         {"provenance", "user"},
+                                         {"tolerance", {{"relative", 0.05}}}};
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "product.duty.flw");
+  }
+
+  // Unknown top-level field
+  {
+    json doc = base_valid_spec();
+    doc["unknown_section"] = json{{"key", "value"}};
+    auto res = compiler.compile(doc);
+    REQUIRE(!res.has_value());
+    CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+    CHECK(res.error().subject() == "unknown_section");
+  }
+}
+
+TEST_CASE("SPEC-010: contradiction check examines all stated power limits", "[SPEC-010]") {
+  SpecCompiler compiler;
+  json doc = base_valid_spec();
+  // Q = 0.05 m3/s, p = 1500 Pa -> P_air = 75 W
+  doc["product"]["duty"]["pressure"]["value"] = 1500.0;
+  // product.power_limit is generous (1000 W)
+  doc["product"]["power_limit"] = json{{"value", 1000.0}, {"unit", "W"}, {"provenance", "user"}};
+  // product.motor.power_limit is tight (20 W)
+  doc["product"]["motor"]["power_limit"] =
+      json{{"value", 20.0}, {"unit", "W"}, {"provenance", "user"}};
+
+  auto res = compiler.compile(doc);
+  REQUIRE(!res.has_value());
+  CHECK(res.error().code() == cemkit::core::ErrorCode::infeasible_requirement);
+  CHECK(res.error().subject() == "product.motor.power_limit");
 }

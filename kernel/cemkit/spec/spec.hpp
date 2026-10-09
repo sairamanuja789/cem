@@ -11,6 +11,7 @@
 #include "cemkit/core/provenance.hpp"
 #include "cemkit/core/result.hpp"
 #include "cemkit/spec/field.hpp"
+#include "cemkit/spec/options.hpp"
 #include "cemkit/spec/question.hpp"
 
 namespace cemkit::spec {
@@ -59,6 +60,7 @@ class Spec {
   // Derives a new immutable revision linked to this one as parent (SPEC-009).
   [[nodiscard]] core::Result<Spec> derive_new_revision(const nlohmann::json& modifications) const;
 
+  [[nodiscard]] const CompilerOptions& compiler_options() const noexcept { return options_; }
   [[nodiscard]] const nlohmann::json& raw_document() const noexcept { return raw_document_; }
   [[nodiscard]] nlohmann::json to_json() const;
 
@@ -72,6 +74,7 @@ class Spec {
   std::string family_;
   std::string title_;
 
+  CompilerOptions options_;
   std::map<std::string, Field> fields_;
   std::vector<Question> questions_;
   std::vector<ProvenanceConflict> conflicts_;

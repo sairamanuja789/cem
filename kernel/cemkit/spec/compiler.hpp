@@ -4,15 +4,10 @@
 #include <string_view>
 
 #include "cemkit/core/result.hpp"
-#include "cemkit/spec/essential.hpp"
+#include "cemkit/spec/options.hpp"
 #include "cemkit/spec/spec.hpp"
 
 namespace cemkit::spec {
-
-struct CompilerOptions {
-  bool autonomous_mode{false};
-  EssentialFieldResolver essential_resolver{default_essential_fields};
-};
 
 class SpecCompiler {
  public:

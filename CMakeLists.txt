@@ -13,6 +13,7 @@ option(CEMKIT_ENABLE_COVERAGE "Build with --coverage for gcovr (gcc-coverage pre
 find_package(mp-units CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Catch2 3 CONFIG REQUIRED)
+find_package(OpenCASCADE CONFIG REQUIRED)  # ADR-004: cmake/vcpkg-ports/opencascade
 
 enable_testing()
 add_subdirectory(kernel)

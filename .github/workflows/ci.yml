@@ -33,6 +33,15 @@ jobs:
             echo "PINS_EOF"
           } >> "$GITHUB_OUTPUT"
 
+      # Authenticated pulls: anonymous Docker Hub pulls from shared runner IPs hit 429 rate limits.
+      # Secrets are unavailable to pull requests from forks, so those fall back to anonymous pulls.
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Build the ci image

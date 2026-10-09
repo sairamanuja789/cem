@@ -13,8 +13,9 @@ returned. Different content under the same identity is refused (immutability).
 
 from __future__ import annotations
 
+import json
 import sqlite3
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import cache
@@ -27,24 +28,38 @@ from cemkit.store.artifacts import ArtifactStore
 from cemkit.store.errors import DocumentRejected, StoreError
 from cemkit.store.provenance import canonical_json, sha256_hex
 from cemkit.store.records import (
+    ARTIFACT_ROLES,
+    RESOURCE_CLASSES,
     SHA256_HEX,
     ArtifactRecord,
+    AttemptRecord,
     CandidateRecord,
+    Claim,
+    ExpiredLease,
     FailureRecord,
     JobEvent,
     JobRecord,
+    JobSpec,
+    Lease,
+    PublishedFile,
     ResultRecord,
     Run,
     RunMetadata,
     SpecRecord,
+    Usage,
     versions_from_json,
 )
-from cemkit.store.sqlite import migrate
+from cemkit.store.sqlite import migrate, queue
 
 DATABASE_NAME: Final = "store.sqlite3"
 ARTIFACTS_DIRECTORY: Final = "artifacts"
 JOB_STATUSES: Final = ("queued", "running", "publishing", "done", "failed")  # ORC-004
 ERROR_CODES: Final = "urn:cemkit:schema:v1:error-codes"
+DEFAULT_MAX_RETRIES: Final = 1  # ORC-003: "Default 1 retry"
+DEFAULT_MAX_HEAVY_JOBS: Final = 1  # ORC-002: heavy jobs one at a time by default
+# A worker that stops renewing its lease has no failure code of its own in error-codes.json; the
+# lost attempt is recorded as internal_error with the reason (ADR-005, owner review).
+LOST_WORKER_CODE: Final = "internal_error"
 _PRAGMAS: Final = frozenset({"journal_mode", "foreign_keys", "synchronous"})
 
 _RUN = (
@@ -436,3 +451,167 @@ class SqliteStore:
 
     def artifact_records(self) -> tuple[ArtifactRecord, ...]:
         return tuple(ArtifactRecord(*row) for row in self._db.execute(f"{_ARTIFACT} ORDER BY 1"))
+
+    # --- job queue (T13; ORC-001..004) -------------------------------------------------------
+
+    def enqueue_job(
+        self,
+        run: Run,
+        kind: str,
+        payload: Mapping[str, Any],
+        *,
+        resource_class: str = "light",
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        candidate: CandidateRecord | None = None,
+    ) -> JobSpec:
+        """Record a job a worker will run; its input hash is the hash of its kind and payload."""
+        if not kind:
+            raise StoreError("a job needs a kind")
+        if resource_class not in RESOURCE_CLASSES:
+            raise StoreError(f"resource class {resource_class!r} is not one of {RESOURCE_CLASSES}")
+        if isinstance(max_retries, bool) or not isinstance(max_retries, int) or max_retries < 0:
+            raise StoreError(f"max_retries must be a non-negative integer, got {max_retries!r}")
+        payload_json, _ = _canonical("job payload", dict(payload))
+        hashed = sha256_hex(canonical_json({"kind": kind, "payload": json.loads(payload_json)}))
+        candidate_pk = None if candidate is None else candidate.candidate_pk
+        with self._write() as db:
+            return queue.enqueue(
+                db,
+                run.run_pk,
+                kind,
+                payload_json,
+                hashed,
+                resource_class,
+                max_retries,
+                candidate_pk,
+            )
+
+    def claim_job(
+        self,
+        run: Run,
+        worker_id: str,
+        kinds: Sequence[str],
+        *,
+        now: float,
+        lease_seconds: float,
+        max_heavy: int = DEFAULT_MAX_HEAVY_JOBS,
+    ) -> Claim | None:
+        if not worker_id:
+            raise StoreError("a worker needs an id")
+        if lease_seconds <= 0 or max_heavy < 0:
+            raise StoreError("lease_seconds must be positive and max_heavy non-negative")
+        with self._write() as db:
+            return queue.claim(db, run.run_pk, worker_id, kinds, now, lease_seconds, max_heavy)
+
+    def heartbeat(self, run: Run, lease: Lease, *, now: float, lease_seconds: float) -> float:
+        """Extend the lease; returns the new expiry. Raises LeaseLost if it is no longer held."""
+        with self._write() as db:
+            return queue.heartbeat(db, run.run_pk, lease, now, lease_seconds)
+
+    def mark_publishing(self, run: Run, lease: Lease, reason: str) -> None:
+        with self._write() as db:
+            queue.mark_publishing(db, run.run_pk, lease, reason)
+
+    def fail_attempt(
+        self, run: Run, lease: Lease, code: str, reason: str, usage: Usage | None = None
+    ) -> str:
+        """End the attempt as failed with a REL-002 code; returns the new status (queued/failed)."""
+        _require_valid("failure code", _schemas().errors(ERROR_CODES, code))
+        if not reason:
+            raise StoreError("a failed attempt needs a reason")
+        with self._write() as db:
+            return queue.end_attempt(
+                db, run.run_pk, lease, "failed", code, reason, usage or Usage()
+            )
+
+    def complete_job(
+        self, run: Run, lease: Lease, usage: Usage, files: Sequence[PublishedFile]
+    ) -> None:
+        """Mark a publishing job done with its published files. Each file must be stored already."""
+        for item in files:
+            if item.role not in ARTIFACT_ROLES or not item.name:
+                raise StoreError(f"bad published file {item!r}")
+            if not self._artifacts.contains(item.sha256):
+                raise StoreError(f"artifact {item.sha256} is not in the artifact store")
+        with self._write() as db:
+            queue.complete(db, run.run_pk, lease, usage, files)
+
+    def expired_leases(self, *, now: float) -> tuple[ExpiredLease, ...]:
+        with self._write() as db:
+            return queue.expired(db, now)
+
+    def abandon_lease(self, run: Run, lease: Lease, *, now: float, reason: str) -> str:
+        """End an expired attempt as lost (its worker died); requeue it if retries remain."""
+        with self._write() as db:
+            queue.require_expired(db, lease, now)
+            return queue.end_attempt(
+                db, run.run_pk, lease, "lost", LOST_WORKER_CODE, reason, Usage()
+            )
+
+    def adopt_lease(
+        self, run: Run, lease: Lease, worker_id: str, *, now: float, lease_seconds: float
+    ) -> Lease:
+        with self._write() as db:
+            return queue.adopt(db, run.run_pk, lease, worker_id, now, lease_seconds)
+
+    def job_spec(self, job_pk: int) -> JobSpec:
+        return queue.spec(self._db, job_pk)
+
+    def job_statuses(self) -> dict[int, str]:
+        rows = self._db.execute("SELECT job_pk, status FROM job_status ORDER BY job_pk")
+        return {int(pk): str(value) for pk, value in rows}
+
+    def attempts(self, job_pk: int) -> tuple[AttemptRecord, ...]:
+        rows = self._db.execute(
+            "SELECT a.attempt_pk, a.lease_pk, a.job_pk, a.run_pk, l.attempt, a.outcome, a.code,"
+            " a.reason, a.peak_rss_bytes, a.cpu_seconds, a.wall_seconds, a.recorded_at"
+            " FROM job_attempts AS a JOIN job_leases AS l ON l.lease_pk = a.lease_pk"
+            " WHERE a.job_pk = ? ORDER BY a.attempt_pk",
+            (job_pk,),
+        )
+        return tuple(
+            AttemptRecord(
+                attempt_pk=row[0],
+                lease_pk=row[1],
+                job_pk=row[2],
+                run_pk=row[3],
+                attempt=row[4],
+                outcome=row[5],
+                code=row[6],
+                reason=row[7],
+                usage=Usage(row[8], row[9], row[10]),
+                recorded_at=row[11],
+            )
+            for row in rows
+        )
+
+    def failures(self, job_pk: int) -> tuple[FailureRecord, ...]:
+        rows = self._db.execute(
+            "SELECT failure_pk, run_pk, job_pk, candidate_pk, code, message, details, recorded_at"
+            " FROM failures WHERE job_pk = ? ORDER BY failure_pk",
+            (job_pk,),
+        )
+        return tuple(FailureRecord(*row) for row in rows)
+
+    def job_artifacts(self, job_pk: int) -> tuple[tuple[str, ArtifactRecord], ...]:
+        """(role, artifact) for every file the job published."""
+        rows = self._db.execute(
+            "SELECT ja.role, a.artifact_pk, a.run_pk, a.sha256, a.size_bytes, a.name,"
+            " a.media_type, a.recorded_at FROM job_artifacts AS ja"
+            " JOIN artifacts AS a ON a.artifact_pk = ja.artifact_pk"
+            " WHERE ja.job_pk = ? ORDER BY ja.link_pk",
+            (job_pk,),
+        )
+        return tuple((str(row[0]), ArtifactRecord(*row[1:])) for row in rows)
+
+    def unfinished_jobs(self, kinds: Sequence[str]) -> int:
+        """Jobs of these kinds that are queued, running or publishing."""
+        if not kinds:
+            return 0
+        marks = ", ".join("?" for _ in kinds)
+        row = self._db.execute(
+            "SELECT count(*) FROM job_status AS js JOIN jobs AS j ON j.job_pk = js.job_pk"
+            f" WHERE js.status IN ('queued', 'running', 'publishing') AND j.kind IN ({marks})",
+            tuple(kinds),
+        ).fetchone()
+        return int(row[0])

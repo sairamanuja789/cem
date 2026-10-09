@@ -122,12 +122,19 @@ T08 then compares the C++ and Python results field for field.
 
 ### D8. Spec compiler semantics and unit conversions (T07: SPEC-001 to SPEC-011, IN-001)
 
-- **Unit conversion factors:**
-  - Length: 1 mm = 0.001 m, 1 cm = 0.01 m, 1 in = 0.0254 m (exact ISO definition).
+**Status of D8: proposed (needs owner review).** D1–D7 are the owner's accepted decisions; D8 was
+written during autonomous work on T07 and is not accepted until the owner reviews it
+(`docs/open-items.md`). Open point: inH₂O is taken as the **conventional** inch of water,
+249.08891 Pa. Datasheets that state inches of water at 60 °F (248.84 Pa) or 39.2 °F (249.082 Pa,
+both NIST SP 811 Sec. B.8) differ by up to 0.1 %; the owner decides whether a reference
+temperature must be stated with inH₂O.
+
+- **Unit conversion factors** (non-SI factors: NIST SP 811 (2008), Sec. B.8):
+  - Length: 1 mm = 0.001 m, 1 cm = 0.01 m, 1 in = 0.0254 m (exact).
   - Angular velocity: 1 rpm = π/30 rad/s.
   - Volume flow rate: 1 m³/min = 1/60 m³/s, 1 m³/h = 1/3600 m³/s, 1 L/s = 0.001 m³/s,
     1 CFM = (0.3048)³ / 60 m³/s = 0.0004719474432 m³/s.
-  - Pressure: 1 kPa = 1000 Pa, 1 mmH₂O = 9.80665 Pa (ISO standard gravity g₀ = 9.80665 m/s²),
+  - Pressure: 1 kPa = 1000 Pa, 1 mmH₂O = 9.80665 Pa (conventional; standard gravity g_n = 9.80665 m/s² exactly),
     1 inH₂O = 25.4 × 9.80665 Pa = 249.08891 Pa. Both ASCII ("mmH2O", "inH2O") and Unicode
     ("mmH₂O", "inH₂O") spellings are accepted.
   - Power: 1 kW = 1000 W.

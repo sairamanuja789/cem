@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cemkit:schema:v1:result",
+  "title": "cemkit result",
+  "description": "The outcome of evaluating one candidate against an exact spec revision (SPEC-009). Either status ok with fidelity-labelled metrics (COR-003, REP-001), or status failed with exactly one failure code (REL-002). Metric uncertainty is a half-width in the metric's unit, present exactly for l2_verified and l3_validated (docs/models/platform/fidelity-and-provenance.md).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "spec", "kernel_version", "status"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "candidate_id": { "$ref": "urn:cemkit:schema:v1:candidate#/$defs/candidate_id" },
+    "spec": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/spec_ref" },
+    "kernel_version": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/semver" },
+    "status": { "enum": ["ok", "failed"] },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/$defs/labelled_value" }
+    },
+    "failure": { "$ref": "#/$defs/failure" }
+  },
+  "if": { "properties": { "status": { "const": "ok" } } },
+  "then": { "required": ["metrics"], "not": { "required": ["failure"] } },
+  "else": { "required": ["failure"], "not": { "required": ["metrics"] } },
+  "$defs": {
+    "fidelity": {
+      "description": "Fidelity label names as stored (kernel/cemkit/core/fidelity.hpp).",
+      "enum": ["l0_predicted", "l1_predicted", "l2_simulated", "l2_verified", "l3_validated"]
+    },
+    "model_id": {
+      "description": "Identity of the model or procedure that produced the value (PHY-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/semver" }
+      }
+    },
+    "labelled_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "fidelity", "model"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/si_unit" },
+        "fidelity": { "$ref": "#/$defs/fidelity" },
+        "model": { "$ref": "#/$defs/model_id" },
+        "uncertainty": { "type": "number", "minimum": 0 }
+      },
+      "if": {
+        "required": ["fidelity"],
+        "properties": { "fidelity": { "enum": ["l2_verified", "l3_validated"] } }
+      },
+      "then": { "required": ["uncertainty"] },
+      "else": { "not": { "required": ["uncertainty"] } }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "$ref": "urn:cemkit:schema:v1:error-codes" },
+        "message": { "type": "string", "minLength": 1 },
+        "subject": { "type": "string" },
+        "details": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  }
+}

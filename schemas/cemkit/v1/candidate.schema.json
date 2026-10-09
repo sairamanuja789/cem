@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cemkit:schema:v1:candidate",
+  "title": "cemkit candidate",
+  "description": "One design candidate: a point in a family's parameter space (FAM-003), tied to an exact spec revision (SPEC-009). Parameter values are in SI units, as the kernel uses them; unit '1' marks a dimensionless parameter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "spec", "family", "parameters"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "candidate_id": { "$ref": "#/$defs/candidate_id" },
+    "spec": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/spec_ref" },
+    "family": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+    },
+    "parameters": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/$defs/parameter" }
+    }
+  },
+  "$defs": {
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "$ref": "urn:cemkit:schema:v1:spec#/$defs/si_unit" }
+      }
+    }
+  }
+}

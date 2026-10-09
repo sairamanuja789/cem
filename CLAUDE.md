@@ -57,6 +57,7 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 - `cmake --preset clang-asan && cmake --build --preset clang-asan -j 6 && ctest --preset clang-asan`
 - `uv run pytest`
 - `uv run ruff check . && uv run mypy --strict python/`
+- `ctest --preset gcc-debug -R fans_l0_crosscheck` — kernel L0 vs the Python reference (PHY-005)
 
 Machine: 16 GB RAM. Never build C++ with more than `-j 6`; OpenCascade builds can run out of memory.
 

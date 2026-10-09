@@ -286,7 +286,7 @@ These define "production grade" in testable terms. Numeric targets marked (propo
 | --- | --- | --- | --- | --- |
 | COR-001 | All kernel physics shall use strong unit types so that adding incompatible quantities fails to compile | C++ units library (mp-units); bypassing it needs a reviewed exception | M | I, T |
 | COR-002 | Floating-point results of L1 models shall be identical across reruns on the same build | No uninitialized memory, no unordered reductions in deterministic paths | M | T |
-| COR-003 | Every reported quantity shall carry its fidelity label end to end, from kernel to report | Label is part of the data type, not formatting | M | T |
+| COR-003 | Every reported quantity shall carry its fidelity label end to end, from kernel to report | Label is part of the data type, not formatting. Values labelled L2 verified or L3 validated must also carry their uncertainty (numerical or measurement) | M | T |
 | REPRO-001 | Any stored result shall be regenerable from its record using the same container image | Demonstrated monthly on a random sample | M | D |
 | REPRO-002 | All dependencies shall be pinned to exact versions (C++ through vcpkg or Conan lock, Python through uv lock, solvers through the image digest) | No floating versions | M | I |
 | PERF-001 | One L1 evaluation of a ducted axial candidate shall take at most 1 ms in the kernel (proposed) | Measured by a benchmark in CI | M | T |
@@ -296,11 +296,11 @@ These define "production grade" in testable terms. Numeric targets marked (propo
 | RES-001 | Total memory used by a heavy job shall be capped below physical RAM, leaving at least 3 GB for the OS (proposed: 12 GB cap on 16 GB) | Enforced by the runner | M | T |
 | RES-002 | The system shall estimate CFD memory from cell count before meshing and refuse cases above the cap | Uses the measured RAM-per-cell figure | P | T |
 | REL-001 | No crash in the orchestration layer shall corrupt the store | SQLite in WAL mode, transactions per job state change | M | T |
-| REL-002 | Every failure shall be classified with one of the defined failure codes | No uncategorized failures in reports | M | T |
+| REL-002 | Every failure shall be classified with one of the defined failure codes | The controlled list is docs/models/platform/error-codes.md, generated from and tested against kernel/cemkit/core/error.hpp. Codes are append-only: never renamed, renumbered or reused. No uncategorized failures in reports | M | T |
 | REL-003 | Failure-injection tests shall cover mesh failure, solver divergence, out-of-memory, disk full and killed process | Run in CI with fakes, nightly with real solvers | M | T |
 | MAINT-001 | C++ code shall build with -Wall -Wextra -Werror under GCC and Clang, pass clang-tidy, and run tests under AddressSanitizer and UBSan | In CI on every change | M | T |
 | MAINT-002 | Python code shall pass ruff and mypy --strict | In CI | M | T |
-| MAINT-003 | Line coverage of kernel physics and spec code shall be at least 90% (proposed) | Coverage is a floor, not a goal | M | T |
+| MAINT-003 | Line coverage shall be at least 90% (proposed) on the platform core, spec and physics modules and on every product domain's physics (products/\*/common and each family's L1 model) | Coverage is a floor, not a goal | M | T |
 | MAINT-004 | Every architectural decision shall be recorded as an ADR | context, options, decision, consequences | M | I |
 | MAINT-005 | Public interfaces (C ABI, Python API, JSON schemas) shall follow semantic versioning | Breaking change = major version | M | I |
 | SEC-001 | Secrets (LLM API keys) shall come only from the environment or a secret store, never from files in the repository or records | Checked by a secret scanner in CI | M | T |
@@ -341,6 +341,8 @@ The first product is a 3D-printed ducted axial fan of 120 mm nominal size; its d
 
 The base is the production skeleton every fan family will stand on: units, specifications, provenance, feasibility, the plugin system, geometry plumbing, the store and the job runner. It contains no fan-specific physics beyond L0; the ducted axial L1 model is the next milestone, built on top of it.
 
+> **v1.2:** the repository layout below is superseded by `docs/repository-structure.md`: a product-agnostic CEM platform (`cem`kit) with fans as the first product domain, ports and adapters for every external engine, and dependency rules enforced in CI. The module scope and acceptance criteria in this section still apply, under the new paths.
+
 **Repository layout**
 
 ```text
@@ -349,19 +351,19 @@ fan-cem/
 ├── vcpkg.json                         # C++ deps pinned by baseline: OCCT 8.0.x, mp-units, nlohmann-json, Catch2, nanobind
 ├── pyproject.toml, uv.lock            # Python deps pinned
 ├── schemas/                           # JSON Schema: single source of truth for spec, candidate, result
-├── kernel/                            # libfancem, C++23 mode
-│   ├── include/fancem/
+├── kernel/                            # libcemkit, C++23 mode
+│   ├── include/cemkit/
 │   │   ├── core/      units.hpp, quantity.hpp, fidelity.hpp, provenance.hpp, result.hpp, version.hpp
 │   │   ├── spec/      spec.hpp, field.hpp, compiler.hpp, questions.hpp
 │   │   ├── physics/   air.hpp, similarity.hpp, specific_speed.hpp
 │   │   ├── family/    plugin.hpp, registry.hpp, parameter_space.hpp
 │   │   └── geometry/  backend.hpp, checks.hpp, export.hpp
 │   ├── src/                           # implementations, incl. occt_backend.cpp
-│   ├── capi/fancem.h                  # stable C ABI
+│   ├── capi/cemkit.h                  # stable C ABI
 │   ├── plugins/stub_family/           # proves FAM-002 in CI
 │   └── tests/                         # Catch2 unit and property tests
-├── bindings/python/                   # nanobind module fancem._kernel (batch APIs)
-├── python/fancem/
+├── bindings/python/                   # nanobind module cemkit._kernel (batch APIs)
+├── python/cemkit/
 │   ├── cli.py
 │   ├── orchestration/  jobs.py, worker.py, limits.py
 │   ├── store/          db.py, migrations/, artifacts.py
@@ -385,7 +387,7 @@ fan-cem/
 | capi + bindings | C, C++ | Stable C ABI and Python module with batch evaluation | PERF-002, MAINT-005 |
 | store | Python | SQLite schema, migrations, content-addressed artifacts, run metadata | STORE-001 to STORE-004, REL-001 |
 | orchestration | Python | Durable job queue, worker, resource limits, retries, failure codes | ORC-001 to ORC-003, RES-001, REL-002 |
-| CLI | Python | `fancem spec compile`, `fancem spec questions`, `fancem feasibility`, `fancem geometry smoke`, `fancem runs show` | IN-001, UC-01 to UC-03, UC-08 |
+| CLI | Python | `cemkit spec compile`, `cemkit spec questions`, `cemkit feasibility`, `cemkit geometry smoke`, `cemkit runs show` | IN-001, UC-01 to UC-03, UC-08 |
 | reference | Python | Reference implementations of L0 formulas for cross-checking | PHY-005 |
 | CI and container | — | Pinned toolchain, sanitizers, lint, type checks, coverage | MAINT-001 to MAINT-003, REPRO-002, SEC-001 |
 
@@ -396,11 +398,11 @@ fan-cem/
 - [ ] Clean clone builds and passes all tests with one command inside the container
 - [ ] CI runs GCC and Clang builds with -Werror, clang-tidy, ASan/UBSan, ruff, mypy --strict, and coverage of at least 90% on core, spec and physics
 - [ ] A unit error (e.g. adding Pa to m³/s) fails to compile, shown by a negative compile test
-- [ ] `fancem spec compile examples/axial_120.yaml` produces a versioned spec with provenance on every field and lists the open questions from section 7
+- [ ] `cemkit spec compile examples/axial_120.yaml` produces a versioned spec with provenance on every field and lists the open questions from section 7
 - [ ] A spec with a pressure lacking its type is rejected with a message naming the field
-- [ ] `fancem feasibility` returns specific speed and diameter matching the Python reference to floating-point tolerance, and rejects an impossible duty with the violated limit
+- [ ] `cemkit feasibility` returns specific speed and diameter matching the Python reference to floating-point tolerance, and rejects an impossible duty with the violated limit
 - [ ] The stub family registers and runs without any edit outside its folder
-- [ ] `fancem geometry smoke` builds an OCCT solid, passes validity checks and exports STEP and STL with content-hash names
+- [ ] `cemkit geometry smoke` builds an OCCT solid, passes validity checks and exports STEP and STL with content-hash names
 - [ ] Killing the worker mid-job and restarting resumes without losing or duplicating completed jobs
 - [ ] Every run record contains kernel, plugin and model versions, git commit, container digest and input hash
 - [ ] ADR-001 to ADR-003 merged

@@ -7,10 +7,10 @@ refresh log. Decision record: `docs/adr/006-toolchain-pins-openfoam-version.md`.
 
 | Item | Value |
 |---|---|
-| Local image | `fancem-dev:latest` |
-| Image ID (config digest) | `sha256:f182b4bde19c787e10a63cf47dcb398672820c856c88dcc4ea55fa90fd94acb0` |
+| Local image | `cemkit-dev:latest` |
+| Image ID (config digest) | `sha256:fe98a63eaf86725631006663996763d037d5e607b3b09d38dcf68cb0f602ba3b` |
 | Size | 4.02 GB |
-| Built | 2026-10-09T15:53:40.159366401+05:30 |
+| Built | 2026-10-09T16:44:23.09607097+05:30 |
 | Base image | `ubuntu:noble-20260911@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3` |
 | Ubuntu snapshot | `20260920T000000Z` |
 

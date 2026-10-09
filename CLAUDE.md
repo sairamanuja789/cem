@@ -14,7 +14,7 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 
 ## Architecture rules (never violate)
 1. Layers: kernel (C++23, `kernel/`) ← bindings (nanobind + C ABI, `bindings/`) ← orchestration
-   (Python, `python/fancem/`). Solvers (OpenFOAM, CalculiX, Gmsh) are external processes.
+   (Python, `python/cemkit/`). Solvers (OpenFOAM, CalculiX, Gmsh) are external processes.
    The kernel never calls Python, the network, or a solver.
 2. Placement: code that defines engineering truth or runs once per candidate goes in the kernel.
    Code that talks to people, files, services or schedules work goes in Python.
@@ -37,7 +37,7 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 - Use `/task <ID>` (see `.claude/commands/task.md`). Restate the task's requirement IDs and acceptance
   criteria, propose a plan, and wait for approval before editing files.
 - Tests first. Write failing tests that encode the acceptance criteria, then implement.
-- Physics: write the Python reference in `python/fancem/reference/` first, then port to C++.
+- Physics: write the Python reference in `python/cemkit/reference/` first, then port to C++.
   Both must agree to floating-point tolerance.
 - Never weaken, skip, delete or loosen a test to make it pass. If a test looks wrong, stop and explain.
 - Protected files (enforced by a hook): `docs/requirements.md`, `tests/hand_calcs/verified/`,
@@ -61,9 +61,12 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 Machine: 16 GB RAM. Never build C++ with more than `-j 6`; OpenCascade builds can run out of memory.
 
 ## Repository map
-- `kernel/` C++23 kernel (libfancem): core, spec, physics, family, geometry, capi, plugins, tests
-- `bindings/python/` nanobind module `fancem._kernel`
-- `python/fancem/` CLI, orchestration, store, intake, reporting, reference implementations
+Full layout and dependency rules: `docs/repository-structure.md` (ADR-009). Platform name: cemkit.
+- `kernel/cemkit/` platform modules (core, spec, physics, product, geometry/mesh/simulation ports and
+  adapters, capi); `kernel/products/<product>/` product domains (fans first); `kernel/testing/` shared tests
+- `bindings/python/` nanobind module `cemkit._kernel`
+- `python/cemkit/` CLI, orchestration, store, intake, reporting, reference implementations; product glue
+  in `python/cemkit/products/<product>/`
 - `schemas/` JSON Schemas (single source of truth for spec, candidate, result)
 - `data/` sourced engineering data (e.g. family specific-speed ranges), each value with a citation
 - `docs/` requirements, architecture, build plan, ADRs, model pages

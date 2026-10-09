@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"  # T11 moves to scikit-build-core for the nanobind module
 
 [project]
-name = "fancem"
+name = "cemkit"
 version = "0.0.0"
-description = "Fan CEM orchestration layer"
+description = "cemkit: CEM platform orchestration layer"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "jsonschema",
@@ -24,7 +24,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["python/fancem"]
+packages = ["python/cemkit"]
 
 [tool.uv]
 default-groups = ["dev"]
@@ -41,12 +41,12 @@ extend-exclude = [".cache", "build", "vcpkg_installed"]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["fancem"]
+known-first-party = ["cemkit"]
 
 [tool.mypy]
 strict = true
-mypy_path = "python"
-files = ["python", "tests/python"]
+mypy_path = "python:scripts"
+files = ["python", "tests/python", "scripts"]
 explicit_package_bases = true
 
 [tool.pytest.ini_options]
@@ -57,7 +57,7 @@ markers = ["req(id): the requirement ID this test verifies (for example SPEC-004
 pythonpath = ["python"]
 
 [tool.coverage.run]
-source = ["python/fancem"]
+source = ["python/cemkit"]
 branch = true
 
 [tool.coverage.report]

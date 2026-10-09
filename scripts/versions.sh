@@ -4,8 +4,8 @@
 set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-pins="${FANCEM_PINS:-$here/../docker/pins.env}"
-[ -f "$pins" ] || pins=/opt/fancem/pins.env
+pins="${CEMKIT_PINS:-$here/../docker/pins.env}"
+[ -f "$pins" ] || pins=/opt/cemkit/pins.env
 # shellcheck disable=SC1090
 . "$pins"
 
@@ -28,8 +28,8 @@ for entry in \
   row "$pkg" "${!var}" "$(apt_ver "$pkg")"
 done
 
-# Solver rows exist only in the dev image (FANCEM_IMAGE_TARGET=dev); the ci image has no solvers.
-if [ "${FANCEM_IMAGE_TARGET:-dev}" = dev ]; then
+# Solver rows exist only in the dev image (CEMKIT_IMAGE_TARGET=dev); the ci image has no solvers.
+if [ "${CEMKIT_IMAGE_TARGET:-dev}" = dev ]; then
 for entry in calculix-ccx:APT_CALCULIX_CCX libglu1-mesa:APT_LIBGLU1_MESA libgl1:APT_LIBGL1 libxrender1:APT_LIBXRENDER1 libxcursor1:APT_LIBXCURSOR1 libxfixes3:APT_LIBXFIXES3 libxft2:APT_LIBXFT2 libfontconfig1:APT_LIBFONTCONFIG1 libxinerama1:APT_LIBXINERAMA1; do
   pkg="${entry%%:*}"; var="${entry##*:}"
   row "$pkg" "${!var}" "$(apt_ver "$pkg")"

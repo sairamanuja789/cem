@@ -6,7 +6,8 @@ Tasks are in dependency order; T03 can run in parallel with T02–T05.
 ADR numbering: 000 hardware budget (T03) · 001 language and stack · 002 v1 scope and validation target ·
 003 requirement semantics (002 and 003 are defined in `docs/architecture.md` section 12) ·
 004 OpenCascade backend (T10) · 005 job resource limits (T13) · 006 toolchain pins and OpenFOAM version (T01) ·
-007 compilers, standard library and warnings (T01/T02) · 008 CI execution (T02).
+007 compilers, standard library and warnings (T01/T02) · 008 CI execution (T02) ·
+009 repository structure (docs/repository-structure.md) · 010 reserved: wrapper type for pressure kinds, if needed.
 Requirement IDs refer to `docs/requirements.md`. "Human" marks steps Claude Code cannot do for you.
 
 The base is done when every box in **T15** is ticked. The ducted axial L1 model, CFD, optimizer
@@ -74,20 +75,20 @@ Report the final image size.
 - `vcpkg.json` with `builtin-baseline` equal to `VCPKG_COMMIT` in `docker/pins.env`: mp-units, nlohmann-json,
   catch2. (OpenCascade is added in T10.) If the pinned port of mp-units fails with GCC 13 or Clang 20,
   stop and report; feature options may change, the version may not.
-- Empty `libfancem` with one trivial Catch2 test; a toolchain test compiling a `std::expected` example under
+- Empty kernel library with one trivial Catch2 test; a toolchain test compiling a `std::expected` example under
   every preset; `.clang-format` (100 columns) and `.clang-tidy` (bugprone, performance, modernize, selected
   cppcoreguidelines, readability without magic-numbers; every disabled check commented; WarningsAsErrors;
   project sources only).
 - `pyproject.toml` + `uv.lock`: `requires-python ">=3.13,<3.14"`; pytest, pytest-cov, hypothesis,
   jsonschema, typer, ruff, mypy, gcovr; `uv sync --locked`; hatchling backend for now (T11 moves to
-  scikit-build-core); package `python/fancem` with `py.typed`. Ruff line length 100, rules E, F, W, I, B, UP,
+  scikit-build-core); package `python/cemkit` with `py.typed`. Ruff line length 100, rules E, F, W, I, B, UP,
   SIM, RUF, `ruff format --check`; mypy strict; pytest `--strict-markers --strict-config`, warnings as
   errors, marker `req` registered. Reuse the Gmsh install from T01; no second pin.
 - Gates that prove they work (negative tests tagged with their requirement ID): an unused variable fails to
   compile under the project flags; under `clang-asan` a deliberate heap-buffer overflow is caught; gitleaks
   detects a fake secret built by concatenation at test runtime in a temp directory (never commit a
   secret-like string).
-- Coverage (MAINT-003): gcovr reports on `kernel/src/core`, `spec`, `physics` with a 90% floor; the floor
+- Coverage (MAINT-003): gcovr reports on the MAINT-003 scope (`kernel/cemkit/{core,spec,physics}`, `kernel/products/*/common`, each family's L1 model) with a 90% floor; the floor
   applies once those directories contain code. In T02, show that the report runs. No trivial code to game it.
 - `scripts/check.sh`: refuses to run outside the container; runs every stage even after a failure; prints a
   pass/fail summary; exits non-zero if anything failed. Stages: all presets (configure, build, ctest),
@@ -122,15 +123,16 @@ link is recorded in the T02 report, and PR 2 is closed unmerged.
 **Requirements:** COR-001, COR-003, PHY-004
 
 **Deliverables**
-- `kernel/include/fancem/core/`: `units.hpp` (mp-units aliases for the SI quantities used),
+- `kernel/cemkit/core/`: `units.hpp` (mp-units aliases for the SI quantities used),
   `fidelity.hpp` (L0, L1, L2 simulated, L2 verified, L3 validated), `provenance.hpp`
   (user, image, derived, default, unknown), `error.hpp` (`Error`, error-code enum),
   `result.hpp` (`std::expected` aliases; labelled value = quantity + fidelity + model version),
   `version.hpp`.
-- Compile-fail tests in `kernel/tests/compile_fail/` (e.g. adding a pressure to a flow rate).
+- Compile-fail tests in `kernel/testing/compile_fail/` (e.g. adding a pressure to a flow rate); fan pressure
+  kinds and their compile-fail tests in `kernel/products/fans/common/`.
 
 **Done when:** unit and compile-fail tests pass under all presets; the error-code list is documented
-in `docs/models/error-codes.md` for reuse by Python.
+in `docs/models/platform/error-codes.md` and `schemas/cemkit/v1/error-codes.json` for reuse by Python.
 
 ---
 
@@ -160,10 +162,11 @@ specific-diameter formulas come from its section 6. Do not start T06 without it,
 formulas from memory.
 
 **Deliverables**
-- `python/fancem/reference/l0.py`: air properties at the default state, fan laws, flow coefficient,
+- `python/cemkit/reference/` (mirroring the kernel modules: generic air properties under platform physics,
+  fan laws and coefficients under `fans/common`), `l0.py`: air properties at the default state, fan laws, flow coefficient,
   pressure coefficient, specific speed, specific diameter. Each function documents assumptions,
   validity range and source.
-- `docs/models/l0-similarity.md`: equations, conventions, sources.
+- `docs/models/fans/l0-similarity.md` (and `docs/models/platform/air-properties.md`): equations, conventions, sources.
 - `tests/hand_calcs/proposed/l0_*.yaml`: at least 5 hand-calculated cases with the working shown.
 
 **Human step:** check the proposed hand calculations and move correct ones to `tests/hand_calcs/verified/`.
@@ -178,7 +181,7 @@ formulas from memory.
 **Requirements:** SPEC-001 to SPEC-010, IN-001
 
 **Deliverables**
-- `kernel/include/fancem/spec/` and `kernel/src/spec/`: parse JSON (nlohmann), validate against the
+- `kernel/cemkit/spec/`: parse JSON (nlohmann), validate against the
   schema rules, convert to SI with the original value and unit recorded, unit table
   (mm, m, rpm, rad/s, m³/s, m³/h, m³/min, CFM, Pa, mmH₂O, inH₂O, W), pressure-type rule,
   precedence user > image > derived > default, essential-field check (asks the family plugin;
@@ -200,9 +203,10 @@ PERF-001 is written for the ducted axial L1 model and is **deferred to the axial
 build an L1 model in T08.
 
 **Deliverables**
-- `kernel/include/fancem/physics/` and `kernel/src/physics/`: port of T06 using mp-units and
+- `kernel/cemkit/physics/` (generic: air properties) and `kernel/products/fans/common/` (fan laws, coefficients,
+  specific speed and diameter, feasibility): port of T06 using mp-units and
   `std::expected`; out-of-range inputs return out-of-validity errors.
-- `data/family_ranges.yaml`: specific-speed ranges per family, each with a citation. Values without a
+- `data/fans/family_ranges.yaml`: specific-speed ranges per family, each with a citation. Values without a
   verified source stay `UNSOURCED`, and the feasibility gate reports "range unsourced" for them.
   **Do not invent ranges.**
 - Feasibility check returning the violated limit and the nearest feasible duty where computable.
@@ -219,10 +223,12 @@ build an L1 model in T08.
 **Requirements:** FAM-001, FAM-002, FAM-003, SPEC-006, UC-09
 
 **Deliverables**
-- `kernel/include/fancem/family/plugin.hpp` (interface: parameter space, initial design, L1 evaluation,
+- `kernel/cemkit/product/family.hpp` (interface: parameter space, initial design, L1 evaluation,
   constraints, geometry recipe, simulation case, essential fields, feasible range),
   `registry.hpp` (static registration), `parameter_space.hpp` (named parameters with units, bounds, defaults).
-- `kernel/plugins/stub_family/`: a minimal family used only by tests.
+- `kernel/testing/stub_product/` and `stub_family/`: a minimal product and family used only by tests,
+  registered explicitly (`register_family(Registry&)`); a CI test fails if any folder under
+  `products/*/families/` is missing from the registry.
 - CI check that the stub builds and registers with no edits outside its folder.
 
 **Done when:** the spec compiler asks the stub plugin for essential fields; FAM-002 test passes.
@@ -236,7 +242,7 @@ build an L1 model in T08.
 **Deliverables**
 - Add OpenCascade 8.0.x: use the vcpkg port if it already offers 8.0.x, otherwise build OCCT 8.0.1 from
   source inside the container (limit to `-j 6`). Record the choice in `docs/adr/004-opencascade-backend.md`.
-- `kernel/include/fancem/geometry/backend.hpp` (interface), `kernel/src/geometry/occt_backend.cpp`:
+- `kernel/cemkit/geometry/port/backend.hpp` (interface), `kernel/cemkit/geometry/occt/occt_backend.cpp`:
   build a test solid (cylinder hub plus a lofted plate from 3 sections), validity checks
   (closed, manifold, no self-intersection), mass properties, STEP and STL export,
   content-hash file names. All OCCT exceptions converted to `Error`.
@@ -251,9 +257,9 @@ input produces `geometry_failed` with a reason; exports open in FreeCAD (human c
 **Requirements:** PERF-002, MAINT-005, PHY-005
 
 **Deliverables**
-- `kernel/capi/fancem.h` + implementation: ABI version, spec compile, feasibility, batch L0 evaluation,
-  geometry smoke; JSON in and out; `fancem_free`; no exceptions cross the boundary.
-- `bindings/python/`: nanobind module `fancem._kernel` built with scikit-build-core (the Python project
+- `kernel/cemkit/capi/cemkit.h` + implementation: ABI version, spec compile, feasibility, batch L0 evaluation,
+  geometry smoke; JSON in and out; `cemkit_free`; no exceptions cross the boundary.
+- `bindings/python/`: nanobind module `cemkit._kernel` built with scikit-build-core (the Python project
   moves from hatchling to scikit-build-core here).
 - Python tests comparing kernel batch results with the reference on 10,000 random inputs; benchmark.
 
@@ -266,7 +272,7 @@ input produces `geometry_failed` with a reason; exports open in FreeCAD (human c
 **Requirements:** STORE-001 to STORE-004, REL-001, STORE-002
 
 **Deliverables**
-- `python/fancem/store/`: SQLite in WAL mode; tables for specs, candidates, jobs, results, failures,
+- `python/cemkit/store/`: SQLite in WAL mode; tables for specs, candidates, jobs, results, failures,
   artifacts, runs; plain-SQL migrations with a small migrator; content-addressed artifact directory;
   run-metadata capture (kernel, plugin and model versions, git commit, container digest, input hash).
 - Append-only enforcement (no UPDATE of result rows; status changes are new rows or a separate table).
@@ -281,7 +287,7 @@ duplicate artifacts are stored once.
 **Requirements:** ORC-001 to ORC-003, RES-001, REL-002, REL-003, OBS-001, SIM-002
 
 **Deliverables**
-- `python/fancem/orchestration/`: durable job states (queued, running, done, failed) with leases and
+- `python/cemkit/orchestration/`: durable job states (queued, running, done, failed) with leases and
   heartbeats; one heavy job at a time by default; retries with a recorded reason; failure codes shared
   with the kernel; resource limits for child processes (memory, cores, wall time) using cgroups via
   `systemd-run --user --scope` or `docker run` limits — decide in `docs/adr/005-job-resource-limits.md`.
@@ -297,9 +303,9 @@ duplicate artifacts are stored once.
 **Requirements:** IN-001, UC-01 to UC-03, UC-08, REP-001, REP-004
 
 **Deliverables**
-- `python/fancem/cli.py` (Typer): `fancem spec compile <file>`, `fancem spec questions <spec-id>`,
-  `fancem feasibility <spec-id>`, `fancem geometry smoke`, `fancem runs show <run-id>`,
-  `fancem runs reproduce <run-id>`.
+- `python/cemkit/cli/` (Typer): `cemkit spec compile <file>`, `cemkit spec questions <spec-id>`,
+  `cemkit feasibility <spec-id>`, `cemkit geometry smoke`, `cemkit runs show <run-id>`,
+  `cemkit runs reproduce <run-id>`.
 - Output always shows units and fidelity labels; a banned-claims check runs on all text output.
 
 **Done when:** each command has an integration test and works inside the container.
@@ -313,11 +319,11 @@ Run every check from requirements section 8 and record the results in `docs/base
 - [ ] Clean clone builds and passes all tests with one command inside the container
 - [ ] CI: GCC and Clang with -Werror, clang-tidy, ASan/UBSan, ruff, mypy --strict, coverage ≥ 90% on core, spec, physics
 - [ ] A unit error fails to compile (negative compile test)
-- [ ] `fancem spec compile examples/axial_120.yaml` gives a versioned spec with provenance on every field and the open questions
+- [ ] `cemkit spec compile examples/axial_120.yaml` gives a versioned spec with provenance on every field and the open questions
 - [ ] A pressure without a type is rejected with a message naming the field
-- [ ] `fancem feasibility` matches the Python reference and rejects an impossible duty with the violated limit
+- [ ] `cemkit feasibility` matches the Python reference and rejects an impossible duty with the violated limit
 - [ ] The stub family registers with no edits outside its folder
-- [ ] `fancem geometry smoke` builds a valid solid and exports STEP and STL with content-hash names
+- [ ] `cemkit geometry smoke` builds a valid solid and exports STEP and STL with content-hash names
 - [ ] Killing the worker mid-job and restarting loses and duplicates nothing
 - [ ] Every run record contains versions, git commit, container digest and input hash
 - [ ] ADR-001 to ADR-003 merged

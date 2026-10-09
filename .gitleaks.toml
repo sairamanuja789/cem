@@ -1,4 +1,4 @@
-title = "fancem secret scan (SEC-001)"
+title = "cemkit secret scan (SEC-001)"
 
 [extend]
 useDefault = true

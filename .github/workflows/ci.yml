@@ -42,7 +42,7 @@ jobs:
           file: docker/Dockerfile
           target: ci
           load: true
-          tags: fancem-ci:latest
+          tags: cemkit-ci:latest
           build-args: ${{ steps.pins.outputs.args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -56,7 +56,7 @@ jobs:
 
       - name: scripts/check.sh in the ci image
         env:
-          FANCEM_TARGET: ci
+          CEMKIT_TARGET: ci
         run: |
           mkdir -p .cache/vcpkg/binary
           scripts/dev.sh scripts/check.sh

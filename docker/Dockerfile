@@ -95,12 +95,12 @@ RUN curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEA
 
 # ---------------------------------------------------------------------------------------------
 FROM toolchain AS ci
-COPY docker/pins.env /opt/fancem/pins.env
+COPY docker/pins.env /opt/cemkit/pins.env
 RUN mkdir -p /home/dev /workspace && chmod 1777 /home/dev
 ENV HOME=/home/dev \
     CC=gcc-13 \
     CXX=g++-13 \
-    FANCEM_IMAGE_TARGET=ci
+    CEMKIT_IMAGE_TARGET=ci
 WORKDIR /workspace
 CMD ["bash"]
 
@@ -159,12 +159,12 @@ RUN uv venv /opt/gmsh-venv --python "${PYTHON_VERSION}" \
  && chmod -R a+rX /opt/gmsh-venv
 
 
-COPY docker/pins.env /opt/fancem/pins.env
+COPY docker/pins.env /opt/cemkit/pins.env
 RUN mkdir -p /home/dev /workspace && chmod 1777 /home/dev \
  && echo '[ -f /usr/lib/openfoam/openfoam*/etc/bashrc ] && . /usr/lib/openfoam/openfoam*/etc/bashrc' >> /etc/bash.bashrc
 ENV HOME=/home/dev \
     CC=gcc-13 \
     CXX=g++-13 \
-    FANCEM_IMAGE_TARGET=dev
+    CEMKIT_IMAGE_TARGET=dev
 WORKDIR /workspace
 CMD ["bash"]

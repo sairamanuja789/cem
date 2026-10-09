@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Everything CI runs (MAINT-001..003, SEC-001, REPRO-002). Run inside the dev or ci container:
-#   scripts/dev.sh scripts/check.sh        (set FANCEM_TARGET=ci to use the ci image)
+#   scripts/dev.sh scripts/check.sh        (set CEMKIT_TARGET=ci to use the ci image)
 # Every stage runs even after a failure; the summary lists each result; exit status is non-zero if any
 # stage failed.
 set -uo pipefail
 
-if [ ! -f /opt/fancem/pins.env ] || [ -z "${FANCEM_IMAGE_TARGET:-}" ]; then
+if [ ! -f /opt/cemkit/pins.env ] || [ -z "${CEMKIT_IMAGE_TARGET:-}" ]; then
   echo "check.sh: refusing to run outside the pinned container. Use scripts/dev.sh scripts/check.sh" >&2
   exit 2
 fi
@@ -34,20 +34,34 @@ preset_stage() { # preset: configure, build, ctest
 }
 
 
-clang_tidy() {
-  # project sources only; the negative-test sources are meant not to compile cleanly
-  run-clang-tidy -p build/clang-debug -quiet \
-    $(find kernel/src kernel/tests -name '*.cpp' -not -path '*/negative/*')
+kernel_sources() { # project C++ sources; the gate sources are meant not to compile cleanly
+  find kernel/cemkit kernel/products kernel/testing -name "$1" -not -path '*/testing/gates/*' \
+    2>/dev/null | sort
 }
 
-clang_format_check() { find kernel \( -name '*.cpp' -o -name '*.hpp' \) | xargs clang-format --dry-run --Werror; }
+clang_tidy() {
+  # shellcheck disable=SC2046
+  run-clang-tidy -p build/clang-debug -quiet $(kernel_sources '*.cpp')
+}
+
+boundaries() { # ADR-009 dependency rules: include scan, link graph, Python imports
+  mkdir -p build/gcc-debug/graph
+  cmake --graphviz=build/gcc-debug/graph/cemkit.dot build/gcc-debug >/dev/null \
+    && uv run python scripts/check_boundaries.py --kernel kernel --python python/cemkit \
+      --manifest build/gcc-debug/cemkit_modules.txt --dot build/gcc-debug/graph/cemkit.dot
+}
+
+clang_format_check() {
+  { kernel_sources '*.cpp'; kernel_sources '*.hpp'; find kernel/testing/gates -name '*.cpp'; } \
+    | xargs clang-format --dry-run --Werror
+}
 
 gcovr_report() {
   local floor=()
   # shellcheck disable=SC2207
   floor=($(coverage_floor_args "$root"))
   if [ "${#floor[@]}" -eq 0 ]; then
-    echo "note: no code yet in kernel/src/{core,spec,physics}; coverage floor not applied"
+    echo "note: no code yet in the MAINT-003 scope; coverage floor not applied"
   fi
   mkdir -p build/coverage
   uv run gcovr --config gcovr.cfg --object-directory build/gcc-coverage \
@@ -85,11 +99,12 @@ stage "clang-debug"           preset_stage clang-debug
 stage "clang-asan"            preset_stage clang-asan
 stage "gcc-coverage"          preset_stage gcc-coverage
 stage "release"               preset_stage release
+stage "boundaries (ADR-009)"  boundaries
 stage "clang-tidy"            clang_tidy
 stage "clang-format"          clang_format_check
 stage "ruff check"            uv run ruff check .
 stage "ruff format"           uv run ruff format --check .
-stage "mypy --strict"         uv run mypy --strict python/ tests/python
+stage "mypy --strict"         uv run mypy --strict python/ tests/python scripts
 stage "pytest + coverage"     uv run pytest -q --cov --cov-report=term-missing
 stage "gcovr (MAINT-003)"     gcovr_report
 stage "gitleaks (SEC-001)"    gitleaks_scan

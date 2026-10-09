@@ -1,6 +1,6 @@
 # ADR-000: Hardware budget: OpenFOAM memory per million cells and the job memory cap
 
-- Status: proposed (measured numbers below; the cap needs the user's acceptance)
+- Status: accepted (user, 2026-10-10)
 - Date: 2026-10-10
 - Requirements affected: ASM-001, RES-001, RES-002, CON-001
 
@@ -112,8 +112,9 @@ The container fit gives 8.4 M.
 
   Rerun `scripts/measure_openfoam_memory.sh` and update this ADR with the new numbers.
 
-## Open question for the user
+## Extrapolation policy (user decision, 2026-10-10)
 
-When an estimate lies beyond the measured range, should the runner apply an extra margin? Such a
-margin would be a policy choice, not a measured value, so it is left to you. Without one, cases are
-refused only when the plain estimate exceeds the cap.
+No extra margin is applied to estimates beyond the measured range. The runner refuses a case only
+when the plain estimate exceeds the 12 GiB cap. Any estimate above 1.05 M cells is logged as
+extrapolated. The policy is to be revisited when the first fan case (M3) is measured at larger
+sizes.

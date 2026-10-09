@@ -1,0 +1,20 @@
+id: l0_010
+title: Free delivery - fan static pressure zero converts to the dynamic pressure alone
+requirements: [SPEC-004, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D1 (free delivery accepted, Delta p_s >= 0; ISO 5801 definitions)
+working: |
+  dp_s = 0 Pa (free delivery);  Q = 0.05 m3/s;  D_duct = 0.120 m (AX-001);  rho = 1.18 kg/m3
+  A_out = pi D_duct^2 / 4 = 3.141592654 x 0.0144 / 4 = 0.01130973355 m2
+  v     = Q / A_out = 0.05 / 0.01130973355           = 4.420970641 m/s
+  v^2   = 4.420970641^2                               = 19.54498141 m2/s2
+  p_d   = 1/2 rho v^2 = 0.5 x 1.18 x 19.54498141     = 11.53153903 Pa
+  dp_t  = dp_s + p_d = 0 + 11.53153903                = 11.53153903 Pa   (provenance: derived)
+  Cross-check: l0_005 has the same Q and D_duct with dp_s = 120 Pa and gives 131.5315390 Pa,
+  which is 120 Pa more.
+checks:
+  - function: fan_total_from_static
+    args: {fan_static_pressure: 0.0, flow: 0.05, d_duct: 0.12}
+    expected: 11.53153903336792
+    rel_tol: 1.0e-9

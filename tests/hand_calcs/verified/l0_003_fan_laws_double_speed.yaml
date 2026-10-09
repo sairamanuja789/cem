@@ -1,0 +1,22 @@
+id: l0_003
+title: Fan laws, speed doubled at fixed diameter and density
+requirements: [PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: docs/architecture.md section 6 (Q ~ N D^3, dp ~ rho N^2 D^2, P ~ rho N^3 D^5)
+working: |
+  Point 1: omega = 209.4395102 rad/s, D = 0.119 m, Q = 0.05 m3/s, dp_t = 150 Pa, P = 15 W
+  (illustrative), rho = 1.18 kg/m3.
+  Ratios: N2/N1 = 2, D2/D1 = 1, rho2/rho1 = 1.
+  Q2  = 0.05 x 2      = 0.1 m3/s
+  dp2 = 150  x 2^2    = 600 Pa
+  P2  = 15   x 2^3    = 120 W
+  Validity of point 2: U = 24.92 m/s <= 48.95 m/s; 600 Pa <= 1418.55 Pa.
+checks:
+  - function: scale_fan_laws
+    args:
+      point: {omega: 209.43951023931953, d_tip: 0.119, flow: 0.05, fan_total_pressure: 150.0, power: 15.0}
+      omega: 418.87902047863906
+      d_tip: 0.119
+    expected: {flow: 0.1, fan_total_pressure: 600.0, power: 120.0}
+    rel_tol: 1.0e-12

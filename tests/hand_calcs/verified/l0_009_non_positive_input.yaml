@@ -1,0 +1,15 @@
+id: l0_009
+title: A zero flow rate returns out_of_validity
+requirements: [PHY-003, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D3 (every input finite and strictly positive)
+working: |
+  Q = 0 is not strictly positive, so out_of_validity, with bounds (0, inf).
+checks:
+  - function: specific_speed
+    args: {omega: 209.43951023931953, flow: 0.0, fan_total_pressure: 150.0}
+    expected_error:
+      code: out_of_validity
+      subject: flow
+      details: {value: "0", bounds: "(0, inf)", model: fans.l0@1.0.0}

@@ -48,10 +48,13 @@ spec-compiler task.
 
 ## Conversion between the kinds
 
-No conversion between the kinds exists yet. It needs the conventional outlet fan dynamic pressure,
-including the ISO 5801 compressibility (Mach factor) correction, and probably its own
-`fan_dynamic_pressure` kind. That conversion is a physics model with its own validity range. It
-will be added later with a cited source, a Python reference and a hand calculation, not in T04.
+- **Python reference (T06):** `fan_total_from_static` in
+  `python/cemkit/reference/fans/common/l0.py` adds the conventional fan dynamic pressure,
+  Δp_t = Δp_s + ½ ρ (Q / A_out)² with A_out = π D_duct² / 4 (ADR-003 D1). Its result has
+  provenance **derived**. Δp_s ≥ 0 is accepted, so free delivery (Δp_s = 0) is valid.
+- **Assumptions:** ρ₂ ≈ ρ₁ and the Mach factor is 1. Both hold inside the incompressible range of
+  ADR-003 D3. Equations and validity are in `docs/models/fans/l0-similarity.md`.
+- **C++ kernel:** the conversion and a typed `fan_dynamic_pressure` follow with the L0 port in T08.
 
 ## Evidence
 

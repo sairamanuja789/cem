@@ -5,6 +5,9 @@ include(cmake/cemkit.cmake)
 add_subdirectory(cemkit/core)
 add_subdirectory(cemkit/spec)
 add_subdirectory(cemkit/physics)
+add_subdirectory(cemkit/product)
+
+
 add_subdirectory(products/fans/common)
 
 add_subdirectory(testing)

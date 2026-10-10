@@ -1,8 +1,9 @@
-# Fan CEM — instructions for Claude Code
+# CEM platform — instructions for Claude Code
 
-A Computational Engineering Model (CEM) that turns a reference image plus stated
-requirements into a fan design whose performance is computed, checked and traceable.
-First product: 120 mm ducted axial fan. Later: wall, pedestal, ceiling, centrifugal fans.
+A Computational Engineering Model (CEM) platform that turns a reference image plus stated
+requirements into a design whose performance is computed, checked and traceable.
+First product: fans — 120 mm ducted axial fan. Later: wall, pedestal, ceiling, centrifugal fans.
+The platform core names no product (ADR-015).
 
 ## Sources of truth — read the relevant parts before every task
 - `docs/requirements.md` — the requirements spec. Requirement IDs (e.g. SPEC-004) are binding.
@@ -32,6 +33,73 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 9. Never write "optimal", "perfect", "validated" or "certified" in outputs or reports unless the
    evidence required by the spec exists (REP-004).
 10. LLM output is untrusted data: validate against a schema, never execute it or use it as a path.
+
+## Platform and engineering design rules (ADR-015; engine research 2026-10-10)
+Layering (ADR-015):
+- The platform core (`kernel/cemkit/`, platform Python) names no product or family. Families own
+  their fields (`Family::field_catalogue()`, which generates the family JSON schema), spec checks,
+  feasibility report, physics, recipes and simulation cases.
+- Two-user rule: no shared abstraction (geometry operation, domain library, solver contract) until
+  two real users need it. Stub families are test fixtures, not users.
+- Physics are pure-function libraries, not plugins, and never include geometry or adapter code: they
+  take numbers (chord, radius), never shapes. No `kernel/domains/` until a second family needs a model.
+- Abstraction layers, depending downward only: math primitives → quantities/units → geometry (via the
+  port) → governing equations and constitutive models → numerical methods / solver adapters →
+  constraints and objectives → product design algorithms → verification and validation.
+
+Concepts adopted from NX / Simcenter / ANSYS (public product concepts, not copied implementations;
+not cited sources):
+- Separate stages with explicit hand-offs: geometry → mesh → solve → post-process. Each stage gets
+  typed inputs, never another stage's internals.
+- History = rebuild: a geometry recipe is an ordered list of typed port operations; regenerating it
+  from parameters is the feature history. No feature tree, no CAD constraint solver — recipes compute
+  positions explicitly from engineering parameters.
+- Select edges and faces by geometric rule (e.g. blade–hub intersection edges), never by index, and
+  attach named groups that carry through to meshing and boundary conditions.
+- Stale-aware pipeline (like a project schematic): each stage is keyed by a content hash of its
+  inputs (recipe id@version, parameter values, backend version); reuse when unchanged, invalidate
+  when any input changes. Stop at the first question, invalid input, out-of-validity or infeasible
+  result.
+- Multi-fidelity exploration: screen with L0/L1, explore with design of experiments plus surrogates,
+  run L2 only on finalists. Rank only at the fidelity actually reached (rule 8).
+- Verification as in solver verification manuals: compare against analytic cases; use manufactured
+  solutions and mesh-convergence studies for solver adapters.
+- Do not build: a geometric constraint solver, a PDE/CFD/FEA solver, adjoint sensitivities or
+  reduced-order models, until a measured bottleneck justifies them.
+
+Mathematics and numerics:
+- Prefer established libraries over hand-written numerics (new dependency → ask, LIFE-002): OCCT for
+  B-splines, lofts, booleans, fillets, meshing and mass properties; external CalculiX, OpenFOAM and
+  Gmsh for field problems; Eigen or SciPy only when a real user appears.
+- Small, justified internal numerics only: frames and rigid transforms at the port boundary,
+  bracketed root finding (Brent) for scalar implicit relations, Gauss–Legendre spanwise integration.
+- Conditioning: optimise in dimensionless, scaled variables (φ, ψ, ωₛ for fans); QR rather than
+  normal equations for least squares; re-orthonormalise composed rotations; integrate in r/R.
+- Every iterative method has a tolerance and an iteration cap; non-convergence is an error, never a
+  number.
+- Optimiser choice follows the problem: gradient-based (SQP, analytic gradients, multi-start) for
+  smooth cheap L0/L1; enumeration or evolutionary for discrete choices; Pareto (NSGA-II type) for
+  several objectives; Bayesian or surrogate search when L2 cost dominates.
+
+Physics and verification:
+- Keep fundamental laws (conservation, Euler turbomachine equation, actuator-disk momentum,
+  equilibrium, linear elasticity, energy balance) separate from empirical correlations (losses,
+  deviation, low-Re section data, Nusselt/friction correlations, allowables). Every correlation is
+  cited or `UNSOURCED`.
+- Every model records: id@version, typed inputs and outputs, method (closed form | iterative with
+  tolerance | solver with settings), validity predicates with sources, verification evidence, and a
+  fidelity-labelled output. No universal `Model` base class.
+- Errors stay distinct: missing input (question), invalid input, out of validity, infeasible,
+  non-convergence, not implemented.
+- A geometrically valid solid proves nothing physical: geometry validity and performance are separate
+  checks and are reported separately.
+- Verification kinds stay distinct in reports: code verification (hand calcs, Python ↔ C++),
+  numerical verification (convergence, mesh independence), model validation (published measured
+  data), physical validation (our rig, L3).
+- Never claim a performance improvement without a baseline, a benchmark and a measurement; until
+  measured it is a hypothesis.
+- Known applicability gap: `scale_fan_laws` assumes the same Reynolds regime but does not check it;
+  size scaling at low Reynolds numbers (120 mm fans) is where it is least valid.
 
 ## How to work
 - Use `/task <ID>` (see `.claude/commands/task.md`). Restate the task's requirement IDs and acceptance

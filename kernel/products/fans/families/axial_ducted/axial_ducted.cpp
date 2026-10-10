@@ -108,11 +108,13 @@ core::Result<std::optional<DerivedTipDiameter>> rotor_tip_diameter(const spec::S
   const core::Length nominal = *size->si_value * mp_units::isq::length[mp_units::si::metre];
   if (!from_duct) {
     // The user stated the rotor tip diameter itself: nothing is derived or assumed.
-    return DerivedTipDiameter{.value = nominal,
-                              .provenance = size->provenance,
-                              .provisional = size->provisional || reference->provisional,
-                              .rule = k_tip_stated_rule,
-                              .from = {"product.nominal_size", "product.size_reference"}};
+    return DerivedTipDiameter{
+        .value = nominal,
+        .provenance = size->provenance,
+        // reference is set here (kind came from it); checked for clang-tidy.
+        .provisional = size->provisional || (reference.has_value() && reference->provisional),
+        .rule = k_tip_stated_rule,
+        .from = {"product.nominal_size", "product.size_reference"}};
   }
   const auto clearance = spec.field("product.tip_clearance_min");
   if (!clearance || !clearance->si_value) {

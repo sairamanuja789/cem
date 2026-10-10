@@ -98,7 +98,7 @@ TEST_CASE("fields outside the catalogue are rejected naming the path", "[SPEC-00
 
 TEST_CASE("a declared qualifier is required, refused or unknown with the family's messages",
           "[SPEC-004]") {
-  const auto head = [](json extra) {
+  const auto head = [](const json& extra) {
     json f{{"value", 1.0}, {"unit", "Pa"}, {"provenance", "user"}};
     f.update(extra);
     return doc({{"head", f}});
@@ -134,7 +134,7 @@ TEST_CASE("a catalogue resolver error rejects the spec", "[SPEC-006]") {
 
 TEST_CASE("family catalogues are validated", "[FAM-001]") {
   CHECK(validate_family_catalogue(fixture_catalogue()).has_value());
-  const auto invalid = [](FieldCatalogue c) {
+  const auto invalid = [](const FieldCatalogue& c) {
     const auto r = validate_family_catalogue(c);
     REQUIRE(!r.has_value());
     return r.error().code();

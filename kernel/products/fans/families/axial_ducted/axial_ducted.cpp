@@ -136,7 +136,8 @@ core::Status check_air_power(const spec::Spec& spec) {
   }
   const double q = *flow_f->si_value;
   const double p = *pressure_f->si_value;
-  if (!(q > 0.0 && p > 0.0)) {
+  const bool positive = q > 0.0 && p > 0.0;
+  if (!positive) {
     return {};
   }
   const double air_power = q * p;

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "products/fans/common/feasibility_json.hpp"
 #include "products/fans/common/l0.hpp"
@@ -46,7 +47,7 @@ core::Status register_operations(product::Operations& operations) {
   const auto pa = si::pascal;
   const auto ms = si::metre / si::second;
   const auto one = mp_units::one;
-  const std::pair<const char*, product::Operation> table[] = {
+  const std::vector<std::pair<const char*, product::Operation>> table{
       {"tip_speed",
        [ms](const Json& c) {
          const Json& a = args_of(c);

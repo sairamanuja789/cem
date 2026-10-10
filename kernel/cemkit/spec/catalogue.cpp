@@ -244,7 +244,7 @@ nlohmann::ordered_json family_schema(std::string_view family, const FieldCatalog
       "GENERATED from the family's field catalogue (Family::field_catalogue, ADR-015); never edit. "
       "Regenerate with scripts/gen_family_schemas.sh.";
   out["x-cemkit-families"] = OJson::array({std::string{family}});
-  for (auto& [key, value] : body.items()) {
+  for (const auto& [key, value] : body.items()) {
     out[key] = value;
   }
   OJson defs = OJson::object();

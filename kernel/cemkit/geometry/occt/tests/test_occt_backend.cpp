@@ -375,7 +375,7 @@ TEST_CASE("OCCT output does not reach stdout", "[GEO-004]") {
   REQUIRE(solid.has_value());
 
   std::ostringstream captured_cout;
-  const auto original_cout = std::cout.rdbuf(captured_cout.rdbuf());
+  auto* const original_cout = std::cout.rdbuf(captured_cout.rdbuf());
   const auto step = backend.export_bytes(
       **solid,
       port::ExportRequest{.format = port::ExportFormat::step, .tessellation = std::nullopt});

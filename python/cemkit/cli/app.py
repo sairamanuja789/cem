@@ -355,8 +355,6 @@ def spec_questions(
 
 # --- feasibility ---------------------------------------------------------------------------------
 
-INPUT_UNITS = {"flow": "m3/s", "fan_total_pressure": "Pa", "omega": "rad/s"}
-
 
 def input_line(name: str, value: Json) -> str:
     if "fidelity" in value:  # computed by the kernel (for example a converted pressure)
@@ -377,11 +375,9 @@ def check_lines(check: Json) -> list[str]:
         lines.append(f"    limit violated: {check['violation']['describe']}")
     nearest = check["nearest_feasible"]
     if nearest is not None:
-        lines.append(
-            "    nearest feasible duty for this limit: flow "
-            f"{labelled(nearest['flow'], 'm3/s')}, fan total pressure "
-            f"{labelled(nearest['fan_total_pressure'], 'Pa')}"
-        )
+        # The product names its quantities (label, unit); the CLI only prints them (ADR-015).
+        duty = ", ".join(f"{q['label']} {labelled(q, q['unit'])}" for q in nearest.values())
+        lines.append(f"    nearest feasible duty for this limit: {duty}")
     elif check["status"] == "violated":
         lines.append("    nearest feasible duty: not computable for this limit")
     return lines
@@ -414,11 +410,18 @@ def feasibility(
         report = response["report"]
         lines = [f"feasibility of {spec_id} revision {record.revision}: run {run_id}", "inputs:"]
         lines += [input_line(name, value) for name, value in response["inputs"].items()]
-        if report["specific_speed"] is not None:
-            lines.append(f"specific speed: {labelled(report['specific_speed'], '(1)')}")
+        for value in report.values():
+            if isinstance(value, dict) and "label" in value:
+                lines.append(f"{value['label']}: {labelled(value, value['unit'])}")
         lines.append("checks:")
         for check in report["checks"]:
             lines += check_lines(check)
+        evaluated = ("pass", "violated")
+        skipped = sum(check["status"] not in evaluated for check in report["checks"])
+        lines.append(
+            f"checks not evaluated: {skipped} of {len(report['checks'])} "
+            "(a check that was not evaluated never counts as a pass)"
+        )
         lines.append(f"verdict: {VERDICT_TEXT[report['verdict']]}")
         emit(lines)
         if report["verdict"] == "infeasible":

@@ -198,6 +198,8 @@ def test_feasibility_of_the_example_computes_the_tip_speed_check(tmp_path: Path)
     tip_check = next(c for c in report.checks if c.limit == "incompressible_tip_speed")
     assert tip_check.status == "pass"
     assert f"  incompressible_tip_speed: pass: {tip_check.message}" in out
+    # The unsourced specific-speed range is not evaluated and is counted, never passed (REP-002).
+    assert "checks not evaluated: 1 of 3 (a check that was not evaluated never counts" in out
     assert "needs the rotational speed and the rotor tip diameter" not in out
 
 

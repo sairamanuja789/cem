@@ -90,6 +90,7 @@
    "  incompressible_pressure: pass: within EPSILON gamma p1",
    "  incompressible_tip_speed: pass: within sqrt(2 EPSILON) a1",
    "  family_specific_speed_range: range_unsourced: range unsourced: no cited specific-speed range for fans.axial_ducted",
+   "checks not evaluated: 1 of 3 (a check that was not evaluated never counts as a pass)",
    "verdict: unconfirmed: no limit violated, but at least one check could not be applied"
   ]
  }

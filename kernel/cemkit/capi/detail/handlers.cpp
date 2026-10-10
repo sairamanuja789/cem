@@ -452,7 +452,8 @@ core::Result<Json> spec_compile(const Json& request) {
   const nlohmann::json document = member(request, "spec");
   const spec::SpecCompiler compiler{
       spec::CompilerOptions{.autonomous_mode = autonomous,
-                            .essential_resolver = product::essential_field_resolver(family_registry()),
+                            .essential_resolver =
+                                product::essential_field_resolver(family_registry()),
                             .default_resolver = {}}};
   auto compiled = compiler.compile(document);
   if (!compiled) {

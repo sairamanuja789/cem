@@ -207,7 +207,7 @@ FanGeometryParams fan_geometry_params_of(const product::Json& a) {
   return p;
 }
 
-core::Status register_operations(product::Operations& operations) {
+core::Status register_geometry_operation(product::Operations& operations) {
   using product::Json;
   return operations.add(
       "ducted_fan_geometry",

@@ -61,6 +61,9 @@ struct FanGeometry {
 
 // Registers "ducted_fan_geometry" (C ABI cemkit_product_operation, docs/capi.md): the rotor and
 // duct of a request, each with validity, topology, mass properties and exports.
+[[nodiscard]] core::Status register_geometry_operation(product::Operations& operations);
+
+// Every operation of this family: ducted_fan_geometry and mean_line (operations.cpp).
 [[nodiscard]] core::Status register_operations(product::Operations& operations);
 
 // The blade section points (for tests): upper and lower curves, `points` each.

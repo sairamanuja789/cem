@@ -117,6 +117,21 @@ def test_the_example_leaves_the_duty_point_unknown() -> None:
     assert duty["pressure"]["value"] is None and duty["pressure"]["provenance"] == "unknown"
 
 
+@pytest.mark.req("SPEC-001")
+@pytest.mark.req("SPEC-004")
+@pytest.mark.req("SPEC-011")
+def test_the_trial_duty_example_is_valid_and_labelled_as_a_trial() -> None:
+    # ADR-016: the trial duty is a provisional default, never a user requirement.
+    loaded = cs.load_yaml((ROOT / "examples" / "axial_120_trial.yaml").read_text(encoding="utf-8"))
+    assert isinstance(loaded, dict)
+    assert spec_errors(loaded) == []
+    for name in ("flow", "pressure"):
+        field = loaded["product"]["duty"][name]
+        assert field["provenance"] == "default" and field["provisional"] is True
+        assert "TRIAL" in field["note"]
+    assert loaded["product"]["duty"]["pressure"]["kind"] == "fan_static"
+
+
 @pytest.mark.req("SPEC-004")
 @pytest.mark.req("SPEC-011")
 def test_a_known_typed_duty_point_with_tolerances_is_valid() -> None:

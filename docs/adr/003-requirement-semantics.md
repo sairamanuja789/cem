@@ -90,6 +90,11 @@ the same Reynolds-number regime. L0 has no viscosity to check this.
 
 - φ, ψ and δ_s use the **rotor tip diameter** D, and U = ω D / 2.
 - The **duct diameter** enters only the static-to-total conversion of D1.
+- **Rotor tip diameter from the spec (owner decision D6, 2026-10-10; provisional default).** The
+  120 mm of AX-001 is the duct inner diameter, and D = 120 mm − 2 × tip clearance, with the
+  clearance taken from the spec (`product.tip_clearance_min`, AX-009). If no clearance is stated,
+  D stays unknown and the tip-speed check stays not computable. The derived D has provenance
+  `default` and is provisional until the owner confirms frame vs rotor diameter (HI-023).
 
 ### D5. Family boundaries
 

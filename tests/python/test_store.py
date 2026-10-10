@@ -871,3 +871,26 @@ def test_versions_serialise_canonically_or_as_unknown() -> None:
     assert meta.plugin_versions_json() == '{"fans.axial_ducted":"0.1.0"}'
     unknown = copy.replace(meta, plugin_versions=UNKNOWN)
     assert unknown.plugin_versions_json() == UNKNOWN
+
+
+# --- T14: reads the CLI needs ---------------------------------------------------------------------
+
+
+@pytest.mark.req("STORE-002")
+def test_runs_specs_and_artifacts_can_be_read_back(store: SqliteStore) -> None:
+    run = store.record_run(metadata())
+    assert store.run(run.run_pk) == run
+    with pytest.raises(StoreError):
+        store.run(run.run_pk + 100)
+
+    rev1 = store.record_spec(run, spec_doc())
+    rev2_doc = spec_doc() | {"revision": 2, "parent": {"spec_id": "axial-120", "revision": 1}}
+    rev2 = store.record_spec(run, rev2_doc)
+    assert store.spec_records("axial-120") == (rev1, rev2)
+    assert store.spec_records("no-such-spec") == ()
+    assert store.run_specs(run) == (rev1, rev2)
+
+    other = store.record_run(metadata())
+    first = store.record_artifact(run, b"inputs", "command.json", "application/json")
+    store.record_artifact(other, b"elsewhere", "command.json")
+    assert store.run_artifacts(run) == (first,)

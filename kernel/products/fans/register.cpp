@@ -3,6 +3,7 @@
 #include <string>
 
 #include "products/fans/families/axial_ducted/axial_ducted.hpp"
+#include "products/fans/families/axial_ducted/geometry.hpp"
 #include "products/fans/operations.hpp"
 
 namespace cemkit::fans {
@@ -17,7 +18,10 @@ core::Status register_product(product::Registry& registry, product::Operations& 
   if (auto ok = register_fan_families(registry); !ok) {
     return ok;
   }
-  return register_operations(operations);
+  if (auto ok = register_operations(operations); !ok) {
+    return ok;
+  }
+  return axial_ducted::register_operations(operations);
 }
 
 core::Result<FeasibilityReport> check_family_feasibility(std::string_view family, const Duty& duty,

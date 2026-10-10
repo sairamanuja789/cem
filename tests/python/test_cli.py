@@ -334,3 +334,48 @@ def test_banned_claims_are_refused_in_all_output(tmp_path: Path) -> None:
     assert result.exit_code == 3
     assert "banned claims ['certified']" in result.output
     assert "PETG" not in result.output
+
+
+FAN_PLACEHOLDER = ROOT / "examples" / "fan_geometry_placeholder.yaml"
+
+
+@pytest.mark.req("GEO-001")
+@pytest.mark.req("GEO-002")
+@pytest.mark.req("GEO-004")
+def test_geometry_fan_writes_valid_rotor_and_duct_without_performance(tmp_path: Path) -> None:
+    """ADR-015 M3: geometry from stated parameters only, two valid parts, content-hash files."""
+    result = invoke(
+        tmp_path / "store",
+        "geometry",
+        "fan",
+        str(FAN_PLACEHOLDER),
+        "--out",
+        str(tmp_path / "out"),
+        "--json",
+    )
+    assert result.exit_code == 0, result.output
+    document = json.loads(result.stdout)
+    parts = document["output"]["result"]["parts"]
+    assert [p["name"] for p in parts] == ["rotor", "duct"]
+    assert all(p["validity"]["ok"] for p in parts)
+    assert "no performance" in document["output"]["result"]["basis"]
+    assert abs(document["output"]["result"]["tip_clearance"] - 0.0005) < 1e-12
+    for f in document["files"]:
+        data = Path(f["path"]).read_bytes()
+        assert f["name"].split("-", 1)[1].startswith(hashlib.sha256(data).hexdigest())
+    again = invoke(tmp_path / "store2", "geometry", "fan", str(FAN_PLACEHOLDER), "--json")
+    assert [f["name"] for f in json.loads(again.stdout)["files"]] == [
+        f["name"] for f in document["files"]
+    ]  # GEO-001: the same parameters give the same files
+
+
+@pytest.mark.req("GEO-002")
+def test_geometry_fan_rejects_a_tip_outside_the_duct_naming_the_station(tmp_path: Path) -> None:
+    params = cs.load_yaml(FAN_PLACEHOLDER.read_text(encoding="utf-8"))
+    assert isinstance(params, dict)
+    params["stations"][-1]["radius"] = 0.061
+    path = tmp_path / "bad.json"
+    path.write_text(json.dumps(params), encoding="utf-8")
+    result = invoke(tmp_path / "store", "geometry", "fan", str(path))
+    assert result.exit_code != 0
+    assert "stations[2].radius" in result.output

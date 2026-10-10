@@ -21,7 +21,7 @@ from cemkit.errors import Error, error
 
 # The C ABI MAJOR.MINOR this package was written against (MAINT-005): the library must have the
 # same MAJOR and at least this MINOR.
-ABI_REQUIRED = (0, 2)
+ABI_REQUIRED = (0, 3)
 
 CEMKIT_OK = 0
 CEMKIT_FAILED = 1
@@ -109,3 +109,9 @@ def geometry_smoke(request: Json) -> Json:
     """Builds the geometry test solid and reports validity, topology, mass properties and export
     hashes (GEO-001, GEO-002, GEO-004). Writes no files."""
     return _call(_kernel.geometry_smoke, request)
+
+
+def product_operation(request: Json) -> Json:
+    """A named product operation with the kernel's geometry backend (ABI 0.3, ADR-015): for
+    example {"operation": "ducted_fan_geometry", "args": {...}}. Writes no files."""
+    return _call(_kernel.product_operation, request)

@@ -7,41 +7,32 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepBuilderAPI_Copy.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
-#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepGProp.hxx>
 #include <BRepLib.hxx>
-#include <GProp_GProps.hxx>
-#include <BRep_Tool.hxx>
-#include <GeomAbs_Shape.hxx>
-#include <GeomAPI_Interpolate.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <NCollection_HArray1.hxx>
-#include <NCollection_IndexedDataMap.hxx>
-#include <TopTools_ShapeMapHasher.hxx>
-#include <TopExp.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <gp_Ax1.hxx>
-#include <gp_Trsf.hxx>
-#include <BRepBuilderAPI_Copy.hxx>
-#include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
-#include <numbers>
-#include <vector>
+#include <BRepPrimAPI_MakeRevol.hxx>
+#include <BRep_Tool.hxx>
+#include <GProp_GProps.hxx>
+#include <GeomAPI_Interpolate.hxx>
+#include <GeomAbs_Shape.hxx>
+#include <Geom_BSplineCurve.hxx>
 #include <IFSelect_ReturnStatus.hxx>
 #include <IMeshTools_Parameters.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <Message_Printer.hxx>
+#include <NCollection_Array1.hxx>
+#include <NCollection_HArray1.hxx>
+#include <NCollection_IndexedDataMap.hxx>
 #include <NCollection_List.hxx>
 #include <STEPControl_StepModelType.hxx>
 #include <STEPControl_Writer.hxx>
@@ -51,21 +42,31 @@
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TopAbs_ShapeEnum.hxx>
+#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <cmath>
 #include <cstddef>
 #include <format>
+#include <gp_Ax1.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
 #include <iostream>
 #include <memory>
+#include <numbers>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "cemkit/core/error.hpp"
 #include "cemkit/core/result.hpp"
@@ -358,7 +359,6 @@ core::Result<std::string> stl_bytes(const TopoDS_Shape& shape,
   return std::move(out).str();
 }
 
-
 // --- construction operations (M2) -------------------------------------------------------------
 
 constexpr double k_spline_tolerance_mm = 1e-6;  // interpolation tolerance in model units (mm)
@@ -380,19 +380,19 @@ core::Result<TopoDS_Edge> spline_edge(const std::vector<port::Point3>& points,
     return core::fail(core::ErrorCode::geometry_failed, subject + " needs at least 2 points",
                       subject, {{"count", std::to_string(points.size())}});
   }
-  Handle(NCollection_HArray1<gp_Pnt>) array =
-      new NCollection_HArray1<gp_Pnt>(1, static_cast<int>(points.size()));
+  NCollection_Array1<gp_Pnt> local(1, static_cast<int>(points.size()));
   for (std::size_t i = 0; i < points.size(); ++i) {
     auto p = point_mm(points.at(i), std::format("{}[{}]", subject, i));
     if (!p) {
       return std::unexpected{std::move(p).error()};
     }
-    if (i > 0 && p->Distance(array->Value(static_cast<int>(i))) <= k_spline_tolerance_mm) {
+    if (i > 0 && p->Distance(local.Value(static_cast<int>(i))) <= k_spline_tolerance_mm) {
       return core::fail(core::ErrorCode::geometry_failed, "consecutive points coincide",
                         std::format("{}[{}]", subject, i));
     }
-    array->SetValue(static_cast<int>(i) + 1, *p);
+    local.SetValue(static_cast<int>(i) + 1, *p);
   }
+  const Handle(NCollection_HArray1<gp_Pnt>) array = new NCollection_HArray1<gp_Pnt>(local);
   GeomAPI_Interpolate interpolate(array, /*periodic=*/false, k_spline_tolerance_mm);
   interpolate.Perform();
   if (!interpolate.IsDone()) {
@@ -524,8 +524,7 @@ core::Result<std::unique_ptr<port::Solid>> build_revolve(const port::RevolveProf
   }
   BRepBuilderAPI_MakeFace face(polygon.Wire(), /*OnlyPlane=*/true);
   if (!face.IsDone()) {
-    return core::fail(core::ErrorCode::geometry_failed, "profile is not a planar face",
-                      "profile");
+    return core::fail(core::ErrorCode::geometry_failed, "profile is not a planar face", "profile");
   }
   BRepPrimAPI_MakeRevol revol(face.Face(), gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)),
                               2.0 * std::numbers::pi);
@@ -540,15 +539,14 @@ core::Result<std::unique_ptr<port::Solid>> build_pattern(const TopoDS_Shape& bas
                                                          const TopoDS_Shape& item,
                                                          std::size_t count) {
   if (count < 1) {
-    return core::fail(core::ErrorCode::geometry_failed, "a pattern needs at least 1 copy",
-                      "count");
+    return core::fail(core::ErrorCode::geometry_failed, "a pattern needs at least 1 copy", "count");
   }
   NCollection_List<TopoDS_Shape> tools;
   for (std::size_t k = 0; k < count; ++k) {
     gp_Trsf rotation;
-    rotation.SetRotation(gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)),
-                         2.0 * std::numbers::pi * static_cast<double>(k) /
-                             static_cast<double>(count));
+    rotation.SetRotation(
+        gp_Ax1(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0)),
+        2.0 * std::numbers::pi * static_cast<double>(k) / static_cast<double>(count));
     BRepBuilderAPI_Transform copy(item, rotation, /*Copy=*/true);
     if (!copy.IsDone()) {
       return core::fail(core::ErrorCode::geometry_failed, "pattern copy failed",

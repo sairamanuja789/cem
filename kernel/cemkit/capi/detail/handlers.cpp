@@ -21,6 +21,7 @@
 #include "cemkit/geometry/occt/occt_backend.hpp"
 #include "cemkit/geometry/port/backend.hpp"
 #include "cemkit/physics/air.hpp"
+#include "cemkit/product/geometry_json.hpp"
 #include "cemkit/product/products.hpp"
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/catalogue.hpp"
@@ -107,7 +108,8 @@ Json evaluate_case(const Json& c, const product::Operations& operations) {
   if (operation == nullptr) {
     throw BadRequest{"function", "unknown function: " + fn};
   }
-  auto r = (*operation)(c);
+  const geometry::occt::OcctBackend backend;
+  auto r = (*operation)(c, product::OperationContext{.geometry = backend});
   if (!r) {
     return Json{{"error", error_json(r.error())}};
   }
@@ -219,51 +221,6 @@ port::TestSolidParams solid_params_of(const Json& request) {
   return params;
 }
 
-// RFC 4648 base64 (standard alphabet, with padding), for export bytes in a JSON response.
-std::string base64(std::string_view bytes) {
-  static constexpr std::string_view k_alphabet =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  std::string out;
-  out.reserve((bytes.size() + 2) / 3 * 4);
-  std::size_t i = 0;
-  for (; i + 2 < bytes.size(); i += 3) {
-    const auto n = (static_cast<unsigned>(static_cast<unsigned char>(bytes[i])) << 16U) |
-                   (static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 1])) << 8U) |
-                   static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 2]));
-    out += k_alphabet[(n >> 18U) & 63U];
-    out += k_alphabet[(n >> 12U) & 63U];
-    out += k_alphabet[(n >> 6U) & 63U];
-    out += k_alphabet[n & 63U];
-  }
-  if (i < bytes.size()) {
-    auto n = static_cast<unsigned>(static_cast<unsigned char>(bytes[i])) << 16U;
-    const bool two = i + 1 < bytes.size();
-    if (two) {
-      n |= static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 1])) << 8U;
-    }
-    out += k_alphabet[(n >> 18U) & 63U];
-    out += k_alphabet[(n >> 12U) & 63U];
-    out += two ? k_alphabet[(n >> 6U) & 63U] : '=';
-    out += '=';
-  }
-  return out;
-}
-
-port::ExportRequest export_request_of(const Json& e) {
-  const std::string format = text(e, "format");
-  if (format == "step") {
-    return port::ExportRequest{.format = port::ExportFormat::step, .tessellation = std::nullopt};
-  }
-  if (format == "stl") {
-    return port::ExportRequest{.format = port::ExportFormat::stl,
-                               .tessellation = port::Tessellation{
-                                   .linear_deflection = length_of(number(e, "linear_deflection")),
-                                   .angular_deflection = number(e, "angular_deflection") *
-                                                         isq::angular_measure[si::radian]}};
-  }
-  throw BadRequest{"format", "unknown export format: " + format};
-}
-
 core::Result<spec::Spec> compile_spec(const Json& request, const Products& p) {
   bool autonomous = false;
   if (request.contains("autonomous_mode")) {
@@ -334,7 +291,8 @@ core::Result<Json> feasibility(const Json& request) {
   if (request.contains("range")) {
     c["range"] = request["range"];
   }
-  auto r = (*operation)(c);
+  const geometry::occt::OcctBackend backend;
+  auto r = (*operation)(c, product::OperationContext{.geometry = backend});
   if (!r) {
     return std::unexpected(r.error());
   }
@@ -368,77 +326,42 @@ core::Result<Json> l0_batch(const Json& request) {
 
 core::Result<Json> geometry_smoke(const Json& request) {
   const port::TestSolidParams params = solid_params_of(request);
-  std::vector<port::ExportRequest> exports;
-  if (request.contains("exports")) {
-    if (!request["exports"].is_array()) {
-      throw BadRequest{"exports", "must be an array: exports"};
-    }
-    for (const auto& e : request["exports"]) {
-      exports.push_back(export_request_of(e));
-    }
-  }
+  const product::ExportOptions options = product::export_options_of(request);
   const geometry::occt::OcctBackend backend;
   auto solid = backend.build_test_solid(params);
   if (!solid) {
     return std::unexpected(solid.error());
   }
-  auto validity = backend.check_validity(**solid);
-  auto topology = backend.topology(**solid);
-  auto mass = backend.mass_properties(**solid);
-  if (!validity) {
-    return std::unexpected(validity.error());
+  auto report = product::solid_json(backend, **solid, options);
+  if (!report) {
+    return std::unexpected(report.error());
   }
-  if (!topology) {
-    return std::unexpected(topology.error());
-  }
-  if (!mass) {
-    return std::unexpected(mass.error());
-  }
-  bool include_data = false;
-  if (request.contains("include_data")) {
-    if (!request["include_data"].is_boolean()) {
-      throw BadRequest{"include_data", "must be a boolean: include_data"};
-    }
-    include_data = request["include_data"].get<bool>();
-  }
-  Json files = Json::array();
-  for (const auto& e : exports) {
-    auto bytes = backend.export_bytes(**solid, e);
-    if (!bytes) {
-      return std::unexpected(bytes.error());
-    }
-    Json file{{"format", std::string{port::extension(e.format)}},
-              {"sha256", core::sha256_hex(*bytes)},
-              {"size_bytes", bytes->size()}};
-    if (include_data) {
-      file["data_base64"] = base64(*bytes);
-    }
-    files.push_back(std::move(file));
-  }
-  const auto& v = *validity;
-  const auto& t = *topology;
-  const auto& m = *mass;
   Json out = versions(products());
   out["backend"] = std::string{backend.name()};
-  out["validity"] = Json{{"ok", v.ok()},
-                         {"brep_valid", v.brep_valid},
-                         {"closed", v.closed},
-                         {"manifold", v.manifold},
-                         {"self_intersection_free", v.self_intersection_free},
-                         {"free_edges", v.free_edges},
-                         {"non_manifold_edges", v.non_manifold_edges}};
-  out["topology"] = Json{{"solids", t.solids},
-                         {"shells", t.shells},
-                         {"faces", t.faces},
-                         {"edges", t.edges},
-                         {"vertices", t.vertices}};
-  out["mass_properties"] =
-      Json{{"volume", m.volume.numerical_value_in(mp_units::cubic(si::metre))},
-           {"area", m.area.numerical_value_in(mp_units::square(si::metre))},
-           {"centroid", Json::array({m.centroid[0].numerical_value_in(si::metre),
-                                     m.centroid[1].numerical_value_in(si::metre),
-                                     m.centroid[2].numerical_value_in(si::metre)})}};
-  out["exports"] = std::move(files);
+  for (auto& [key, value] : report->items()) {
+    out[key] = std::move(value);
+  }
+  return out;
+}
+
+// A product operation by name ({"operation", ...the operation's case}) with this library's geometry
+// backend (ADR-015 rule 5).
+core::Result<Json> product_operation(const Json& request) {
+  const std::string name = text(request, "operation");
+  const Products p = products();
+  const product::Operation* operation = p.operations.find(name);
+  if (operation == nullptr) {
+    throw BadRequest{"operation", "unknown operation: " + name};
+  }
+  const geometry::occt::OcctBackend backend;
+  auto r = (*operation)(request, product::OperationContext{.geometry = backend});
+  if (!r) {
+    return std::unexpected(r.error());
+  }
+  Json out = versions(p);
+  out["backend"] = std::string{backend.name()};
+  out["operation"] = name;
+  out["result"] = std::move(*r);
   return out;
 }
 

@@ -1,6 +1,6 @@
 {
  "body": {
-  "abi_version": "0.2.0",
+  "abi_version": "0.3.0",
   "inputs": {
    "d_tip": {
     "from": [

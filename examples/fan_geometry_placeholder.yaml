@@ -1,0 +1,18 @@
+# GEOMETRY TEST PARAMETERS - NOT A DESIGN. NO PERFORMANCE IS IMPLIED (CLAUDE.md rules 7 and 9).
+# `cemkit geometry fan examples/fan_geometry_placeholder.yaml --out DIR` builds a ducted fan rotor
+# and duct from these values to show the geometry recipe (ADR-015 M3). Only the duct size comes
+# from the v1 spec (examples/axial_120.yaml: nominal_size 120 mm as duct_inner_diameter,
+# tip_clearance_min 0.5 mm, owner decision D6: tip radius = 60 - 0.5 mm). Every other value is a
+# placeholder chosen to make a plausible-looking 120 mm fan, not a sizing result: blade count, hub,
+# chords, stagger, camber and thickness must come from the owner or, later, from the axial L1 model.
+# Units: metres and radians.
+blade_count: 7                # placeholder
+hub_radius: 0.020             # placeholder (40 mm hub)
+hub_length: 0.025             # placeholder (envelope.depth_min is 25 mm)
+duct_inner_radius: 0.060      # 120 mm duct inner diameter (v1 spec)
+duct_wall: 0.002              # placeholder
+duct_length: 0.030            # placeholder (within envelope depth 25-40 mm)
+stations:                     # circular-arc cambered plates; stagger from the hub axis
+  - {radius: 0.017, chord: 0.020, stagger: 0.7854, camber: 0.0015, thickness: 0.0012}  # inside the hub
+  - {radius: 0.038, chord: 0.018, stagger: 1.0123, camber: 0.0015, thickness: 0.0012}
+  - {radius: 0.0595, chord: 0.016, stagger: 1.1519, camber: 0.0012, thickness: 0.0012}  # tip (D6)

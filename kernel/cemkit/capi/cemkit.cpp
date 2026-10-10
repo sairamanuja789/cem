@@ -111,6 +111,10 @@ cemkit_status cemkit_geometry_smoke(const char* request_json, char** out_json) {
   return call(&cemkit::capi::detail::geometry_smoke, request_json, out_json);
 }
 
+cemkit_status cemkit_product_operation(const char* request_json, char** out_json) {
+  return call(&cemkit::capi::detail::product_operation, request_json, out_json);
+}
+
 void cemkit_free(char* json) {
   // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory): C ABI ownership
   std::free(json);

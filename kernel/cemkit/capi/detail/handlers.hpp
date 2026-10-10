@@ -25,5 +25,6 @@ using BadRequest = product::BadRequest;
 [[nodiscard]] core::Result<Json> feasibility(const Json& request);
 [[nodiscard]] core::Result<Json> l0_batch(const Json& request);
 [[nodiscard]] core::Result<Json> geometry_smoke(const Json& request);
+[[nodiscard]] core::Result<Json> product_operation(const Json& request);
 
 }  // namespace cemkit::capi::detail

@@ -3,9 +3,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 #include <memory>
 #include <string_view>
 #include <nlohmann/json.hpp>
+#include <optional>
 
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"
@@ -54,6 +56,22 @@ fans::Duty l0_001_duty() {
 }
 
 const auto k_omega = 209.43951023931953 * isq::angular_velocity[si::radian / si::second];
+
+// The derived tip diameter, after REQUIREs that it exists. clang-tidy cannot see through REQUIRE,
+// so the value is read with value_or: a missing value becomes NaN with no rule and fails every
+// CHECK on it.
+axial::DerivedTipDiameter require_tip(
+    const core::Result<std::optional<axial::DerivedTipDiameter>>& tip) {
+  REQUIRE(tip.has_value());
+  REQUIRE(tip->has_value());
+  return tip.value_or(std::nullopt)
+      .value_or(axial::DerivedTipDiameter{
+          .value = core::Length{std::numeric_limits<double>::quiet_NaN() * isq::length[si::metre]},
+          .provenance = core::Provenance::unknown,
+          .provisional = false,
+          .rule = {},
+          .from = {}});
+}
 
 }  // namespace
 
@@ -132,10 +150,7 @@ TEST_CASE("every other family operation is not implemented, never a number", "[F
 
 TEST_CASE("D6: the rotor tip diameter is the duct diameter minus twice the spec's tip clearance",
           "[AX-001][AX-009][SEL-004]") {
-  const auto tip = axial::rotor_tip_diameter(compile(sized_spec()));
-  REQUIRE(tip.has_value());
-  REQUIRE(tip->has_value());
-  const auto& d = **tip;
+  const auto d = require_tip(axial::rotor_tip_diameter(compile(sized_spec())));
   // 0.120 m - 2 x 0.0005 m = 0.119 m, the d_tip of the verified hand calculation l0_001.
   CHECK_THAT(d.value.numerical_value_in(si::metre), Catch::Matchers::WithinRel(0.119, 1e-12));
   CHECK(d.provenance == core::Provenance::default_value);
@@ -147,11 +162,9 @@ TEST_CASE("D6: the rotor tip diameter is the duct diameter minus twice the spec'
 
 TEST_CASE("D6: feasibility computes the tip-speed check from the spec-derived tip diameter",
           "[AX-001][AX-009][SEL-004]") {
-  const auto tip = axial::rotor_tip_diameter(compile(sized_spec()));
-  REQUIRE(tip.has_value());
-  REQUIRE(tip->has_value());
-  const auto report = axial::check_feasibility(l0_001_duty(), cemkit::physics::default_air(),
-                                               k_omega, (*tip)->value);
+  const auto tip = require_tip(axial::rotor_tip_diameter(compile(sized_spec())));
+  const auto report =
+      axial::check_feasibility(l0_001_duty(), cemkit::physics::default_air(), k_omega, tip.value);
   REQUIRE(report.has_value());
   REQUIRE(report->checks.size() == 3);
   CHECK(report->checks[1].limit == "incompressible_tip_speed");
@@ -202,13 +215,11 @@ TEST_CASE("a stated rotor tip diameter is used as given, without a clearance",
   auto doc = sized_spec();
   doc["product"]["size_reference"] = {{"value", "rotor_tip_diameter"}, {"provenance", "user"}};
   doc["product"].erase("tip_clearance_min");
-  const auto tip = axial::rotor_tip_diameter(compile(doc));
-  REQUIRE(tip.has_value());
-  REQUIRE(tip->has_value());
-  CHECK_THAT((*tip)->value.numerical_value_in(si::metre), Catch::Matchers::WithinRel(0.12, 1e-12));
-  CHECK((*tip)->provenance == core::Provenance::user);
-  CHECK(!(*tip)->provisional);
-  CHECK((*tip)->rule == axial::k_tip_stated_rule);
+  const auto tip = require_tip(axial::rotor_tip_diameter(compile(doc)));
+  CHECK_THAT(tip.value.numerical_value_in(si::metre), Catch::Matchers::WithinRel(0.12, 1e-12));
+  CHECK(tip.provenance == core::Provenance::user);
+  CHECK(!tip.provisional);
+  CHECK(tip.rule == axial::k_tip_stated_rule);
 }
 
 TEST_CASE("D6: a non-positive nominal size is rejected on its own field", "[AX-001]") {

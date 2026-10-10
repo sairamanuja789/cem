@@ -1,0 +1,77 @@
+id: l1_002
+title: Loss-free free-vortex blade sections at hub, mid and tip for the TRIAL duty
+requirements: [PHY-001, PHY-005]
+model: fans.axial.free_vortex@0.1.0
+status: proposed
+source: >
+  Free-vortex swirl c_theta2 = dp_t / (rho omega r) from Euler's equation with c_theta1 = 0 and the
+  same dp_t at every radius (Dixon & Hall, Fluid Mechanics and Thermodynamics of Turbomachinery,
+  7th ed., ch. 6; to be confirmed); velocity triangles by trigonometry; circular-arc camber height
+  h = (c/2) tan(theta/4) (geometry); reaction R = 1 - c_theta2/(2U) (Dixon & Hall ch. 5, c_x
+  constant, c_theta1 = 0; to be confirmed).
+inputs_note: >
+  TRIAL duty (ADR-016), not a requirement: Q = 0.028 m3/s, dp_t = 21.6 Pa (rounded from the
+  18 Pa fan static of examples/axial_120_trial.yaml), omega = 2000 rpm, r_tip = 0.0595 m (D6),
+  r_hub = 0.020 m (placeholder), chords 20 mm at the hub and 16 mm at the tip (placeholders, linear),
+  thickness 1.2 mm, 3 stations, embed 3 mm; rho = 1.18 kg/m3 (AX-005).
+working: |
+  A    = pi (0.0595^2 - 0.020^2) = pi x 0.00314025          = 0.009865386330 m2
+  c_x  = 0.028 / 0.009865386330                              = 2.838206134 m/s
+  rho omega = 1.18 x 209.4395102                             = 247.1386221 kg/(m3 s)
+  K    = dp_t / (rho omega) = 21.6 / 247.1386221             = 0.08740034163 m2/s  (= r c_theta2)
+
+  Hub, r = 0.020 m, c = 0.020 m:
+  U        = 209.4395102 x 0.020                             = 4.188790205 m/s
+  c_theta2 = 0.08740034163 / 0.020                           = 4.370017082 m/s
+  beta1    = atan2(4.188790205, 2.838206134)                 = 0.9752819628 rad (55.88 deg)
+  beta2    = atan2(4.188790205 - 4.370017082, 2.838206134)
+           = atan2(-0.181226877, 2.838206134)                = -0.06376604523 rad (-3.65 deg)
+  theta    = 0.9752819628 + 0.06376604523                    = 1.039048008 rad (59.53 deg)
+  xi       = (0.9752819628 - 0.06376604523) / 2              = 0.4557579588 rad; recipe stagger -xi
+  h        = 0.010 x tan(1.039048008 / 4) = 0.010 x 0.2657667 = 0.002657667 m
+  W1 = sqrt(2.838206^2 + 4.188790^2) = sqrt(8.055414 + 17.546164) = 5.059800 m/s
+  W2 = sqrt(8.055414 + 0.032843) = 2.843986 m/s;  W2/W1      = 0.5620770
+  R  = 1 - 4.370017082 / (2 x 4.188790205)                   = 0.4783676
+
+  Mid, r = 0.03975 m, c = 0.018 m:
+  U = 8.325220532, c_theta2 = 0.08740034163 / 0.03975 = 2.198750733 m/s
+  beta1 = atan2(8.325220532, 2.838206134) = 1.242236401 rad; beta2 = atan2(6.126469799, 2.838206134)
+        = 1.136962503 rad; theta = 0.1052738985 rad; h = 0.009 x tan(0.02631847) = 0.000236921 m
+  Tip, r = 0.0595 m, c = 0.016 m:
+  U = 12.46165086, c_theta2 = 1.468913305 m/s; beta1 = 1.346860971 rad; beta2 = 1.318125154 rad;
+  theta = 0.02873581697 rad; h = 0.008 x tan(0.007183954) = 0.0000574726 m
+
+  Note: at the hub beta2 < 0 (the relative flow is turned past axial) and W2/W1 = 0.56: the free
+  vortex loads the placeholder 40 mm hub heavily at this duty. The model reports this; it applies
+  no limit (a de Haller limit needs a cited source).
+checks:
+  - function: free_vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.003}
+    expected:
+      axial_velocity: 2.83820613427152
+      stations:
+        - {radius: 0.017, embedded: true, camber: 0.0026576671733706658, recipe_stagger: -0.45575795876359787}
+        - {radius: 0.02, blade_speed: 4.1887902047863905, outlet_swirl: 4.370017081506279,
+           relative_inlet_angle: 0.9752819627563539, relative_outlet_angle: -0.0637660452291582,
+           camber_angle: 1.0390480079855122, recipe_stagger: -0.45575795876359787,
+           camber: 0.0026576671733706658, de_haller_ratio: 0.5620769960178094,
+           reaction: 0.4783676350616932}
+        - {radius: 0.03975, relative_inlet_angle: 1.2422364014281697,
+           relative_outlet_angle: 1.1369625029361965, camber: 0.00023692097619392274,
+           de_haller_ratio: 0.7676421262042015, reaction: 0.8679463970726964}
+        - {radius: 0.0595, outlet_swirl: 1.4689133047079932, relative_inlet_angle: 1.3468609711392965,
+           relative_outlet_angle: 1.3181251541697687, camber: 5.747262264778856e-05,
+           recipe_stagger: -1.3324930626545326, de_haller_ratio: 0.8883049548512303}
+    rel_tol: 1.0e-9
+  - function: free_vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.020}
+    expected_error: {code: out_of_validity, subject: embed_depth}
+  - function: free_vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 2,
+           embed_depth: 0.003}
+    expected_error: {code: out_of_validity, subject: stations}

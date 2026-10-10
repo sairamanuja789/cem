@@ -381,3 +381,57 @@ def test_geometry_fan_rejects_a_tip_outside_the_duct_naming_the_station(tmp_path
     result = invoke(tmp_path / "store", "geometry", "fan", str(path))
     assert result.exit_code != 0
     assert "stations[2].radius" in result.output
+
+
+TRIAL_SPEC = ROOT / "examples" / "axial_120_trial.yaml"
+TRIAL_DESIGN = ROOT / "examples" / "fan_design_trial.yaml"
+
+
+@pytest.mark.req("PHY-001")
+@pytest.mark.req("GEO-001")
+@pytest.mark.req("REP-001")
+def test_design_fan_builds_l1_sections_into_valid_parts(tmp_path: Path) -> None:
+    """Step 5 (ADR-016): the TRIAL spec's duty drives the free-vortex sections, which are built."""
+    store = tmp_path / "store"
+    assert invoke(store, "spec", "compile", str(TRIAL_SPEC)).exit_code == 0
+    result = invoke(
+        store, "design", "fan", "axial-120-trial", str(TRIAL_DESIGN), "--out", str(tmp_path / "o")
+    )
+    assert result.exit_code == 0, result.output
+    out = result.output
+    assert "[L1 predicted, fans.axial.free_vortex@0.1.0]" in out
+    assert "UNSOURCED" in out
+    assert "rotor: validity ok" in out and "duct: validity ok" in out
+    assert len(list((tmp_path / "o").iterdir())) == 4  # rotor and duct, STEP and STL
+    rows = [line.split() for line in out.splitlines() if line.startswith("   ")]
+    assert [float(r[0]) for r in rows[:1]] == [20.0]  # the hub station first, in mm
+    reproduced = invoke(store, "runs", "reproduce", "2")
+    assert reproduced.exit_code == 0, reproduced.output
+
+
+@pytest.mark.req("PHY-003")
+def test_design_fan_names_a_missing_design_parameter(tmp_path: Path) -> None:
+    store = tmp_path / "store"
+    assert invoke(store, "spec", "compile", str(TRIAL_SPEC)).exit_code == 0
+    params = cs.load_yaml(TRIAL_DESIGN.read_text(encoding="utf-8"))
+    assert isinstance(params, dict)
+    del params["chord_tip"]
+    path = tmp_path / "bad.json"
+    path.write_text(json.dumps(params), encoding="utf-8")
+    result = invoke(store, "design", "fan", "axial-120-trial", str(path))
+    assert result.exit_code != 0
+    assert "chord_tip" in result.output
+
+
+@pytest.mark.req("GEO-001")
+def test_the_fan_geometry_can_export_one_unpatterned_blade() -> None:
+    """M5 meshing needs one closed blade solid (root station included), not the fused rotor."""
+    from cemkit import kernel
+
+    params = cs.load_yaml(FAN_PLACEHOLDER.read_text(encoding="utf-8"))
+    response = kernel.product_operation(
+        {"operation": "ducted_fan_geometry", "args": params, "parts": ["blade"]}
+    )
+    (part,) = response["result"]["parts"]
+    assert part["name"] == "blade" and part["validity"]["ok"]
+    assert part["topology"]["solids"] == 1

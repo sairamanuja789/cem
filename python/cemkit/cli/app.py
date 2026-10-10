@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import os
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -73,9 +74,11 @@ app = typer.Typer(no_args_is_help=True, add_completion=False, help="cemkit CEM p
 spec_app = typer.Typer(no_args_is_help=True, help="Specs: compile and questions")
 runs_app = typer.Typer(no_args_is_help=True, help="Runs: show and reproduce")
 geometry_app = typer.Typer(no_args_is_help=True, help="Geometry checks")
+design_app = typer.Typer(no_args_is_help=True, help="L1 designs with geometry")
 app.add_typer(spec_app, name="spec")
 app.add_typer(runs_app, name="runs")
 app.add_typer(geometry_app, name="geometry")
+app.add_typer(design_app, name="design")
 
 
 class Failure(Exception):
@@ -501,6 +504,180 @@ def geometry_smoke(
     run_guarded(body)
 
 
+# --- design --------------------------------------------------------------------------------------
+
+DESIGN_PARAMS = (
+    "r_hub",
+    "chord_hub",
+    "chord_tip",
+    "thickness",
+    "stations",
+    "embed_depth",
+    "blade_count",
+    "hub_length",
+    "duct_wall",
+    "duct_length",
+)
+
+
+def si_field(compiled: Json, path: str) -> float | None:
+    field = compiled["fields"].get(path)
+    value = None if field is None else field["si_value"]
+    return None if value is None else float(value)
+
+
+def design_request(spec: Json, params: Json) -> tuple[Json, Json]:
+    """The L0 feasibility response of the spec and the free_vortex_design request built from it and
+    the stated design parameters (every length in m). Units come from the kernel's spec compiler
+    only (CLAUDE.md rule 4)."""
+    missing = [k for k in DESIGN_PARAMS if k not in params]
+    if missing:
+        raise Failure(f"the design parameters lack: {', '.join(missing)}")
+    feasibility = kernel.feasibility_for_spec(spec)
+    verdict = feasibility["report"]["verdict"]
+    if verdict == "infeasible":
+        raise Failure("the L0 feasibility gate rejects this duty; no design is attempted")
+    inputs = feasibility["inputs"]
+    for name in ("flow", "fan_total_pressure", "omega", "d_tip"):
+        if name not in inputs:
+            raise Failure(f"the spec gives no {name}; run cemkit feasibility for the reason")
+    compiled = kernel.spec_compile(spec)
+    clearance = si_field(compiled, "product.tip_clearance_min")
+    if clearance is None:
+        raise Failure("the spec gives no product.tip_clearance_min")
+    r_tip = inputs["d_tip"]["value"] / 2.0
+    air = {
+        key: value
+        for key, value in (
+            ("density", si_field(compiled, "air.density")),
+            ("temperature", si_field(compiled, "air.temperature")),
+        )
+        if value is not None
+    }
+    args = {
+        "flow": inputs["flow"]["value"],
+        "fan_total_pressure": inputs["fan_total_pressure"]["value"],
+        "omega": inputs["omega"]["value"],
+        "r_tip": r_tip,
+        **{k: params[k] for k in DESIGN_PARAMS[:6]},
+        "geometry": {
+            "blade_count": params["blade_count"],
+            "hub_length": params["hub_length"],
+            "duct_inner_radius": r_tip + clearance,
+            "duct_wall": params["duct_wall"],
+            "duct_length": params["duct_length"],
+        },
+    }
+    return feasibility, {"operation": "free_vortex_design", "args": args, "air": air}
+
+
+def design_fan_output(
+    spec: Json, params: Json, exports: list[Json]
+) -> tuple[Json, list[tuple[str, Json, bytes]]]:
+    """The recorded output of cemkit design fan (no versions, no file bytes) and the files."""
+    feasibility, request = design_request(spec, params)
+    design = kernel.product_operation(request)
+    geometry = kernel.product_operation(
+        {
+            "operation": "ducted_fan_geometry",
+            "args": design["result"]["value"]["geometry_args"],
+            "exports": exports,
+            "include_data": True,
+        }
+    )
+    geometry_output, files = fan_output(geometry)
+    output = {
+        "feasibility": without_versions(feasibility),
+        "design": without_versions(design),
+        "geometry": geometry_output,
+    }
+    return output, files
+
+
+def design_lines(output: Json) -> list[str]:
+    design = output["design"]["result"]
+    value = design["value"]
+    label = f"[{design['fidelity_label']}, {design['model']}]"
+    ml = value["mean_line"]
+    lines = [
+        f"design: free-vortex blade sections {label}",
+        "  loss-free, zero incidence and zero deviation (no loss or deviation data is sourced:",
+        "  UNSOURCED); every angle in degrees from the axial direction",
+        f"  axial velocity: {num(value['axial_velocity'])} m/s; mean line: flow coefficient "
+        f"{num(ml['flow_coefficient'])}, work coefficient {num(ml['work_coefficient'])}, "
+        f"de Haller {num(ml['de_haller_ratio'])}",
+        "  radius_mm  beta1  beta2  camber  stagger  chord_mm  camber_mm  de_Haller  reaction",
+    ]
+    for s in value["stations"]:
+        if s["embedded"]:
+            continue
+        lines.append(
+            f"  {s['radius'] * 1e3:9.2f} {math.degrees(s['relative_inlet_angle']):6.2f} "
+            f"{math.degrees(s['relative_outlet_angle']):6.2f} "
+            f"{math.degrees(s['camber_angle']):7.2f} "
+            f"{math.degrees(s['stagger_from_axis']):8.2f} {s['chord'] * 1e3:9.2f} "
+            f"{s['camber'] * 1e3:10.3f} {s['de_haller_ratio']:10.3f} {s['reaction']:9.3f}"
+        )
+    if any(s["relative_outlet_angle"] < 0.0 for s in value["stations"]):
+        lines.append(
+            "  note: beta2 < 0 at some stations (the relative flow is turned past axial); no limit"
+        )
+        lines.append("  is applied because a blade-loading limit needs a cited source (HI-026)")
+    return lines
+
+
+@design_app.command("fan")
+def design_fan(
+    spec_id: Annotated[str, typer.Argument(help="Recorded spec id (duty, speed, size)")],
+    params: Annotated[
+        Path, typer.Argument(help="Design parameters (JSON or YAML, m): hub, chords, counts")
+    ],
+    store: Annotated[Path, typer.Option(envvar=STORE_ENV, help="Store directory")] = Path(
+        DEFAULT_STORE
+    ),
+    revision: Annotated[int | None, typer.Option(help="Revision (default: latest)")] = None,
+    out: Annotated[
+        Path | None, typer.Option(help="Also write <part>-<sha256>.<ext> files to this directory")
+    ] = None,
+) -> None:
+    """L1 free-vortex design of a ducted axial rotor from a recorded spec and stated design
+    parameters, built as STEP and STL (PHY-001, GEO-001, GEO-002, ADR-016). Loss-free: no
+    efficiency, loss or deviation is applied, and nothing here is simulated or measured."""
+
+    def body() -> None:
+        loaded = load_spec_file(params)
+        exports = loaded.pop("exports", FAN_EXPORTS)
+        with store_at(store) as opened:
+            record = stored_spec(opened, spec_id, revision)
+            spec = record.document()
+            output, files = design_fan_output(spec, loaded, exports)
+            inputs = {"spec": spec, "params": loaded, "exports": exports}
+            run_id = record_run(opened, "design fan", inputs, output)
+            run = opened.run(run_id)
+            paths = []
+            for part, export, data in files:
+                name = f"{part}-{export['sha256']}.{export['format']}"
+                opened.record_artifact(run, data, name, MEDIA_TYPES[export["format"]])
+                where = write_named(out, name, data) if out is not None else None
+                paths.append((name, export["size_bytes"], where))
+        lines = [f"design fan of {spec_id} revision {record.revision}: run {run_id}"]
+        lines += [input_line(n, v) for n, v in output["feasibility"]["inputs"].items()]
+        lines.append(f"L0 feasibility: {VERDICT_TEXT[output['feasibility']['report']['verdict']]}")
+        lines += design_lines(output)
+        for part in output["geometry"]["result"]["parts"]:
+            v, m = part["validity"], part["mass_properties"]
+            lines.append(
+                f"{part['name']}: validity {'ok' if v['ok'] else 'FAILED'}, volume "
+                f"{num(m['volume'])} m3 (geometry, no fidelity label)"
+            )
+        lines.append("exports (content-hash names, stored as artifacts):")
+        for name, size, where in paths:
+            lines.append(f"  {name}  {size} bytes" + (f"  -> {where}" if where else ""))
+        emit(lines)
+
+    run_guarded(body)
+
+
 # --- runs ----------------------------------------------------------------------------------------
 
 
@@ -563,6 +740,8 @@ def recompute(command: Json) -> Json:
         return response
     if name == "geometry fan":
         return fan_output(kernel.product_operation(inputs))[0]
+    if name == "design fan":
+        return design_fan_output(inputs["spec"], inputs["params"], inputs["exports"])[0]
     raise Failure(f"cannot reproduce command {name!r}")
 
 

@@ -6,7 +6,7 @@ Every line in `data/`, `kernel/`, `python/` and `schemas/` (tests excluded) with
 the UNSOURCED marker (CLAUDE.md rule 7). Some lines define or explain the marker;
 the rest are values or models still waiting for a cited source.
 
-19 line(s) in 11 file(s).
+23 line(s) in 14 file(s).
 
 ## `data/fans/family_ranges.yaml`
 
@@ -41,13 +41,26 @@ the rest are values or models still waiting for a cited source.
 - `// - feasibility: the T08 L0 gate with this family's specific-speed range, which is UNSOURCED`
 - `// The family's specific-speed range for the T08 gate: UNSOURCED, no bounds (CLAUDE.md rule 7).`
 
+## `kernel/products/fans/families/axial_ducted/free_vortex.hpp`
+
+- `// sourced, UNSOURCED): camber angle theta = beta1 - beta2, stagger from the axis`
+
 ## `kernel/products/fans/families/axial_ducted/mean_line.hpp`
 
 - `// sourced (UNSOURCED), so the swirl is the least that delivers dp_t and every output is ideal.`
 
+## `python/cemkit/cli/app.py`
+
+- `"  UNSOURCED); every angle in degrees from the axial direction",`
+
 ## `python/cemkit/reference/crosscheck.py`
 
 - `"source": gate.UNSOURCED,`
+
+## `python/cemkit/reference/fans/axial/free_vortex.py`
+
+- `no deviation rule is sourced, UNSOURCED) has camber angle theta = beta1 - beta2 and stagger`
+- `de_haller_ratio: float  # W2 / W1 (reported only: a limit on it is empirical, UNSOURCED)`
 
 ## `python/cemkit/reference/fans/axial/mean_line.py`
 

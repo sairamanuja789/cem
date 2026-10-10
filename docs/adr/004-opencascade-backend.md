@@ -54,7 +54,11 @@ The overlay differs from the pinned port only in:
 - release build only (`VCPKG_BUILD_TYPE release`); debug presets link the release libraries;
 - patches: the five upstream vcpkg patches plus `0006-incallocator-align-allocations.patch`,
   which aligns `NCollection_IncAllocator` allocations to `alignof(std::max_align_t)` to fix UBSan
-  alignment violations in `NCollection_TListNode` (HI-011, owner decision D1).
+  alignment violations in `NCollection_TListNode` (HI-011, owner decision D1). Per owner decision D1,
+  the configuration route was investigated first: OCCT 8.0.0 `CMakeLists.txt:93` provides
+  `USE_MMGR_TYPE`, which already defaults to `NATIVE`. However, `NCollection_IncAllocator` is an
+  independent pool allocator invoked regardless of the chosen memory manager, so no configuration
+  option removes the misaligned allocation path, making patch 0006 necessary.
 
 The pin is exact: the overlay fixes the tag and SHA512, so a baseline bump does not change OCCT.
 Changing OCCT means editing the overlay (and this ADR).

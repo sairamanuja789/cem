@@ -12,9 +12,24 @@ namespace si = mp_units::si;
 namespace isq = mp_units::isq;
 using product::Json;
 
+namespace {
+
+// A labelled quantity with the words and unit the report prints it with (ADR-015: product
+// wording lives in the product, so the CLI stays product-neutral). Additive members.
+Json with_text(Json quantity, const char* label, const char* unit) {
+  quantity["label"] = label;
+  quantity["unit"] = unit;
+  return quantity;
+}
+
+}  // namespace
+
 product::Json duty_json(const LabelledDuty& duty) {
-  return Json{{"flow", product::labelled_json(duty.flow, mp_units::cubic(si::metre) / si::second)},
-              {"fan_total_pressure", product::labelled_json(duty.pressure, si::pascal)}};
+  return Json{
+      {"flow", with_text(product::labelled_json(duty.flow, mp_units::cubic(si::metre) / si::second),
+                         "flow", "m3/s")},
+      {"fan_total_pressure",
+       with_text(product::labelled_json(duty.pressure, si::pascal), "fan total pressure", "Pa")}};
 }
 
 product::Json report_json(const FeasibilityReport& report) {
@@ -29,7 +44,8 @@ product::Json report_json(const FeasibilityReport& report) {
   }
   Json ws = nullptr;
   if (report.specific_speed) {
-    ws = product::labelled_json(*report.specific_speed, mp_units::one);
+    ws = with_text(product::labelled_json(*report.specific_speed, mp_units::one), "specific speed",
+                   "(1)");
   }
   return Json{{"verdict", std::string{to_string(report.verdict())}},
               {"specific_speed", ws},

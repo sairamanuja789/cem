@@ -80,7 +80,8 @@ Request: `{"flow", "fan_total_pressure", ["omega"], ["d_tip"], ["air"], "range":
 "specific_speed_min", "specific_speed_max", "source"}}`. Response `report`: `verdict`
 (`infeasible`, `unconfirmed`, `confirmed`), `specific_speed` (labelled or null) and `checks`
 (`limit`, `status`, `message`, `violation`, `nearest_feasible` with labelled `flow` and
-`fan_total_pressure`). Rules: `docs/models/fans/feasibility.md`.
+`fan_total_pressure`). Since 0.3.0 the specific speed and each nearest-duty quantity also carry
+`label` and `unit`, the words the product prints them with. Rules: `docs/models/fans/feasibility.md`.
 
 Spec form (UC-03): `{"spec": <spec document>}`. The kernel compiles the spec and takes the duty
 from `product.duty.flow` and `product.duty.pressure`, the speed from `product.rotational_speed`

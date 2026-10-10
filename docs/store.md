@@ -29,7 +29,7 @@ with open_store(Path("runs/store")) as store:  # creates and migrates if needed
 <root>/artifacts/tmp/              files being written
 ```
 
-## Schema (migration 0001)
+## Schema (migrations 0001 and 0002)
 
 | Table | One row per | Key columns |
 | --- | --- | --- |
@@ -42,6 +42,18 @@ with open_store(Path("runs/store")) as store:  # creates and migrates if needed
 | `failures` | classified failure | `code` (REL-002, from `schemas/cemkit/v1/error-codes.json`), `message`, `details` |
 | `artifacts` | use of an artifact | `sha256`, `size_bytes`, `name`, `media_type` |
 | `schema_version` | applied migration | `version`, `name`, `sha256` of the file, `applied_at` |
+
+### Job queue (migration 0002, T13)
+
+| Table | One row per | Key columns |
+| --- | --- | --- |
+| `job_specs` | job a worker runs (1:1 with `jobs`) | `resource_class` (`light`/`heavy`), `max_retries`, `payload` |
+| `job_leases` | attempt start or hand-over | `job_pk`, `worker_id`, `attempt`, `acquired_at`, `expires_at` (Unix seconds) |
+| `job_heartbeats` | lease renewal | `lease_pk`, `at`, `expires_at` |
+| `job_attempts` | end of a lease | `outcome` (`done`, `failed`, `lost`, `handed_over`), `code`, `reason`, `peak_rss_bytes`, `cpu_seconds`, `wall_seconds` |
+| `job_artifacts` | file a job published | `job_pk`, `artifact_pk`, `role` (`output`, `manifest`, `log`) |
+
+The view `job_status` gives each job's newest status. See [orchestration.md](orchestration.md).
 
 Every table except `runs` and `schema_version` has `run_pk NOT NULL REFERENCES runs`, so every record
 reaches the STORE-002 fields of the run that wrote it. Every row also has `recorded_at` (UTC, ISO 8601).

@@ -1051,7 +1051,7 @@ TEST_CASE("invalid UTF-8 in a text array does not throw", "[SPEC-001]") {
 
 TEST_CASE("compiler rejects temperature-specific unit basis with spec_rejected naming field",
           "[SPEC-003]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler(fixture_options());
   json doc = base_valid_spec();
   doc["product"]["duty"]["pressure"]["unit"] = "inH2O@60F";
   const auto res = compiler.compile(doc);

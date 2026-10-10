@@ -1,8 +1,9 @@
-# Fan CEM — instructions for Claude Code
+# CEM platform — instructions for Claude Code
 
-A Computational Engineering Model (CEM) that turns a reference image plus stated
-requirements into a fan design whose performance is computed, checked and traceable.
-First product: 120 mm ducted axial fan. Later: wall, pedestal, ceiling, centrifugal fans.
+A Computational Engineering Model (CEM) platform that turns a reference image plus stated
+requirements into a design whose performance is computed, checked and traceable.
+First product: fans — 120 mm ducted axial fan. Later: wall, pedestal, ceiling, centrifugal fans.
+The platform core names no product (ADR-015).
 
 ## Sources of truth — read the relevant parts before every task
 - `docs/requirements.md` — the requirements spec. Requirement IDs (e.g. SPEC-004) are binding.

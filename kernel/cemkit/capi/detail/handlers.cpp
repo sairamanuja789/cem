@@ -338,7 +338,7 @@ core::Result<Json> geometry_smoke(const Json& request) {
   }
   Json out = versions(products());
   out["backend"] = std::string{backend.name()};
-  for (auto& [key, value] : report->items()) {
+  for (const auto& [key, value] : report->items()) {
     out[key] = std::move(value);
   }
   return out;

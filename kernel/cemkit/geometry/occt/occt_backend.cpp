@@ -463,7 +463,7 @@ core::Result<std::unique_ptr<port::Solid>> one_valid_solid(const TopoDS_Shape& s
 
 template <class Boolean>
 core::Result<std::unique_ptr<port::Solid>> run_boolean(const TopoDS_Shape& a,
-                                                       NCollection_List<TopoDS_Shape> tools,
+                                                       const NCollection_List<TopoDS_Shape>& tools,
                                                        const std::string& subject) {
   Boolean op;
   NCollection_List<TopoDS_Shape> arguments;

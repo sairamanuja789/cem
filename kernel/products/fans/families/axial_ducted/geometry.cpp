@@ -227,7 +227,7 @@ core::Status register_operations(product::Operations& operations) {
             return std::unexpected(report.error());
           }
           Json part{{"name", name}};
-          for (auto& [key, value] : report->items()) {
+          for (const auto& [key, value] : report->items()) {
             part[key] = std::move(value);
           }
           parts.push_back(std::move(part));

@@ -214,8 +214,9 @@ class GeometryBackend {
   [[nodiscard]] virtual core::Result<EdgeSelection> select(const Solid& solid,
                                                            const EdgesOnCylinder& rule) const = 0;
   // Rounds the edges a rule selects with a constant radius; no selected edge is geometry_failed.
-  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> fillet(
-      const Solid& solid, const EdgesOnCylinder& rule, core::Length radius) const = 0;
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> fillet(const Solid& solid,
+                                                                    const EdgesOnCylinder& rule,
+                                                                    core::Length radius) const = 0;
 
   // GEO-004: the exported file's bytes. Identical solids and requests give identical bytes.
   [[nodiscard]] virtual core::Result<std::string> export_bytes(

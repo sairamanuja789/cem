@@ -7,8 +7,8 @@ add_subdirectory(cemkit/spec)
 add_subdirectory(cemkit/physics)
 add_subdirectory(cemkit/product)
 
-
-add_subdirectory(products/fans/common)
+# Product domains.
+add_subdirectory(products/fans)
 
 add_subdirectory(testing)
 

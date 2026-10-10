@@ -25,7 +25,7 @@ from cemkit.reference.fans.common.feasibility import (
     Report,
     check_feasibility,
 )
-from cemkit.reference.fans.common.l0 import FanStaticPressure
+from cemkit.reference.fans.common.l0 import FanStaticPressure, FanTotalPressure
 from cemkit.reference.platform.air import default_air
 from cemkit.reporting.claims import BannedClaim, banned_claims, check_claims
 from cemkit.store import open_store
@@ -34,6 +34,9 @@ ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples" / "axial_120.yaml"
 RANGES = ROOT / "data" / "fans" / "family_ranges.yaml"
 runner = CliRunner()
+# Owner decision D6 (provisional): D_tip = D_duct - 2 c_tip with the example's nominal_size 120 mm
+# (duct_inner_diameter) and tip_clearance_min 0.5 mm (AX-001, AX-009).
+D6_TIP = 0.12 - 2.0 * 0.0005
 
 
 def invoke(store: Path, *args: str) -> Any:
@@ -139,8 +142,8 @@ def test_feasibility_matches_the_reference_and_reports_range_unsourced(tmp_path:
     assert result.exit_code == 0, result.output
     out = result.output
 
-    # The reference: static to total through the 0.12 m duct, then the gate (range UNSOURCED, no
-    # tip diameter), with the spec's air (AX-005 defaults).
+    # The reference: static to total through the 0.12 m duct, then the gate (range UNSOURCED, tip
+    # diameter from owner decision D6), with the spec's air (AX-005 defaults).
     air = default_air()
     total = l0.fan_total_from_static(FanStaticPressure(120.0), 0.05, 0.12, air)
     assert isinstance(total, l0.Derived)
@@ -149,6 +152,7 @@ def test_feasibility_matches_the_reference_and_reports_range_unsourced(tmp_path:
         air,
         FamilyRange("fans.axial_ducted", None, None, UNSOURCED),
         omega=209.43951023931953,
+        d_tip=D6_TIP,
     )
     assert isinstance(report, Report) and report.specific_speed is not None
     numbers = {
@@ -162,6 +166,36 @@ def test_feasibility_matches_the_reference_and_reports_range_unsourced(tmp_path:
         assert f"  {limit}: {status}:" in out
     assert "range unsourced: no cited specific-speed range for fans.axial_ducted" in out
     assert f"verdict: {report.verdict}" in out
+
+
+@pytest.mark.req("SEL-004")
+@pytest.mark.req("AX-001")
+@pytest.mark.req("AX-009")
+def test_feasibility_of_the_example_computes_the_tip_speed_check(tmp_path: Path) -> None:
+    # examples/axial_120.yaml with a duty point (its speed, 2000 rpm, is already stated): the tip
+    # diameter comes from the spec by owner decision D6, so the tip-speed check is computed.
+    store = tmp_path / "store"
+    spec_file = write(tmp_path, "rev2.yaml", with_duty(2, 150.0, "fan_total"))
+    assert invoke(store, "spec", "compile", str(spec_file)).exit_code == 0
+    result = invoke(store, "feasibility", "axial-120")
+    assert result.exit_code == 0, result.output
+    out = result.output
+    tip = re.search(r"  d_tip: (\S+) m  \[default, provisional\] D_tip = D_duct - 2 c_tip ", out)
+    assert tip is not None, out
+    assert float(tip.group(1)) == pytest.approx(D6_TIP, rel=1e-12)
+    assert "(from product.nominal_size, product.size_reference, product.tip_clearance_min)" in out
+    report = check_feasibility(
+        Duty(0.05, FanTotalPressure(150.0)),
+        default_air(),
+        FamilyRange("fans.axial_ducted", None, None, UNSOURCED),
+        omega=209.43951023931953,
+        d_tip=D6_TIP,
+    )
+    assert isinstance(report, Report)
+    tip_check = next(c for c in report.checks if c.limit == "incompressible_tip_speed")
+    assert tip_check.status == "pass"
+    assert f"  incompressible_tip_speed: pass: {tip_check.message}" in out
+    assert "needs the rotational speed and the rotor tip diameter" not in out
 
 
 @pytest.mark.req("SEL-004")

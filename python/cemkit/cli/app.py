@@ -275,6 +275,13 @@ INPUT_UNITS = {"flow": "m3/s", "fan_total_pressure": "Pa", "omega": "rad/s"}
 def input_line(name: str, value: Json) -> str:
     if "fidelity" in value:  # computed by the kernel (for example a converted pressure)
         return f"  {name}: {labelled(value, value['unit'])} derived: {value['rule']}"
+    if "rule" in value:  # taken from the spec by a stated rule (for example D6's tip diameter)
+        flags = value["provenance"] + (", provisional" if value["provisional"] else "")
+        sources = ", ".join(value["from"])
+        return (
+            f"  {name}: {num(value['value'])} {value['unit']}  [{flags}] {value['rule']}"
+            f"  (from {sources})"
+        )
     return f"  {name}: {num(value['value'])} {value['unit']}  (from {value['from']})"
 
 

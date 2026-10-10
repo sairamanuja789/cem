@@ -273,3 +273,41 @@ TEST_CASE("feasibility from a spec maps the duty and uses the family hook", "[SE
   CHECK(i.body["report"]["verdict"] == "infeasible");
   CHECK(i.body["report"]["checks"][0]["violation"]["details"]["bounds"] == "(0, 1418.55]");
 }
+
+TEST_CASE("feasibility from a spec computes the tip-speed check from the D6 tip diameter",
+          "[SEL-004][AX-001][AX-009]") {
+  json spec = minimal_spec();
+  spec["product"]["duty"] = {{"flow",
+                              {{"value", 0.05},
+                               {"unit", "m3/s"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"relative", 0.05}}}}},
+                             {"pressure",
+                              {{"value", 150.0},
+                               {"unit", "Pa"},
+                               {"kind", "fan_total"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"minus", 0.0}, {"plus", 10.0}}}}}};
+  spec["product"]["size_reference"] = {{"value", "duct_inner_diameter"}, {"provenance", "user"}};
+  spec["product"]["tip_clearance_min"] = {{"value", 0.5}, {"unit", "mm"}, {"provenance", "user"}};
+  spec["product"]["rotational_speed"] = {
+      {"value", 2000.0}, {"unit", "rpm"}, {"provenance", "user"}};
+  const auto r = call(&cemkit_feasibility, json{{"spec", spec}});
+  REQUIRE(r.status == CEMKIT_OK);
+  // Owner decision D6: D_tip = 0.12 m - 2 x 0.0005 m, provenance default, provisional.
+  const auto& d_tip = r.body["inputs"]["d_tip"];
+  CHECK_THAT(d_tip["value"].get<double>(), WithinRel(0.12 - 2.0 * 0.0005, 1e-12));
+  CHECK(d_tip["unit"] == "m");
+  CHECK(d_tip["provenance"] == "default");
+  CHECK(d_tip["provisional"] == true);
+  CHECK(d_tip["from"].size() == 3);
+  CHECK(r.body["report"]["checks"][1]["limit"] == "incompressible_tip_speed");
+  CHECK(r.body["report"]["checks"][1]["status"] == "pass");
+
+  json no_clearance = spec;
+  no_clearance["product"].erase("tip_clearance_min");
+  const auto n = call(&cemkit_feasibility, json{{"spec", no_clearance}});
+  REQUIRE(n.status == CEMKIT_OK);
+  CHECK(!n.body["inputs"].contains("d_tip"));
+  CHECK(n.body["report"]["checks"][1]["status"] == "not_computable");
+}

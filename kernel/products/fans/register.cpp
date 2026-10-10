@@ -26,4 +26,23 @@ core::Result<FeasibilityReport> check_family_feasibility(std::string_view family
                      {"family", std::string{family}}});
 }
 
+core::Result<std::optional<SpecDerivedLength>> family_rotor_tip_diameter(std::string_view family,
+                                                                         const spec::Spec& spec) {
+  if (family != axial_ducted::k_family_id) {
+    return std::nullopt;
+  }
+  return axial_ducted::rotor_tip_diameter(spec).transform(
+      [](const std::optional<axial_ducted::DerivedTipDiameter>& tip)
+          -> std::optional<SpecDerivedLength> {
+        if (!tip) {
+          return std::nullopt;
+        }
+        return SpecDerivedLength{.value = tip->value,
+                                 .provenance = tip->provenance,
+                                 .provisional = tip->provisional,
+                                 .rule = std::string{tip->rule},
+                                 .from = tip->from};
+      });
+}
+
 }  // namespace cemkit::fans

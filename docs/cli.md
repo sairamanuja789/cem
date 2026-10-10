@@ -30,6 +30,6 @@ keys). `runs reproduce` compares a fresh output with `output.json` byte for byte
 **Exit codes.** 0 done (an *unconfirmed* feasibility verdict is 0); 1 rejected input, unknown id or
 a reproduction that differs; 2 infeasible duty; 3 output refused by the banned-claims check.
 
-**Known limitations.** OCCT prints STEP transfer statistics on stdout during `geometry smoke`
-(HI-013). `feasibility` cannot check the tip speed from a spec (the rotor tip diameter is not
-derived, docs/capi.md). `fans.axial_ducted` is a minimal plugin (HI-014).
+**Known limitations.** `feasibility` checks the tip speed with the rotor tip diameter the family
+derives from the spec (owner decision D6, provisional, HI-023; docs/capi.md); without one the check
+is `not_computable`. `fans.axial_ducted` is a minimal plugin (HI-014).

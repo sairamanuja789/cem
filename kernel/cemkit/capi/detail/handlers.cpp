@@ -455,7 +455,8 @@ Json input_json(double value, const char* unit, const char* from) {
 // SEL-004 for a compiled spec: the duty point and air from the spec, the family's feasibility hook
 // (docs/capi.md). Fan static pressure is converted to fan total with the duct diameter, which is
 // product.nominal_size when product.size_reference is duct_inner_diameter (AX-001). The rotor tip
-// diameter is not derived here, so the tip-speed check is not computable from a spec.
+// diameter comes from the family (owner decision D6, provisional); without one the tip-speed check
+// is not computable.
 core::Result<Json> feasibility_from_spec(const Json& request) {
   auto compiled = compile_spec(request);
   if (!compiled) {
@@ -518,8 +519,26 @@ core::Result<Json> feasibility_from_spec(const Json& request) {
     inputs["omega"] = input_json(*w, "rad/s", "product.rotational_speed");
   }
 
+  // Owner decision D6 (provisional): the family derives the rotor tip diameter from the spec;
+  // without one the tip-speed check stays not computable.
+  const auto tip = fans::family_rotor_tip_diameter(s.family(), s);
+  if (!tip) {
+    return std::unexpected(tip.error());
+  }
+  std::optional<core::Length> d_tip;
+  if (*tip) {
+    const auto& t = **tip;
+    d_tip = t.value;
+    inputs["d_tip"] = Json{{"value", t.value.numerical_value_in(si::metre)},
+                           {"unit", "m"},
+                           {"provenance", std::string{core::to_string(t.provenance)}},
+                           {"provisional", t.provisional},
+                           {"rule", t.rule},
+                           {"from", t.from}};
+  }
+
   const fans::Duty duty{.flow = flow_of(*flow), .pressure = total_of(total)};
-  const auto report = fans::check_family_feasibility(s.family(), duty, air, omega, std::nullopt);
+  const auto report = fans::check_family_feasibility(s.family(), duty, air, omega, d_tip);
   if (!report) {
     return std::unexpected(report.error());
   }

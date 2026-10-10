@@ -87,7 +87,11 @@ and the air density and temperature from `air.*` (the rest of the air from the k
 A fan static pressure is converted to fan total (ADR-003 D1) with the duct diameter
 `product.nominal_size`, which requires `product.size_reference` = `duct_inner_diameter` (AX-001);
 the converted value is reported under `inputs.fan_total_pressure`, labelled and `derived`. The
-rotor tip diameter is not derived, so the tip-speed check is `not_computable`. The family's own
+rotor tip diameter comes from the family (owner decision D6, provisional; `fans.axial_ducted`:
+D_tip = `product.nominal_size` − 2 × `product.tip_clearance_min` for a duct inner diameter) and is
+reported under `inputs.d_tip` with its unit, provenance (`default`), `provisional`, `rule` and the
+spec fields it came from; with a speed it makes the tip-speed check computable. Without it (frame
+or unknown size reference, unknown clearance) the tip-speed check is `not_computable`. The family's own
 feasibility hook supplies the range (`fans.axial_ducted`: `UNSOURCED`). An unknown duty point is
 `spec_rejected` naming the field. The response adds `spec` (`spec_id`, `revision`, `family`) and
 `inputs` (each value with its unit and the spec field it came from).

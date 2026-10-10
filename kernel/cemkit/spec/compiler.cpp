@@ -433,7 +433,10 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
 
   // Essential fields checks (SPEC-006, SPEC-007, SPEC-008)
   const auto essential_list = options_.essential_resolver(spec.family_);
-  for (const auto& ess_path : essential_list) {
+  if (!essential_list.has_value()) {
+    return std::unexpected(essential_list.error());
+  }
+  for (const auto& ess_path : *essential_list) {
     auto it = spec.fields_.find(ess_path);
     const bool is_unknown =
         (it == spec.fields_.end() || it->second.provenance == core::Provenance::unknown ||

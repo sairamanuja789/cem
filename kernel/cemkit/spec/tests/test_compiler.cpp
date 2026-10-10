@@ -21,6 +21,21 @@ Field field_or_empty(const Spec& spec, std::string_view path) {
   return spec.field(path).value_or(Field{});
 }
 
+// Stands in for a family plugin (SPEC-006): the platform has no built-in essential-field list, so
+// every compiler here is given this resolver. The fans.axial_ducted list is ADR-003's; any other
+// family is unknown, as it is for the family registry (cemkit/product). The registry-backed
+// resolver is tested in cemkit/product/tests and kernel/testing/stub_product.
+cemkit::core::Result<std::vector<std::string>> fixture_essentials(std::string_view family) {
+  if (family == "fans.axial_ducted") {
+    return std::vector<std::string>{"product.duty.flow", "product.duty.pressure"};
+  }
+  return cemkit::core::fail(cemkit::core::ErrorCode::spec_rejected, "unknown family", "family");
+}
+
+CompilerOptions fixture_options() {
+  return CompilerOptions{.essential_resolver = fixture_essentials};
+}
+
 json base_valid_spec() {
   return json{
       {"schema_version", "1.0.0"},
@@ -84,7 +99,7 @@ json base_valid_spec() {
 }  // namespace
 
 TEST_CASE("compiler accepts valid JSON structured spec", "[IN-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   const json doc = base_valid_spec();
   const auto res = compiler.compile(doc);
   REQUIRE(res.has_value());
@@ -95,7 +110,7 @@ TEST_CASE("compiler accepts valid JSON structured spec", "[IN-001]") {
 
 TEST_CASE("compiler rejects bare numbers without field object or missing provenance",
           "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Bare number instead of field object
   json doc1 = base_valid_spec();
@@ -115,7 +130,7 @@ TEST_CASE("compiler rejects bare numbers without field object or missing provena
 }
 
 TEST_CASE("inputs are converted to SI keeping original value and unit", "[SPEC-002]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   const auto res = compiler.compile(base_valid_spec());
   REQUIRE(res.has_value());
 
@@ -137,7 +152,7 @@ TEST_CASE("inputs are converted to SI keeping original value and unit", "[SPEC-0
 }
 
 TEST_CASE("dimensionally inconsistent input is rejected naming the field", "[SPEC-003]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   doc["product"]["duty"]["pressure"]["unit"] = "m3/s";
   const auto res = compiler.compile(doc);
@@ -148,7 +163,7 @@ TEST_CASE("dimensionally inconsistent input is rejected naming the field", "[SPE
 
 TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject static-to-static",
           "[SPEC-004]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Missing kind
   {
@@ -194,7 +209,7 @@ TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject stat
 
 TEST_CASE("precedence rule: user > image > derived > default", "[SPEC-005]") {
   // Our compiler resolves precedence: user overrides image/derived/default
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   auto res = compiler.compile(doc);
   REQUIRE(res.has_value());
@@ -216,21 +231,14 @@ TEST_CASE("precedence rule: user > image > derived > default", "[SPEC-005]") {
   CHECK(derived->conflicts()[0].overridden == cemkit::core::Provenance::default_value);
 }
 
-TEST_CASE("essential fields are declared by family plugin stub", "[SPEC-006]") {
-  const auto fields = default_essential_fields("fans.axial_ducted");
-  CHECK(fields.size() >= 2);
-  bool has_flow = false;
-  bool has_pressure = false;
-  for (const auto& f : fields) {
-    if (f == "product.duty.flow") {
-      has_flow = true;
-    }
-    if (f == "product.duty.pressure") {
-      has_pressure = true;
-    }
-  }
-  CHECK(has_flow);
-  CHECK(has_pressure);
+TEST_CASE("a resolver error rejects the spec and names the family", "[SPEC-006]") {
+  SpecCompiler compiler{fixture_options()};
+  json doc = base_valid_spec();
+  doc["family"] = "other.unsupported_family";
+  const auto res = compiler.compile(doc);
+  REQUIRE(!res.has_value());
+  CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+  CHECK(res.error().subject() == "family");
 }
 
 TEST_CASE("spec with unresolved essential unknowns cannot start campaign unless autonomous",
@@ -242,14 +250,16 @@ TEST_CASE("spec with unresolved essential unknowns cannot start campaign unless 
       json{{"value", nullptr}, {"unit", "Pa"}, {"provenance", "unknown"}};
 
   // Normal mode: has unresolved essential unknowns
-  SpecCompiler normal_compiler(CompilerOptions{.autonomous_mode = false});
+  SpecCompiler normal_compiler(
+      CompilerOptions{.autonomous_mode = false, .essential_resolver = fixture_essentials});
   auto res1 = normal_compiler.compile(doc);
   REQUIRE(res1.has_value());
   CHECK(res1->has_unresolved_essential_unknowns());
   CHECK(res1->questions().size() == 2);
 
   // Autonomous mode without default resolver still has unresolved unknowns
-  SpecCompiler auto_compiler_no_defaults(CompilerOptions{.autonomous_mode = true});
+  SpecCompiler auto_compiler_no_defaults(
+      CompilerOptions{.autonomous_mode = true, .essential_resolver = fixture_essentials});
   auto res2 = auto_compiler_no_defaults.compile(doc);
   REQUIRE(res2.has_value());
   CHECK(res2->has_unresolved_essential_unknowns());
@@ -263,7 +273,7 @@ TEST_CASE("compiler produces questions for essential unknowns", "[SPEC-008]") {
   doc["product"]["duty"]["pressure"] =
       json{{"value", nullptr}, {"unit", "Pa"}, {"provenance", "unknown"}};
 
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   auto res = compiler.compile(doc);
   REQUIRE(res.has_value());
   REQUIRE(res->questions().size() == 2);
@@ -274,7 +284,7 @@ TEST_CASE("compiler produces questions for essential unknowns", "[SPEC-008]") {
 }
 
 TEST_CASE("specs are immutable and versioned with parent link", "[SPEC-009]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   auto res = compiler.compile(base_valid_spec());
   REQUIRE(res.has_value());
   CHECK(res->revision() == 1);
@@ -293,7 +303,7 @@ TEST_CASE("specs are immutable and versioned with parent link", "[SPEC-009]") {
 }
 
 TEST_CASE("physically contradictory requirements are rejected", "[SPEC-010]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   // Duty point: Q = 0.05 m3/s, pressure = 1500 Pa -> air power P_air = 0.05 * 1500 = 75 W
   doc["product"]["duty"]["pressure"]["value"] = 1500.0;
@@ -307,7 +317,7 @@ TEST_CASE("physically contradictory requirements are rejected", "[SPEC-010]") {
 }
 
 TEST_CASE("known duty point flow and pressure must carry tolerances", "[SPEC-011]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Missing flow tolerance
   {
@@ -331,7 +341,7 @@ TEST_CASE("known duty point flow and pressure must carry tolerances", "[SPEC-011
 }
 
 TEST_CASE("SpecCompiler::compile_json handles valid and malformed JSON", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   const json doc = base_valid_spec();
   const auto valid_res = compiler.compile_json(doc.dump());
   REQUIRE(valid_res.has_value());
@@ -342,7 +352,7 @@ TEST_CASE("SpecCompiler::compile_json handles valid and malformed JSON", "[SPEC-
 }
 
 TEST_CASE("top-level spec validation errors", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Not a JSON object
   const auto non_obj = compiler.compile(json::array());
@@ -387,7 +397,7 @@ TEST_CASE("top-level spec validation errors", "[SPEC-001]") {
 }
 
 TEST_CASE("field validation error branches", "[SPEC-004]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Field is a primitive instead of object
   {
@@ -506,7 +516,7 @@ TEST_CASE("field validation error branches", "[SPEC-004]") {
 }
 
 TEST_CASE("pressure kind validation error paths", "[SPEC-004]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Pressure missing kind
   {
@@ -528,7 +538,7 @@ TEST_CASE("pressure kind validation error paths", "[SPEC-004]") {
 }
 
 TEST_CASE("tolerance validation error paths", "[SPEC-011]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Relative tolerance <= 0
   {
@@ -559,15 +569,19 @@ TEST_CASE("tolerance validation error paths", "[SPEC-011]") {
 }
 
 TEST_CASE("Spec helpers and derivation", "[SPEC-005]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   const json base_doc = base_valid_spec();
   const auto res = compiler.compile(base_doc);
   REQUIRE(res.has_value());
 
   CHECK(res->to_json() == base_doc);
 
-  const auto other_essentials = default_essential_fields("other.unsupported_family");
-  CHECK(other_essentials.empty());
+  // A family the resolver does not know is rejected, naming the field.
+  json unsupported = base_doc;
+  unsupported["family"] = "other.unsupported_family";
+  const auto unsupported_res = compiler.compile(unsupported);
+  REQUIRE(!unsupported_res.has_value());
+  CHECK(unsupported_res.error().subject() == "family");
 
   // Derive revision with invalid modification that fails compilation
   const json bad_mod = json{{"family", 12345}};
@@ -584,7 +598,7 @@ TEST_CASE("Spec helpers and derivation", "[SPEC-005]") {
 }
 
 TEST_CASE("SPEC-005: lower rank patch loses and records conflict", "[SPEC-005]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   // Base has nominal_size with provenance user (120 mm)
   doc["product"]["nominal_size"] = json{{"value", 120.0}, {"unit", "mm"}, {"provenance", "user"}};
@@ -613,7 +627,7 @@ TEST_CASE("SPEC-005: lower rank patch loses and records conflict", "[SPEC-005]")
 
 TEST_CASE("SPEC-006: compiler calls injected essential resolver", "[SPEC-006]") {
   bool resolver_called = false;
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.essential_resolver = [&](std::string_view family) -> std::vector<std::string> {
     resolver_called = true;
     CHECK(family == "fans.axial_ducted");
@@ -630,7 +644,7 @@ TEST_CASE(
     "SPEC-007: autonomous mode with injected default resolver applies default value with "
     "provisional",
     "[SPEC-007]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.autonomous_mode = true;
   opts.default_resolver = [](std::string_view /*family*/,
                              std::string_view path) -> std::optional<Field> {
@@ -680,7 +694,7 @@ TEST_CASE(
     "SPEC-007: autonomous mode without defaults when product.duty is deleted generates questions "
     "and keeps unresolved true",
     "[SPEC-007]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.autonomous_mode = true;
   // default_resolver is empty (no defaults)
   SpecCompiler compiler(opts);
@@ -698,7 +712,7 @@ TEST_CASE(
 
 TEST_CASE("SPEC-008: Question::unit has coherent SI unit and text essential field is known",
           "[SPEC-008]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
     return {"product.duty.flow", "product.duty.pressure", "manufacturing.process"};
   };
@@ -722,7 +736,7 @@ TEST_CASE("SPEC-008: Question::unit has coherent SI unit and text essential fiel
 }
 
 TEST_CASE("SPEC-009: derive_new_revision leaves base spec completely unchanged", "[SPEC-009]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   auto base_res = compiler.compile(base_valid_spec());
   REQUIRE(base_res.has_value());
 
@@ -744,7 +758,7 @@ TEST_CASE("SPEC-009: derive_new_revision leaves base spec completely unchanged",
 TEST_CASE("exceptions do not escape from derive_new_revision or empty essential_resolver",
           "[SPEC-001]") {
   // derive_new_revision with non-object json
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   auto res = compiler.compile(base_valid_spec());
   REQUIRE(res.has_value());
 
@@ -764,7 +778,7 @@ TEST_CASE("exceptions do not escape from derive_new_revision or empty essential_
 }
 
 TEST_CASE("derive_new_revision preserves CompilerOptions", "[SPEC-009]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.autonomous_mode = true;
   opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
     return {"envelope.width"};
@@ -782,7 +796,7 @@ TEST_CASE("derive_new_revision preserves CompilerOptions", "[SPEC-009]") {
 }
 
 TEST_CASE("revision number and parent validation", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // revision 0
   {
@@ -852,7 +866,7 @@ TEST_CASE("revision number and parent validation", "[SPEC-001]") {
 }
 
 TEST_CASE("offset units and value range checks", "[SPEC-003]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // relative tolerance on degC is rejected
   {
@@ -910,7 +924,7 @@ TEST_CASE("offset units and value range checks", "[SPEC-003]") {
 }
 
 TEST_CASE("unknown fields and misspelt paths are rejected naming the field", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
 
   // Bare top-level power_limit: 20
   {
@@ -947,7 +961,7 @@ TEST_CASE("unknown fields and misspelt paths are rejected naming the field", "[S
 }
 
 TEST_CASE("SPEC-010: contradiction check examines all stated power limits", "[SPEC-010]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   // Q = 0.05 m3/s, p = 1500 Pa -> P_air = 75 W
   doc["product"]["duty"]["pressure"]["value"] = 1500.0;
@@ -964,7 +978,7 @@ TEST_CASE("SPEC-010: contradiction check examines all stated power limits", "[SP
 }
 
 TEST_CASE("SPEC-007: an uncited default from the resolver is not applied", "[SPEC-007]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.autonomous_mode = true;
   opts.default_resolver = [](std::string_view, std::string_view path) -> std::optional<Field> {
     Field f;
@@ -984,7 +998,7 @@ TEST_CASE("SPEC-007: an uncited default from the resolver is not applied", "[SPE
 }
 
 TEST_CASE("SPEC-008: questions carry a specific reason per essential field", "[SPEC-008]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   doc["product"].erase("duty");
   const auto res = compiler.compile(doc);
@@ -997,7 +1011,7 @@ TEST_CASE("SPEC-008: questions carry a specific reason per essential field", "[S
 }
 
 TEST_CASE("derive_new_revision keeps the injected essential resolver", "[SPEC-009]") {
-  CompilerOptions opts;
+  CompilerOptions opts = fixture_options();
   opts.essential_resolver = [](std::string_view) -> std::vector<std::string> {
     return {"product.motor.bore_diameter"};
   };
@@ -1017,7 +1031,7 @@ TEST_CASE("derive_new_revision keeps the injected essential resolver", "[SPEC-00
 }
 
 TEST_CASE("a text field carrying a unit is rejected naming the field", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   doc["manufacturing"]["process"]["unit"] = "mm";
   const auto res = compiler.compile(doc);
@@ -1027,7 +1041,7 @@ TEST_CASE("a text field carrying a unit is rejected naming the field", "[SPEC-00
 }
 
 TEST_CASE("invalid UTF-8 in a text array does not throw", "[SPEC-001]") {
-  SpecCompiler compiler;
+  SpecCompiler compiler{fixture_options()};
   json doc = base_valid_spec();
   doc["product"]["scope"]["value"] = json::array({std::string("rotor\xff")});
   const auto res = compiler.compile(doc);

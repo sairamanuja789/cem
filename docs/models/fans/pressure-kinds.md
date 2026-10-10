@@ -29,6 +29,7 @@ Both are pressure differences in pascal, but a requirement or a rating means one
 | --- | --- | --- |
 | `FanTotalPressure` | `fan_total_pressure` (kind, child of `isq::pressure`) | Pa |
 | `FanStaticPressure` | `fan_static_pressure` (kind, child of `isq::pressure`) | Pa |
+| `FanDynamicPressure` | `fan_dynamic_pressure` (kind, child of `isq::pressure`) | Pa |
 
 Each is its own kind (`mp_units::is_kind`). Values of the same kind add and subtract normally.
 What converts:
@@ -54,7 +55,11 @@ spec-compiler task.
   provenance **derived**. Δp_s ≥ 0 is accepted, so free delivery (Δp_s = 0) is valid.
 - **Assumptions:** ρ₂ ≈ ρ₁ and the Mach factor is 1. Both hold inside the incompressible range of
   ADR-003 D3. Equations and validity are in `docs/models/fans/l0-similarity.md`.
-- **C++ kernel:** the conversion and a typed `fan_dynamic_pressure` follow with the L0 port in T08.
+- **C++ kernel (T08):** `fan_total_from_static` and `conventional_dynamic_pressure` in
+  `kernel/products/fans/common/l0.hpp`. The dynamic pressure is its own kind,
+  `FanDynamicPressure`; the conversion works on SI numbers inside the function and returns a
+  `FanTotalPressure` with provenance **derived** and its rule. No implicit or explicit conversion
+  between the three kinds exists outside that function.
 
 ## Evidence
 

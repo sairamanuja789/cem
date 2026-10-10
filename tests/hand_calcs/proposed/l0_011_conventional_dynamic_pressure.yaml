@@ -1,0 +1,29 @@
+id: l0_011
+title: Conventional fan dynamic pressure, and its outlet-Mach limit
+requirements: [SPEC-004, PHY-003, PHY-005]
+model: fans.l0@1.0.0
+status: proposed
+source: ADR-003 D1 (ISO 5801 conventional fan dynamic pressure, Mach factor 1); ADR-003 D3 with NACA Report 1135 eq. (31b), q = (gamma/2) p M^2
+working: |
+  Case 1. Q = 0.05 m3/s;  D_duct = 0.120 m (AX-001);  rho = 1.18 kg/m3
+  A_out = pi D_duct^2 / 4 = 3.141592654 x 0.0144 / 4 = 0.01130973355 m2
+  v     = Q / A_out = 0.05 / 0.01130973355           = 4.420970641 m/s
+  p_d   = 1/2 rho v^2 = 0.5 x 1.18 x 19.54498141     = 11.53153903 Pa
+  Same number as l0_010 (free delivery): there the total is the dynamic pressure alone.
+
+  Case 2. Q = 1.0 m3/s through the same duct.
+  v     = 1.0 / 0.01130973355                         = 88.41941283 m/s
+  p_d   = 0.5 x 1.18 x 7818.0925                      = 4612.615613 Pa
+  Limit: p_d / (gamma p1) = M_out^2 / 2 <= epsilon, so p_d <= epsilon gamma p1 = 1418.55 Pa
+  (v <= sqrt(2 x 1418.55 / 1.18) = 49.03 m/s). 4612.6 Pa > 1418.55 Pa, so out_of_validity.
+checks:
+  - function: conventional_dynamic_pressure
+    args: {flow: 0.05, d_duct: 0.12}
+    expected: 11.53153903336792
+    rel_tol: 1.0e-9
+  - function: conventional_dynamic_pressure
+    args: {flow: 1.0, d_duct: 0.12}
+    expected_error:
+      code: out_of_validity
+      subject: fan_dynamic_pressure
+      details: {value: "4612.615613347167", bounds: "(0, 1418.55]", model: fans.l0@1.0.0}

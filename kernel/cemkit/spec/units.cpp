@@ -157,6 +157,18 @@ std::optional<QuantityKind> parse_quantity_kind(std::string_view name) noexcept 
 
 bool is_known_unit(std::string_view unit) noexcept { return find_unit(unit) != nullptr; }
 
+bool is_temperature_specific_unit(std::string_view unit) noexcept {
+  if (unit.find('@') != std::string_view::npos) {
+    return true;
+  }
+  if ((unit.starts_with("inH2O") || unit.starts_with("inH₂O") || unit.starts_with("mmH2O") ||
+       unit.starts_with("mmH₂O")) &&
+      (unit.find('(') != std::string_view::npos || unit.find(" at ") != std::string_view::npos)) {
+    return true;
+  }
+  return false;
+}
+
 std::optional<QuantityKind> kind_of_unit(std::string_view unit) noexcept {
   const auto* def = find_unit(unit);
   if (def != nullptr) {
@@ -191,6 +203,11 @@ std::string_view coherent_si_unit(QuantityKind kind) noexcept {
 
 core::Result<double> convert_to_si(QuantityKind kind, std::string_view unit, double value,
                                    std::string_view field_name) {
+  if (is_temperature_specific_unit(unit)) {
+    return core::fail(core::ErrorCode::spec_rejected,
+                      "temperature-specific unit basis is not supported: " + std::string(unit),
+                      std::string(field_name), {{"unit", std::string(unit)}});
+  }
   const auto* def = find_unit(unit);
   if (def == nullptr) {
     return core::fail(core::ErrorCode::unknown_unit, "unknown unit: " + std::string(unit),
@@ -209,6 +226,11 @@ core::Result<double> convert_to_si(QuantityKind kind, std::string_view unit, dou
 
 core::Result<double> convert_tolerance_to_si(QuantityKind kind, std::string_view unit, double value,
                                              std::string_view field_name) {
+  if (is_temperature_specific_unit(unit)) {
+    return core::fail(core::ErrorCode::spec_rejected,
+                      "temperature-specific unit basis is not supported: " + std::string(unit),
+                      std::string(field_name), {{"unit", std::string(unit)}});
+  }
   const auto* def = find_unit(unit);
   if (def == nullptr) {
     return core::fail(core::ErrorCode::unknown_unit, "unknown unit: " + std::string(unit),

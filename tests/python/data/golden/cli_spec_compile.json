@@ -1,0 +1,54 @@
+[
+ {
+  "command": [
+   "spec",
+   "compile",
+   "{spec}"
+  ],
+  "exit_code": 0,
+  "output": [
+   "spec axial-120 revision 1 (family fans.axial_ducted): compiled, run 1",
+   "fields (value as given = SI value; provenance; inputs carry no fidelity label):",
+   "  air.density: 1.18 kg/m3 = 1.18 kg/m3  [default]",
+   "  air.temperature: 298.15 K = 298.15 K  [default]",
+   "  envelope.depth_max: 40 mm = 0.04 m  [default, provisional]",
+   "  envelope.depth_min: 25 mm = 0.025 m  [default, provisional]",
+   "  envelope.height: 120 mm = 0.12 m  [default, provisional]",
+   "  envelope.width: 120 mm = 0.12 m  [default, provisional]",
+   "  manufacturing.material: PETG  [default, provisional]",
+   "  manufacturing.process: FDM  [user]",
+   "  product.duty.flow: unknown  [unknown]",
+   "  product.duty.pressure: unknown  [unknown]",
+   "  product.motor.bore_diameter: unknown  [unknown]",
+   "  product.motor.speed_max: unknown  [unknown]",
+   "  product.motor.speed_min: unknown  [unknown]",
+   "  product.nominal_size: 120 mm = 0.12 m  [user]",
+   "  product.pressure_margin: 0.1 1 = 0.1 1  [derived, provisional]",
+   "  product.rotational_speed: 2000 rpm = 209.43951023931953 rad/s  [default, provisional]",
+   "  product.safety_factor.at_speed_ratio: 1.2 1 = 1.2 1  [default, provisional]",
+   "  product.safety_factor.factor: 2 1 = 2 1  [default, provisional]",
+   "  product.scope: [\"rotor\",\"hub\",\"blades\",\"duct\"]  [user]",
+   "  product.size_reference: duct_inner_diameter  [default, provisional]",
+   "  product.tip_clearance_min: 0.5 mm = 5e-04 m  [default, provisional]",
+   "  product.wall_thickness_min: 0.8 mm = 8e-04 m  [default, provisional]",
+   "open questions (2):",
+   "  product.duty.flow [m3/s]: Essential duty point flow rate (AX-003).",
+   "  product.duty.pressure [Pa]: Essential duty point pressure rise and kind (AX-004).",
+   "not runnable yet: answer the essential questions (SPEC-007)"
+  ]
+ },
+ {
+  "command": [
+   "spec",
+   "questions",
+   "axial-120"
+  ],
+  "exit_code": 0,
+  "output": [
+   "spec axial-120 revision 1:",
+   "open questions (2):",
+   "  product.duty.flow [m3/s]: Essential duty point flow rate (AX-003).",
+   "  product.duty.pressure [Pa]: Essential duty point pressure rise and kind (AX-004)."
+  ]
+ }
+]

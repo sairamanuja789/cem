@@ -1,0 +1,6096 @@
+{
+ "body": {
+  "abi_version": "0.2.0",
+  "kernel_version": "0.0.0",
+  "models": {
+   "fans.feasibility": "1.0.0",
+   "fans.l0": "1.0.0",
+   "platform.air": "1.0.0"
+  },
+  "plugins": {
+   "fans.axial_ducted": "0.1.0"
+  },
+  "results": [
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 20.178390873195266
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1154.8125379517746
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 49.78072219965013
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6344472404560809
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.8782072707068502
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4799176556503204
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.3945551164121823
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 82.23906183978241
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 308.99963761819123
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 443.8480220811763,
+     "flow": 0.03650705123404063,
+     "power": 4159.539867949028
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9320068413828276
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/0/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 352.0028623973631
+   },
+   {
+    "id": "random/0/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.4799176556503204
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 30.339321678109837
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1191.9186060990262
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.11622767011133
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.3322606142185844
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.19940297416683953
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 5.758218508353229
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.0999958243016446
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 43.88292894442952
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 278.5666228885615
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at tip_speed: blade tip-speed Mach number exceeds the incompressible limit M^2/2 <= EPSILON (ADR-003 D3) (bounds=(0, 45.11622767011133], model=fans.l0@1.0.0, value=45.94603227231001)",
+     "details": {
+      "bounds": "(0, 45.11622767011133]",
+      "model": "fans.l0@1.0.0",
+      "value": "45.94603227231001"
+     },
+     "message": "blade tip-speed Mach number exceeds the incompressible limit M^2/2 <= EPSILON (ADR-003 D3)",
+     "subject": "tip_speed"
+    },
+    "id": "random/1/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1711459901511136
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/1/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 319.01990527091874
+   },
+   {
+    "id": "random/1/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 5.758218508353229
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 15.876294147940321
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1348.2254947855524
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.399887623811566
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6152025216787614
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 7.877888081531009
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.4972206209406796
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.0267069584239774
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 40.02655576913294
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 497.05487836511224
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 306.2243850317046,
+     "flow": 1.374348846713075,
+     "power": 300.59826358828576
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2524450294901726
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/2/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 328.0967518509092
+   },
+   {
+    "id": "random/2/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1124.9059426377275
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 5.14193038986972
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.5162637666001207, 0.7240552742412426], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.4972206209406796)",
+        "details": {
+         "bounds": "[0.5162637666001207, 0.7240552742412426]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.4972206209406796"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.4972206209406796
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.7298629695689165
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1134.4120469121954
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.038653970620494
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5505272230069129
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 14.021846512062332
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.30523401269005634
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.474625381196329
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 2.921565497955171
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 324.6795362883515
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 227.52401525976677,
+     "flow": 1.1279902986162875,
+     "power": 12532.341465942916
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.983148600498988
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/3/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 339.68457981699817
+   },
+   {
+    "id": "random/3/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 29.23361925832135
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1435.951704598373
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.32146883020091
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.0598919615259303
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8500500912514594
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8240400367686014
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 3.72284042843951
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4549834325832218
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 617.2066310831725
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 302.3094037311451,
+     "flow": 0.0011208201789258748,
+     "power": 3567.2498571634483
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.3384593466405363
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/4/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 327.54224724356357
+   },
+   {
+    "id": "random/4/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.8240400367686014
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 33.509670203650195
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1331.295707870204
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 44.00337779059748
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5763293551786762
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.2749481126932576
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.8860943787150082
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.3281138864105242
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 222.11499813517474
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 246.2226451349733
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1331.295707870204], model=fans.l0@1.0.0, value=1627.2594415816436)",
+     "details": {
+      "bounds": "(0, 1331.295707870204]",
+      "model": "fans.l0@1.0.0",
+      "value": "1627.2594415816436"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/5/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.375094348834836
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/5/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 311.15086830845
+   },
+   {
+    "id": "random/5/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 730.6558903797729
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.2770611375446834
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[2.4797785400833834, 4.912107831085836], family=fans.test_family, model=fans.feasibility@1.0.0, value=1.8860943787150082)",
+        "details": {
+         "bounds": "[2.4797785400833834, 4.912107831085836]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "1.8860943787150082"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.8860943787150082
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 38.088098256227056
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1085.7704216700436
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 49.4885585034232
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9252111198353732
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.1109330600438154
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 2.6497319151231613
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.0127426763600713
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 441.3600760111618
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 462.2908834726386
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 826.1853964079195,
+     "flow": 14.155181744060563,
+     "power": 7304.283170759271
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.8866626088122207
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/6/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 349.9369530891772
+   },
+   {
+    "id": "random/6/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 608.218040097559
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 14.674094813295804
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[3.4150104965993586, 4.190451687546805], family=fans.test_family, model=fans.feasibility@1.0.0, value=2.6497319151231613)",
+        "details": {
+         "bounds": "[3.4150104965993586, 4.190451687546805]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "2.6497319151231613"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 2.6497319151231613
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 23.601062731753434
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1235.2588850178665
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.59886858417481
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8988407912557353
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 3.3170601121037997
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.1498039951919576
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.3506552442896378
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 148.61897887108432
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 609.1218309332132
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 1031.90074272994,
+     "flow": 44.131162140748124,
+     "power": 11848.024761160907
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.046009586172334
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/7/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 343.64589533863875
+   },
+   {
+    "id": "random/7/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 25.434685295439948
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1308.0147907230973
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.796859573801136
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.42782712315876054
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.5076779905585487
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4330130454745762
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.6074613962848132
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 58.54516205396398
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 179.541772166108
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 874.5330633341586,
+     "flow": 3.4115450131163043,
+     "power": 5128.448566741995
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2473009532277883
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/8/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 323.83269961682845
+   },
+   {
+    "id": "random/8/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.4330130454745762
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 15.405334810232116
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1187.6537519111027
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 44.83777090071555
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.4840066010499836
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 6.3589356513761475
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5178866939128444
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.16579838524416
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 36.457473753728365
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 250.87726090489065
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1187.6537519111027], model=fans.l0@1.0.0, value=1318.3314930821102)",
+     "details": {
+      "bounds": "(0, 1187.6537519111027]",
+      "model": "fans.l0@1.0.0",
+      "value": "1318.3314930821102"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/9/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1814947971447145
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/9/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 317.0509185718482
+   },
+   {
+    "id": "random/9/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.5178866939128444
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 28.435411585020475
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1093.7769667390842
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 47.37353672248782
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6609874298492837
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 2.3378608437356534
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.2818288456026254
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4431305631689417
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 144.8261758745069
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 510.9504168490545
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 1092.7232539593422,
+     "flow": 0.3639206122735255,
+     "power": 3988.7818431058563
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9747363270329427
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/10/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 334.9814906526107
+   },
+   {
+    "id": "random/10/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 849.458504654275
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.6871131826869706
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[1.572347798400116, 2.949884164135176], family=fans.test_family, model=fans.feasibility@1.0.0, value=1.2818288456026254)",
+        "details": {
+         "bounds": "[1.572347798400116, 2.949884164135176]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "1.2818288456026254"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.2818288456026254
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 27.173855764090664
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1144.0969538884813
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.43423920260694
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9684910404175099
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.09430653671545
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 2.741832952814955
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9861307583526807
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 351.3183102949878
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 840.4770700490888
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 309.0016482248852,
+     "flow": 12.327498940700952,
+     "power": 1759.9861357082868
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9754114748667752
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/11/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 342.48178981774686
+   },
+   {
+    "id": "random/11/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 10.430670670986064
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1154.432017588686
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.062127382211415
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.936973708196973
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 14.799514263653645
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.3824067408717401
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.9226300394059759
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 52.01341670567142
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 588.5041135671739
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1154.432017588686], model=fans.l0@1.0.0, value=1957.6810528613144)",
+     "details": {
+      "bounds": "(0, 1154.432017588686]",
+      "model": "fans.l0@1.0.0",
+      "value": "1957.6810528613144"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/12/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.088204142553421
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/12/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 325.70842627840244
+   },
+   {
+    "id": "random/12/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.3824067408717401
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 9.980274893015393
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1358.8214472302636
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.36318477026683
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.26747677494070565
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 15.13673559765539
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.20089369348994954
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 3.6187833008838193
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 2.441525043665095
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 170.39708211749172
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1358.8214472302636], model=fans.l0@1.0.0, value=1885.0274483944268)",
+     "details": {
+      "bounds": "(0, 1358.8214472302636]",
+      "model": "fans.l0@1.0.0",
+      "value": "1885.0274483944268"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/13/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.320642637597939
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/13/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 320.7661556727399
+   },
+   {
+    "id": "random/13/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 817.3736349656149
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1.044722239442712
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.14819997508705293, 0.18367508985771502], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.20089369348994954)",
+        "details": {
+         "bounds": "[0.14819997508705293, 0.18367508985771502]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.20089369348994954"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.20089369348994954
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 42.2559702773648
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1297.0591002569895
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.29942248812481
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6454414265804027
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.884359836804359
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 2.626056665614292
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.145318814078468
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 388.9874034139812
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 562.9514731666225
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1297.0591002569895], model=fans.l0@1.0.0, value=3263.0665289278245)",
+     "details": {
+      "bounds": "(0, 1297.0591002569895]",
+      "model": "fans.l0@1.0.0",
+      "value": "3263.0665289278245"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/14/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2641669442194217
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/14/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 320.3152882518744
+   },
+   {
+    "id": "random/14/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 2.626056665614292
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 20.39188085712257
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1199.7569482027588
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 51.169073656992
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6312337066970982
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 4.641707186456305
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.7489179132346494
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.752959590619438
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 63.43748573782926
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 301.9640247193055
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1199.7569482027588], model=fans.l0@1.0.0, value=1700.4759017587803)",
+     "details": {
+      "bounds": "(0, 1199.7569482027588]",
+      "model": "fans.l0@1.0.0",
+      "value": "1700.4759017587803"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/15/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9164487008446384
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/15/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 361.81998969892976
+   },
+   {
+    "id": "random/15/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 14.895119967542305
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1292.400977373095
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.956493191807326
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5937916152117783
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 6.758978960003654
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5479660380961455
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.9854127369466048
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 35.22211240821479
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 179.94044632461186
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1292.400977373095], model=fans.l0@1.0.0, value=1978.3520637675067)",
+     "details": {
+      "bounds": "(0, 1292.400977373095]",
+      "model": "fans.l0@1.0.0",
+      "value": "1978.3520637675067"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/16/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.0784665288411028
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/16/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 346.17468319040006
+   },
+   {
+    "id": "random/16/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.5479660380961455
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 21.66099499849751
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1162.9406903992005
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.56010333882501
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.19492936194840205
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.759943560122962
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8613149953478327
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.4753329044730115
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 8.85211308346631
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 283.8821124372073
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 281.8561195268872,
+     "flow": 0.04173917420145631,
+     "power": 129.0898456909034
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9863438874755943
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/17/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 343.3717836600267
+   },
+   {
+    "id": "random/17/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 316.18367069160075
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.0537739466769107
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[1.2262764940939097, 1.6720979364208903], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.8613149953478327)",
+        "details": {
+         "bounds": "[1.2262764940939097, 1.6720979364208903]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.8613149953478327"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.8613149953478327
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 20.48233350406758
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1415.3102708636939
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.396320767549696
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6665536686424226
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 3.5774985928179963
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9355788402716319
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.5983609725275196
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 93.97623227953136
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 220.36719678372523
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 749.6566170444398,
+     "flow": 2.377990277189242,
+     "power": 8885.776665992562
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.3735369338298646
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/18/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 321.00046255654087
+   },
+   {
+    "id": "random/18/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1119.5064175364007
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1.6382470229920825
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.5779040780074557, 0.7642833806178292], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.9355788402716319)",
+        "details": {
+         "bounds": "[0.5779040780074557, 0.7642833806178292]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.9355788402716319"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.9355788402716319
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.216895874659311
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1089.4287172217555
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 50.09386924404223
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6376011781584341
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 82.80235222085426
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.0867141522940977
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 3.584542001268217
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 4.202886023803486
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 333.27159793609195
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1089.4287172217555], model=fans.l0@1.0.0, value=2221.1978262023877)",
+     "details": {
+      "bounds": "(0, 1089.4287172217555]",
+      "model": "fans.l0@1.0.0",
+      "value": "2221.1978262023877"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/19/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.8682797230126202
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/19/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 354.2171463833449
+   },
+   {
+    "id": "random/19/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 40.95105730356063
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1241.7635178714681
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 47.36834937891736
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.13416366351170564
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.17681458619032245
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.004297359362987
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.6798079344070596
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 15.851313154558069
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 323.4164150760263
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 145.41414306323995,
+     "flow": 0.7133593090198012,
+     "power": 2920.4706477461355
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1068592260245584
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/20/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 334.94481059446053
+   },
+   {
+    "id": "random/20/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 4.004297359362987
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 36.432655180764094
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1227.5183712435453
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.03229662544505
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.23334062702866984
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.475594357029146
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.0755172344977073
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.1649313356842796
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 34.45495137151695
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 555.2868185349904
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 683.7283543238306,
+     "flow": 0.5174351196858691,
+     "power": 1370.5626060738057
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.0641216791487855
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/21/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 339.63962659815917
+   },
+   {
+    "id": "random/21/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.0755172344977073
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 40.504618058067436
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1364.1337844092047
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 44.79568442449257
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.4083682325220523
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4231441815148533
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4619641805787964
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.621749641420632
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 118.65781257997602
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 361.4191150065079
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1364.1337844092047], model=fans.l0@1.0.0, value=3177.0261145546224)",
+     "details": {
+      "bounds": "(0, 1364.1337844092047]",
+      "model": "fans.l0@1.0.0",
+      "value": "3177.0261145546224"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/22/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.359610805850368
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/22/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 316.753322244513
+   },
+   {
+    "id": "random/22/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1171.4076207232956
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.015536374935190847
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[1.5334016786657667, 2.2095409075573684], family=fans.test_family, model=fans.feasibility@1.0.0, value=1.4619641805787964)",
+        "details": {
+         "bounds": "[1.5334016786657667, 2.2095409075573684]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "1.4619641805787964"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.4619641805787964
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 44.13920414711819
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1312.087173052715
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 50.2814095050005
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8919518780913845
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8866646237258298
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 3.081049028641146
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9749148677755594
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1007.6542154824981
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 1225.7541145301932
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1312.087173052715], model=fans.l0@1.0.0, value=1799.3601972588979)",
+     "details": {
+      "bounds": "(0, 1312.087173052715]",
+      "model": "fans.l0@1.0.0",
+      "value": "1799.3601972588979"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/23/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.03795326313127
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/23/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 355.5432562860358
+   },
+   {
+    "id": "random/23/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 17.330591416757933
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1300.681840533247
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.1165815004589
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9876658599743975
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6473106339674931
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.1050447695813945
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8563882989491731
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 177.3226855981052
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 703.6352198427228
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 77.56659274908591,
+     "flow": 37.60627522918944,
+     "power": 3265.488007354409
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2231701077807429
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/24/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 326.0934750411658
+   },
+   {
+    "id": "random/24/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 4.1050447695813945
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 20.503410674314246
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1203.995440469668
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.0124841995419
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.11466834594079788
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 2.053913956218108
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5883456172784034
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 3.3544501934175392
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 3.017138280873047
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 441.6325936418299
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 731.354164330509,
+     "flow": 0.0018791587556210648,
+     "power": 11517.189821760892
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.044591489942994
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/25/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 339.4995315910805
+   },
+   {
+    "id": "random/25/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 503.0040654270638
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.00192744761468289
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.6981805813272064, 0.962051595960914], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.5883456172784034)",
+        "details": {
+         "bounds": "[0.6981805813272064, 0.962051595960914]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.5883456172784034"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.5883456172784034
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 9.967953385019431
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1143.355499323166
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.1595293452945
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5282402372614308
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.43564177674637755
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.040322502367801
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.06063071771995
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 15.868417956269452
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 438.94067591196847
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 66.66521910706626,
+     "flow": 0.03021180872872997,
+     "power": 13476.521512778994
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9859316597130754
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/26/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 340.5392977881027
+   },
+   {
+    "id": "random/26/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 23.934671960260086
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.01062140410701983
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[4.553159976746496, 7.084766128724639], family=fans.test_family, model=fans.feasibility@1.0.0, value=4.040322502367801)",
+        "details": {
+         "bounds": "[4.553159976746496, 7.084766128724639]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "4.040322502367801"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 4.040322502367801
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 8.884697578970219
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1358.641198903541
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.17600112684929
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.19354907805427407
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 33.81087864653776
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.09352993743848687
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 5.200751717471913
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1.1866041826274472
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 133.98657157025733
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1358.641198903541], model=fans.l0@1.0.0, value=2361.8293505685638)",
+     "details": {
+      "bounds": "(0, 1358.641198903541]",
+      "model": "fans.l0@1.0.0",
+      "value": "2361.8293505685638"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/27/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1707745649862222
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/27/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 340.6557708724589
+   },
+   {
+    "id": "random/27/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 19.573562337955757
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1173.5547769062043
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 50.91494259481106
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.585886070858992
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 4.498538394137692
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.7386699742564752
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.8053392811041167
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 60.44247042115874
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 409.4752264457931
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1173.5547769062043], model=fans.l0@1.0.0, value=2163.6122094454363)",
+     "details": {
+      "bounds": "(0, 1173.5547769062043]",
+      "model": "fans.l0@1.0.0",
+      "value": "2163.6122094454363"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/28/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9054049078886892
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/28/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 360.02301172514694
+   },
+   {
+    "id": "random/28/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.7386699742564752
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 32.862228780434066
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1341.2562072357794
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.06565025154667
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6290351808799608
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.6925247225165008
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.5932489282764253
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.3645638065050683
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 192.37311170494917
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 852.7504867015352
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 823.3841075509453,
+     "flow": 14.59316165219132,
+     "power": 2633.5629362387826
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1611066075656395
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/29/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 339.8754723500954
+   },
+   {
+    "id": "random/29/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.5932489282764253
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 28.002277910120263
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1470.8642061912944
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 50.28356854848556
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6745976118281807
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.8736938147951723
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.528783072824213
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.3516050834053221
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 190.58979059182096
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 406.45409108667775
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1470.8642061912944], model=fans.l0@1.0.0, value=2669.5109453777745)",
+     "details": {
+      "bounds": "(0, 1470.8642061912944]",
+      "model": "fans.l0@1.0.0",
+      "value": "2669.5109453777745"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/30/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1634571487988843
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/30/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 355.5585230289274
+   },
+   {
+    "id": "random/30/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "inside test fixture, not engineering data",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 1.528783072824213
+     },
+     "verdict": "confirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 31.096280010745772
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1312.3520932480676
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.25763533247189
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8359488226800497
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.780770092094894
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 3.2812921651709552
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 0.975525233141143
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 349.37666530473837
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 533.0662098839389
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 791.1124717597368,
+     "flow": 3.834499921542889,
+     "power": 8459.196001083437
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1270632510019254
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/31/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 341.2330118761841
+   },
+   {
+    "id": "random/31/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 25.40565178493145
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1207.1797866242637
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.33174785842203
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.38083220003063395
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 3.028567934464774
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.801283636815129
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.028336750710115
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 49.30660381660554
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 95.29518415705859
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1207.1797866242637], model=fans.l0@1.0.0, value=1933.5952029057262)",
+     "details": {
+      "bounds": "(0, 1207.1797866242637]",
+      "model": "fans.l0@1.0.0",
+      "value": "1933.5952029057262"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/32/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.0335629866622813
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/32/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 341.7570665728861
+   },
+   {
+    "id": "random/32/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.801283636815129
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 37.3377153338101
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1317.0546862217082
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.02644398256269
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.04605978776490122
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.5339243022860944
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.46414689900165146
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 4.920254601661933
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1.098874007152525
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 503.09222572791396
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1317.0546862217082], model=fans.l0@1.0.0, value=1380.658759179646)",
+     "details": {
+      "bounds": "(0, 1317.0546862217082]",
+      "model": "fans.l0@1.0.0",
+      "value": "1380.658759179646"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/33/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2992672897513136
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/33/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 318.38503872786293
+   },
+   {
+    "id": "random/33/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 758.9894401687794
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.0198534632605
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.6272626189702649, 1.1883869388516581], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.46414689900165146)",
+        "details": {
+         "bounds": "[0.6272626189702649, 1.1883869388516581]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.46414689900165146"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.46414689900165146
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 4.1694474294573
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1324.0994352250932
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 51.64194647836286
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.8072733025291983
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 41.233689969744894
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.16459573486495757
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 2.676087538235321
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 5.217843911715728
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 308.03091842296806
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 365.0836457904952,
+     "flow": 0.12196411671332538,
+     "power": 707.468813015695
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.9929911765517975
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/34/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 365.1637054852313
+   },
+   {
+    "id": "random/34/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 459.03814698750625
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.1376532598120063
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[0.11867555275194226, 0.16043046986483767], family=fans.test_family, model=fans.feasibility@1.0.0, value=0.16459573486495757)",
+        "details": {
+         "bounds": "[0.11867555275194226, 0.16043046986483767]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "0.16459573486495757"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.16459573486495757
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 18.64206708492768
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1152.7088280819296
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 45.89397314109329
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.6244957867353541
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.8498295753209892
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 1.4851263387952558
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.400282733700763
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 74.77676387105225
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 248.44539942456518
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 330.189006067179,
+     "flow": 1.3084919155299806,
+     "power": 5605.819156805938
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.0945567930089566
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/35/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 324.5193962366034
+   },
+   {
+    "id": "random/35/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 23.906944217773916
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1406.940871862214
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.083972498163654
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.09916456506208993
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 2.0462884738206744
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 0.5486565209587202
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 3.603802806872378
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 2.685609545750102
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 583.8565857812911
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/scale_fan_laws",
+    "model": "fans.l0@1.0.0",
+    "value": {
+     "fan_total_pressure": 140.32884533997728,
+     "flow": 0.0011498999925062194,
+     "power": 519.0428533375901
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2170408669953314
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/36/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 340.00503019838976
+   },
+   {
+    "id": "random/36/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+       "nearest_feasible": null,
+       "status": "range_unsourced",
+       "violation": null
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 0.5486565209587202
+     },
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 35.56892838896332
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1127.7535009696983
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 44.62967850981803
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9931526810930019
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 1.556004078827588
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 2.1322955200068794
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.0633891713091628
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 623.8163360340775
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 636.3299658117525
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1127.7535009696983], model=fans.l0@1.0.0, value=1592.728215721836)",
+     "details": {
+      "bounds": "(0, 1127.7535009696983]",
+      "model": "fans.l0@1.0.0",
+      "value": "1592.728215721836"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/37/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.1323916617748222
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/37/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 315.5794831646786
+   },
+   {
+    "id": "random/37/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 735.2676385741415
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.19603496533572726
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[2.9316826522614177, 5.410799645705147], family=fans.test_family, model=fans.feasibility@1.0.0, value=2.1322955200068794)",
+        "details": {
+         "bounds": "[2.9316826522614177, 5.410799645705147]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "2.1322955200068794"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 2.1322955200068794
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 48.501166663297326
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1177.704275244314
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 51.07089034273508
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.7547802296634532
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.195008321248271
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 8.825063384891333
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 0.7257726334691899
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 753.5265766131812
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 810.6288933176503
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at tip_speed: blade tip-speed Mach number exceeds the incompressible limit M^2/2 <= EPSILON (ADR-003 D3) (bounds=(0, 51.07089034273508], model=fans.l0@1.0.0, value=64.58529486986153)",
+     "details": {
+      "bounds": "(0, 51.07089034273508]",
+      "model": "fans.l0@1.0.0",
+      "value": "64.58529486986153"
+     },
+     "message": "blade tip-speed Mach number exceeds the incompressible limit M^2/2 <= EPSILON (ADR-003 D3)",
+     "subject": "tip_speed"
+    },
+    "id": "random/38/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 0.903065786461894
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/38/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 361.1257288258254
+   },
+   {
+    "id": "random/38/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "within sqrt(2 EPSILON) a1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "specific speed is outside the family's feasible range",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 236.95829873924131
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.14681579099507217
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "infeasible_requirement",
+        "describe": "infeasible_requirement at specific_speed: specific speed is outside the family's feasible range (bounds=[12.178772314360234, 13.215987349703566], family=fans.test_family, model=fans.feasibility@1.0.0, value=8.825063384891333)",
+        "details": {
+         "bounds": "[12.178772314360234, 13.215987349703566]",
+         "family": "fans.test_family",
+         "model": "fans.feasibility@1.0.0",
+         "value": "8.825063384891333"
+        },
+        "message": "specific speed is outside the family's feasible range",
+        "subject": "specific_speed"
+       }
+      }
+     ],
+     "specific_speed": {
+      "fidelity": "l0_predicted",
+      "fidelity_label": "L0 predicted",
+      "model": "fans.l0@1.0.0",
+      "value": 8.825063384891333
+     },
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 37.20377249084981
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1464.1096673591464
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 47.50455751524843
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/flow_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.7059974412155325
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 0.9199075773866847
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/specific_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 2.6664954652976993
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/specific_diameter",
+    "model": "fans.l0@1.0.0",
+    "value": 1.1059412220596174
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/conventional_dynamic_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 326.5741199735994
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 986.2428802423229
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1464.1096673591464], model=fans.l0@1.0.0, value=1530.423427088379)",
+     "details": {
+      "bounds": "(0, 1464.1096673591464]",
+      "model": "fans.l0@1.0.0",
+      "value": "1530.423427088379"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/39/scale_fan_laws"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/ideal_gas_density",
+    "model": "platform.air@1.0.0",
+    "value": 1.2975767329952212
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/39/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 335.9079475629853
+   },
+   {
+    "id": "random/39/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "within EPSILON gamma p1",
+       "nearest_feasible": null,
+       "status": "pass",
+       "violation": null
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "unconfirmed"
+    }
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/40/tip_speed"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/40/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1292.2285965064875
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/40/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.34521891792107
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/40/flow_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/40/pressure_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/40/specific_speed"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "flow"
+    },
+    "id": "random/40/specific_diameter"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_duct: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_duct"
+    },
+    "id": "random/40/conventional_dynamic_pressure"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_duct: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_duct"
+    },
+    "id": "random/40/fan_total_from_static"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip_new: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip_new"
+    },
+    "id": "random/40/scale_fan_laws"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at temperature: input must be finite and strictly positive (bounds=(0, inf), model=platform.air@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "platform.air@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "temperature"
+    },
+    "id": "random/40/ideal_gas_density"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/40/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 327.7101857243706
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "flow"
+    },
+    "id": "random/40/check_feasibility"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/41/tip_speed"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/41/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1450.4609551030737
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/41/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 46.022126114072286
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/41/flow_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/41/pressure_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1450.4609551030737], model=fans.l0@1.0.0, value=2546.3214573384785)",
+     "details": {
+      "bounds": "(0, 1450.4609551030737]",
+      "model": "fans.l0@1.0.0",
+      "value": "2546.3214573384785"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/41/specific_speed"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/41/specific_diameter"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "flow"
+    },
+    "id": "random/41/conventional_dynamic_pressure"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/41/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 31.638216734905356
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega_new: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega_new"
+    },
+    "id": "random/41/scale_fan_laws"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at pressure: input must be finite and strictly positive (bounds=(0, inf), model=platform.air@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "platform.air@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "pressure"
+    },
+    "id": "random/41/ideal_gas_density"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/41/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 325.42557459883005
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/41/check_feasibility"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/42/tip_speed"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/42/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1168.9287069660293
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/42/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 51.0812055459736
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/42/flow_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/42/pressure_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "flow"
+    },
+    "id": "random/42/specific_speed"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/42/specific_diameter"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_duct: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_duct"
+    },
+    "id": "random/42/conventional_dynamic_pressure"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1168.9287069660293], model=fans.l0@1.0.0, value=1899.5834620689157)",
+     "details": {
+      "bounds": "(0, 1168.9287069660293]",
+      "model": "fans.l0@1.0.0",
+      "value": "1899.5834620689157"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/42/fan_total_from_static"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip_new: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip_new"
+    },
+    "id": "random/42/scale_fan_laws"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at pressure: input must be finite and strictly positive (bounds=(0, inf), model=platform.air@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "platform.air@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "pressure"
+    },
+    "id": "random/42/ideal_gas_density"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/42/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 361.19866832741815
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/42/check_feasibility"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/43/tip_speed"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/43/max_fan_total_pressure",
+    "model": "fans.l0@1.0.0",
+    "value": 1243.0330834244778
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/43/max_tip_speed",
+    "model": "fans.l0@1.0.0",
+    "value": 47.510815473444765
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at omega: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "omega"
+    },
+    "id": "random/43/flow_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip"
+    },
+    "id": "random/43/pressure_coefficient"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/43/specific_speed"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "flow"
+    },
+    "id": "random/43/specific_diameter"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_duct: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_duct"
+    },
+    "id": "random/43/conventional_dynamic_pressure"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1243.0330834244778], model=fans.l0@1.0.0, value=1758.3721021611811)",
+     "details": {
+      "bounds": "(0, 1243.0330834244778]",
+      "model": "fans.l0@1.0.0",
+      "value": "1758.3721021611811"
+     },
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_total_pressure"
+    },
+    "id": "random/43/fan_total_from_static"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at d_tip_new: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "d_tip_new"
+    },
+    "id": "random/43/scale_fan_laws"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at temperature: input must be finite and strictly positive (bounds=(0, inf), model=platform.air@1.0.0, value=-1)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "platform.air@1.0.0",
+      "value": "-1"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "temperature"
+    },
+    "id": "random/43/ideal_gas_density"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "random/43/speed_of_sound",
+    "model": "platform.air@1.0.0",
+    "value": 335.9521980097554
+   },
+   {
+    "id": "random/43/check_feasibility",
+    "report": {
+     "checks": [
+      {
+       "limit": "incompressible_pressure",
+       "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+       "nearest_feasible": {
+        "fan_total_pressure": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 1243.0330834244778
+        },
+        "flow": {
+         "fidelity": "l0_predicted",
+         "fidelity_label": "L0 predicted",
+         "model": "fans.feasibility@1.0.0",
+         "value": 0.7412260720994107
+        }
+       },
+       "status": "violated",
+       "violation": {
+        "code": "out_of_validity",
+        "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1243.0330834244778], model=fans.l0@1.0.0, value=1619.8010579479942)",
+        "details": {
+         "bounds": "(0, 1243.0330834244778]",
+         "model": "fans.l0@1.0.0",
+         "value": "1619.8010579479942"
+        },
+        "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+        "subject": "fan_total_pressure"
+       }
+      },
+      {
+       "limit": "incompressible_tip_speed",
+       "message": "needs the rotational speed and the rotor tip diameter",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      },
+      {
+       "limit": "family_specific_speed_range",
+       "message": "needs the rotational speed",
+       "nearest_feasible": null,
+       "status": "not_computable",
+       "violation": null
+      }
+     ],
+     "specific_speed": null,
+     "verdict": "infeasible"
+    }
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "edge/0/fan_total_from_static",
+    "model": "fans.l0@1.0.0",
+    "provenance": "derived",
+    "rule": "ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+    "value": 11.53153903336792
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_total_pressure: input must be finite and strictly positive (bounds=(0, inf), model=fans.l0@1.0.0, value=0)",
+     "details": {
+      "bounds": "(0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "0"
+     },
+     "message": "input must be finite and strictly positive",
+     "subject": "fan_total_pressure"
+    },
+    "id": "edge/1/fan_total_from_static"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_static_pressure: input must be finite and non-negative (bounds=[0, inf), model=fans.l0@1.0.0, value=-1e-300)",
+     "details": {
+      "bounds": "[0, inf)",
+      "model": "fans.l0@1.0.0",
+      "value": "-1e-300"
+     },
+     "message": "input must be finite and non-negative",
+     "subject": "fan_static_pressure"
+    },
+    "id": "edge/2/fan_total_from_static"
+   },
+   {
+    "error": {
+     "code": "out_of_validity",
+     "describe": "out_of_validity at fan_dynamic_pressure: fan dynamic pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1418.55], model=fans.l0@1.0.0, value=4612.615613347167)",
+     "details": {
+      "bounds": "(0, 1418.55]",
+      "model": "fans.l0@1.0.0",
+      "value": "4612.615613347167"
+     },
+     "message": "fan dynamic pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "subject": "fan_dynamic_pressure"
+    },
+    "id": "edge/3/conventional_dynamic_pressure"
+   },
+   {
+    "fidelity": "l0_predicted",
+    "fidelity_label": "L0 predicted",
+    "id": "edge/4/pressure_coefficient",
+    "model": "fans.l0@1.0.0",
+    "value": 16.978476335698794
+   }
+  ]
+ },
+ "status": 0
+}

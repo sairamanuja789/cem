@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": {
+   "code": "spec_rejected",
+   "describe": "spec_rejected at product.duty.pressure: pressure must state its kind (fan_total or fan_static)",
+   "details": {},
+   "message": "pressure must state its kind (fan_total or fan_static)",
+   "subject": "product.duty.pressure"
+  }
+ },
+ "status": 1
+}

@@ -1,0 +1,99 @@
+{
+ "body": {
+  "abi_version": "0.2.0",
+  "inputs": {
+   "d_tip": {
+    "from": [
+     "product.nominal_size",
+     "product.size_reference",
+     "product.tip_clearance_min"
+    ],
+    "provenance": "default",
+    "provisional": true,
+    "rule": "D_tip = D_duct - 2 c_tip (owner decision D6, 2026-10-10; AX-001, AX-009)",
+    "unit": "m",
+    "value": 0.119
+   },
+   "fan_total_pressure": {
+    "from": "product.duty.pressure",
+    "unit": "Pa",
+    "value": 5000.0
+   },
+   "flow": {
+    "from": "product.duty.flow",
+    "unit": "m3/s",
+    "value": 0.05
+   },
+   "omega": {
+    "from": "product.rotational_speed",
+    "unit": "rad/s",
+    "value": 209.43951023931953
+   }
+  },
+  "kernel_version": "0.0.0",
+  "models": {
+   "fans.feasibility": "1.0.0",
+   "fans.l0": "1.0.0",
+   "platform.air": "1.0.0"
+  },
+  "plugins": {
+   "fans.axial_ducted": "0.1.0"
+  },
+  "report": {
+   "checks": [
+    {
+     "limit": "incompressible_pressure",
+     "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+     "nearest_feasible": {
+      "fan_total_pressure": {
+       "fidelity": "l0_predicted",
+       "fidelity_label": "L0 predicted",
+       "model": "fans.feasibility@1.0.0",
+       "value": 1418.55
+      },
+      "flow": {
+       "fidelity": "l0_predicted",
+       "fidelity_label": "L0 predicted",
+       "model": "fans.feasibility@1.0.0",
+       "value": 0.05
+      }
+     },
+     "status": "violated",
+     "violation": {
+      "code": "out_of_validity",
+      "describe": "out_of_validity at fan_total_pressure: fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3) (bounds=(0, 1418.55], model=fans.l0@1.0.0, value=5000)",
+      "details": {
+       "bounds": "(0, 1418.55]",
+       "model": "fans.l0@1.0.0",
+       "value": "5000"
+      },
+      "message": "fan total pressure exceeds the incompressible limit EPSILON gamma p1 (ADR-003 D3)",
+      "subject": "fan_total_pressure"
+     }
+    },
+    {
+     "limit": "incompressible_tip_speed",
+     "message": "within sqrt(2 EPSILON) a1",
+     "nearest_feasible": null,
+     "status": "pass",
+     "violation": null
+    },
+    {
+     "limit": "family_specific_speed_range",
+     "message": "range unsourced: no cited specific-speed range for fans.axial_ducted",
+     "nearest_feasible": null,
+     "status": "range_unsourced",
+     "violation": null
+    }
+   ],
+   "specific_speed": null,
+   "verdict": "infeasible"
+  },
+  "spec": {
+   "family": "fans.axial_ducted",
+   "revision": 2,
+   "spec_id": "axial-120"
+  }
+ },
+ "status": 0
+}

@@ -1,0 +1,96 @@
+[
+ {
+  "command": [
+   "spec",
+   "compile",
+   "{spec}"
+  ],
+  "exit_code": 0,
+  "output": [
+   "spec axial-120 revision 1 (family fans.axial_ducted): compiled, run 1",
+   "fields (value as given = SI value; provenance; inputs carry no fidelity label):",
+   "  air.density: 1.18 kg/m3 = 1.18 kg/m3  [default]",
+   "  air.temperature: 298.15 K = 298.15 K  [default]",
+   "  envelope.depth_max: 40 mm = 0.04 m  [default, provisional]",
+   "  envelope.depth_min: 25 mm = 0.025 m  [default, provisional]",
+   "  envelope.height: 120 mm = 0.12 m  [default, provisional]",
+   "  envelope.width: 120 mm = 0.12 m  [default, provisional]",
+   "  manufacturing.material: PETG  [default, provisional]",
+   "  manufacturing.process: FDM  [user]",
+   "  product.duty.flow: unknown  [unknown]",
+   "  product.duty.pressure: unknown  [unknown]",
+   "  product.motor.bore_diameter: unknown  [unknown]",
+   "  product.motor.speed_max: unknown  [unknown]",
+   "  product.motor.speed_min: unknown  [unknown]",
+   "  product.nominal_size: 120 mm = 0.12 m  [user]",
+   "  product.pressure_margin: 0.1 1 = 0.1 1  [derived, provisional]",
+   "  product.rotational_speed: 2000 rpm = 209.43951023931953 rad/s  [default, provisional]",
+   "  product.safety_factor.at_speed_ratio: 1.2 1 = 1.2 1  [default, provisional]",
+   "  product.safety_factor.factor: 2 1 = 2 1  [default, provisional]",
+   "  product.scope: [\"rotor\",\"hub\",\"blades\",\"duct\"]  [user]",
+   "  product.size_reference: duct_inner_diameter  [default, provisional]",
+   "  product.tip_clearance_min: 0.5 mm = 5e-04 m  [default, provisional]",
+   "  product.wall_thickness_min: 0.8 mm = 8e-04 m  [default, provisional]",
+   "open questions (2):",
+   "  product.duty.flow [m3/s]: Essential duty point flow rate (AX-003).",
+   "  product.duty.pressure [Pa]: Essential duty point pressure rise and kind (AX-004).",
+   "not runnable yet: answer the essential questions (SPEC-007)"
+  ]
+ },
+ {
+  "command": [
+   "spec",
+   "compile",
+   "{static}"
+  ],
+  "exit_code": 0,
+  "output": [
+   "spec axial-120 revision 2 (family fans.axial_ducted): compiled, run 2",
+   "fields (value as given = SI value; provenance; inputs carry no fidelity label):",
+   "  air.density: 1.18 kg/m3 = 1.18 kg/m3  [default]",
+   "  air.temperature: 298.15 K = 298.15 K  [default]",
+   "  envelope.depth_max: 40 mm = 0.04 m  [default, provisional]",
+   "  envelope.depth_min: 25 mm = 0.025 m  [default, provisional]",
+   "  envelope.height: 120 mm = 0.12 m  [default, provisional]",
+   "  envelope.width: 120 mm = 0.12 m  [default, provisional]",
+   "  manufacturing.material: PETG  [default, provisional]",
+   "  manufacturing.process: FDM  [user]",
+   "  product.duty.flow: 0.05 m3/s = 0.05 m3/s  [user]",
+   "  product.duty.pressure: 150 Pa = 150 Pa (fan_static)  [user]",
+   "  product.motor.bore_diameter: unknown  [unknown]",
+   "  product.motor.speed_max: unknown  [unknown]",
+   "  product.motor.speed_min: unknown  [unknown]",
+   "  product.nominal_size: 120 mm = 0.12 m  [user]",
+   "  product.pressure_margin: 0.1 1 = 0.1 1  [derived, provisional]",
+   "  product.rotational_speed: 2000 rpm = 209.43951023931953 rad/s  [default, provisional]",
+   "  product.safety_factor.at_speed_ratio: 1.2 1 = 1.2 1  [default, provisional]",
+   "  product.safety_factor.factor: 2 1 = 2 1  [default, provisional]",
+   "  product.scope: [\"rotor\",\"hub\",\"blades\",\"duct\"]  [user]",
+   "  product.size_reference: duct_inner_diameter  [default, provisional]",
+   "  product.tip_clearance_min: 0.5 mm = 5e-04 m  [default, provisional]",
+   "  product.wall_thickness_min: 0.8 mm = 8e-04 m  [default, provisional]",
+   "open questions: none"
+  ]
+ },
+ {
+  "command": [
+   "feasibility",
+   "axial-120"
+  ],
+  "exit_code": 0,
+  "output": [
+   "feasibility of axial-120 revision 2: run 3",
+   "inputs:",
+   "  flow: 0.05 m3/s  (from product.duty.flow)",
+   "  fan_total_pressure: 161.53153903336792 Pa [L0 predicted, fans.l0@1.0.0] derived: ISO 5801: fan total = fan static + conventional fan dynamic pressure 1/2 rho (Q/A_out)^2, A_out = pi D_duct^2 / 4, Mach factor 1 within ADR-003 D3",
+   "  omega: 209.43951023931953 rad/s  (from product.rotational_speed)",
+   "  d_tip: 0.119 m  [default, provisional] D_tip = D_duct - 2 c_tip (owner decision D6, 2026-10-10; AX-001, AX-009)  (from product.nominal_size, product.size_reference, product.tip_clearance_min)",
+   "specific speed: 1.170205467938363 (1) [L0 predicted, fans.l0@1.0.0]",
+   "checks:",
+   "  incompressible_pressure: pass: within EPSILON gamma p1",
+   "  incompressible_tip_speed: pass: within sqrt(2 EPSILON) a1",
+   "  family_specific_speed_range: range_unsourced: range unsourced: no cited specific-speed range for fans.axial_ducted",
+   "verdict: unconfirmed: no limit violated, but at least one check could not be applied"
+  ]
+ }
+]

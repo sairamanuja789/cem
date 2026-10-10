@@ -1,0 +1,18 @@
+[
+ {
+  "command": [
+   "geometry",
+   "smoke"
+  ],
+  "exit_code": 0,
+  "output": [
+   "geometry smoke (occt backend, test parameters): run 1",
+   "validity: ok (closed True, manifold True, self-intersection free True)",
+   "topology: 1 solid, 8 faces, 15 edges",
+   "mass properties (geometry, not a prediction: no fidelity label): volume 1.4906757298154391e-05 m3, area 0.00441483028363976 m2, centroid (0.0015555533527475756, 6.433391178248493e-19, -1.247419756387081e-13) m",
+   "exports (content-hash names, stored as artifacts):",
+   "  b245ad86d7b13225ea0f749fa3374c0e973e4aec7ebd7857253902dd6bd173c8.step  32550 bytes",
+   "  f63adecc311aab335702beb9c488dd5b9f36e5f5fd0be1716ccd82832613bdc5.stl  24084 bytes"
+  ]
+ }
+]

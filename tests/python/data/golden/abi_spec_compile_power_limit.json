@@ -1,0 +1,15 @@
+{
+ "body": {
+  "error": {
+   "code": "infeasible_requirement",
+   "describe": "infeasible_requirement at product.power_limit: required air power exceeds stated power limit (air_power=7.5, power_limit=1)",
+   "details": {
+    "air_power": "7.5",
+    "power_limit": "1"
+   },
+   "message": "required air power exceeds stated power limit",
+   "subject": "product.power_limit"
+  }
+ },
+ "status": 1
+}

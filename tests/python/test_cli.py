@@ -7,7 +7,10 @@ the container.
 
 import hashlib
 import json
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -247,6 +250,28 @@ def test_geometry_smoke_exports_step_and_stl_with_content_hash_names(tmp_path: P
     with open_store(store) as opened:
         stored = {a.name for a in opened.run_artifacts(opened.run(1))}
     assert set(names) <= stored and {"command.json", "output.json"} <= stored
+
+
+@pytest.mark.req("GEO-004")
+@pytest.mark.req("IN-001")
+def test_geometry_smoke_json_stdout_is_only_json(tmp_path: Path) -> None:
+    # Owner decision D5: OCCT messages never reach stdout. A child process captures the real file
+    # descriptor 1, so a print from C++ (which CliRunner would not see) fails this test.
+    environment = {**os.environ, "PYTHONPATH": str(ROOT / "python")}
+    child = subprocess.run(
+        [sys.executable, "-m", "cemkit.cli", "geometry", "smoke", "--json"]
+        + ["--store", str(tmp_path / "store")],
+        capture_output=True,
+        text=True,
+        env=environment,
+        check=False,
+    )
+    assert child.returncode == 0, child.stderr
+    document = json.loads(child.stdout)  # the whole of stdout is one JSON document
+    assert child.stdout == json.dumps(document, sort_keys=True) + "\n"
+    assert document["command"] == "geometry smoke"
+    assert document["output"]["validity"]["ok"] is True
+    assert sorted(f["name"].rsplit(".", 1)[1] for f in document["files"]) == ["step", "stl"]
 
 
 @pytest.mark.req("UC-08")

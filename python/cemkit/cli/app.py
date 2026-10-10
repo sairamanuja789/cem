@@ -23,6 +23,7 @@ Exit codes: 0 done; 1 rejected input, unknown id or failed reproduction; 2 infea
 from __future__ import annotations
 
 import base64
+import json
 import os
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -362,6 +363,9 @@ def geometry_smoke(
     out: Annotated[
         Path | None, typer.Option(help="Also write <sha256>.<ext> files to this directory")
     ] = None,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Print one JSON document on stdout instead of text")
+    ] = False,
 ) -> None:
     """Build the geometry test solid and export STEP and STL (GEO-001, GEO-002, GEO-004)."""
 
@@ -378,6 +382,19 @@ def geometry_smoke(
                 opened.record_artifact(run, data, name, MEDIA_TYPES[export["format"]])
                 where = write_named(out, name, data) if out is not None else None
                 paths.append((name, export["size_bytes"], where))
+        if as_json:
+            # D5: stdout carries this one JSON document and nothing else (OCCT logs elsewhere).
+            document = {
+                "command": "geometry smoke",
+                "run": run_id,
+                "output": output,
+                "files": [
+                    {"name": n, "size_bytes": size, "path": str(where) if where else None}
+                    for n, size, where in paths
+                ],
+            }
+            emit([json.dumps(document, sort_keys=True)])
+            return
         v, t, m = response["validity"], response["topology"], response["mass_properties"]
         centroid = ", ".join(num(c) for c in m["centroid"])
         lines = [

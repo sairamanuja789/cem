@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# The cemkit CLI inside the dev container (T14): `scripts/dev.sh scripts/cemkit spec compile ...`.
+# The release preset must have built cemkit._kernel (ADR-013); the store defaults to .cemkit-store/
+# in the current directory (CEMKIT_STORE or --store to change it).
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHONPATH="$root/python${PYTHONPATH:+:$PYTHONPATH}" exec uv run --project "$root" --locked \
+  python -m cemkit.cli "$@"

@@ -16,6 +16,9 @@ dependencies = [
   "typer",
 ]
 
+[project.scripts]
+cemkit = "cemkit.cli.app:main"
+
 [dependency-groups]
 dev = [
   "gcovr",

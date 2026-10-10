@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": {
+   "code": "spec_rejected",
+   "describe": "spec_rejected at product.duty.pressure: static-to-static pressure is rejected (ISO 5801 requires fan_total or fan_static)",
+   "details": {},
+   "message": "static-to-static pressure is rejected (ISO 5801 requires fan_total or fan_static)",
+   "subject": "product.duty.pressure"
+  }
+ },
+ "status": 1
+}

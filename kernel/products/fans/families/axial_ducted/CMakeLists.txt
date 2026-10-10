@@ -4,6 +4,6 @@
 cemkit_add_family(
   SOURCES axial_ducted.cpp
   DEPS cemkit_fans_common
-  TESTS tests/test_axial_ducted.cpp
+  TESTS tests/test_axial_ducted.cpp tests/test_spec_compiler.cpp
   TEST_DEPS cemkit_spec
 )

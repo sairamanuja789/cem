@@ -5,7 +5,7 @@ add_subdirectory(common)
 cemkit_add_families(fan_family_targets)
 cemkit_add_module(
   PATH products/fans
-  SOURCES register.cpp
-  DEPS cemkit_product ${fan_family_targets}
+  SOURCES register.cpp operations.cpp
+  DEPS cemkit_product cemkit_fans_common ${fan_family_targets}
   TESTS tests/test_register.cpp
 )

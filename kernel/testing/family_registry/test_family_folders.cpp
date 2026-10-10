@@ -9,6 +9,7 @@
 
 #include "cemkit/product/registry.hpp"
 #include "products/fans/register.hpp"
+#include "testing/contract_stubs/register.hpp"
 #include "testing/stub_product/register.hpp"
 
 namespace fs = std::filesystem;
@@ -47,6 +48,7 @@ Registry all_products() {
   Registry registry;
   REQUIRE(cemkit::fans::register_fan_families(registry).has_value());
   REQUIRE(cemkit::testing::stub_product::register_stub_product_families(registry).has_value());
+  REQUIRE(cemkit::testing::contract_stubs::register_contract_stub_families(registry).has_value());
   return registry;
 }
 

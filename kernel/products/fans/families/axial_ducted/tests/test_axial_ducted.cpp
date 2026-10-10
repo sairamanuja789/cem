@@ -40,10 +40,7 @@ nlohmann::json sized_spec() {
 cemkit::spec::Spec compile(const nlohmann::json& doc) {
   auto registry = std::make_shared<cemkit::product::Registry>();
   REQUIRE(axial::register_family(*registry).has_value());
-  const cemkit::spec::SpecCompiler compiler{cemkit::spec::CompilerOptions{
-      .autonomous_mode = false,
-      .essential_resolver = cemkit::product::essential_field_resolver(registry),
-      .default_resolver = {}}};
+  const cemkit::spec::SpecCompiler compiler{cemkit::product::compiler_options(registry)};
   auto spec = compiler.compile(doc);
   REQUIRE(spec.has_value());
   return *spec;
@@ -95,10 +92,7 @@ TEST_CASE("fans.axial_ducted registers and declares the ADR-003 D8 essential fie
 TEST_CASE("the spec compiler asks fans.axial_ducted for its essential fields", "[SPEC-006]") {
   auto registry = std::make_shared<cemkit::product::Registry>();
   REQUIRE(axial::register_family(*registry).has_value());
-  const cemkit::spec::SpecCompiler compiler{cemkit::spec::CompilerOptions{
-      .autonomous_mode = false,
-      .essential_resolver = cemkit::product::essential_field_resolver(registry),
-      .default_resolver = {}}};
+  const cemkit::spec::SpecCompiler compiler{cemkit::product::compiler_options(registry)};
   const nlohmann::json doc{{"schema_version", "1.0.0"},
                            {"spec_id", "axial"},
                            {"revision", 1},

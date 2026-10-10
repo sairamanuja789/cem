@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": {
+   "code": "spec_rejected",
+   "describe": "spec_rejected at product.duty.flow: the duty point flow is unknown: answer the spec's questions first",
+   "details": {},
+   "message": "the duty point flow is unknown: answer the spec's questions first",
+   "subject": "product.duty.flow"
+  }
+ },
+ "status": 1
+}

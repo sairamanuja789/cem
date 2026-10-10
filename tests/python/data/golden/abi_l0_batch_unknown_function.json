@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": {
+   "code": "invalid_input",
+   "describe": "invalid_input at cases[0].function: unknown function: no_such_function",
+   "details": {},
+   "message": "unknown function: no_such_function",
+   "subject": "cases[0].function"
+  }
+ },
+ "status": 1
+}

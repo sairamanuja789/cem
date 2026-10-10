@@ -14,36 +14,11 @@ std::optional<Field> Spec::field(std::string_view path) const {
 }
 
 core::Result<void> Spec::check_contradictions() const {
-  // Contradiction check (SPEC-010): air power exceeds stated power limit.
-  const auto flow_f = field("product.duty.flow");
-  const auto pressure_f = field("product.duty.pressure");
-
-  if (flow_f && flow_f->si_value && pressure_f && pressure_f->si_value) {
-    const double q = *flow_f->si_value;
-    const double p = *pressure_f->si_value;
-    if (q > 0.0 && p > 0.0) {
-      const double air_power = q * p;
-
-      // Look for power limit in product or motor or top-level; check every limit present
-      const std::array power_limit_paths = {std::string_view{"product.power_limit"},
-                                            std::string_view{"product.motor.power_limit"},
-                                            std::string_view{"power_limit"}};
-
-      for (const auto path : power_limit_paths) {
-        const auto limit_f = field(path);
-        if (limit_f && limit_f->si_value.has_value()) {
-          const double power_limit = *limit_f->si_value;
-          if (air_power > power_limit) {
-            return core::fail(core::ErrorCode::infeasible_requirement,
-                              "required air power exceeds stated power limit", limit_f->path,
-                              {{"air_power", core::format_number(air_power)},
-                               {"power_limit", core::format_number(power_limit)}});
-          }
-        }
-      }
-    }
+  // SPEC-010: the platform has no contradiction rules of its own; the family's rules run here
+  // (ADR-015 rule 4).
+  if (options_.spec_checks) {
+    return options_.spec_checks(*this);
   }
-
   return {};
 }
 

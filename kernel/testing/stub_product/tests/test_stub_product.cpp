@@ -22,8 +22,7 @@ std::shared_ptr<const cemkit::product::Registry> stub_registry() {
 }
 
 cemkit::spec::SpecCompiler compiler() {
-  return cemkit::spec::SpecCompiler{cemkit::spec::CompilerOptions{
-      .essential_resolver = cemkit::product::essential_field_resolver(stub_registry())}};
+  return cemkit::spec::SpecCompiler{cemkit::product::compiler_options(stub_registry())};
 }
 
 json minimal_spec(const std::string& family) {

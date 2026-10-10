@@ -10,6 +10,7 @@
 #include "cemkit/core/result.hpp"
 #include "cemkit/product/family.hpp"
 #include "cemkit/spec/essential.hpp"
+#include "cemkit/spec/options.hpp"
 
 namespace cemkit::product {
 
@@ -46,5 +47,15 @@ class Registry {
 // compiled spec that keeps its options (SPEC-009) can never outlive it.
 [[nodiscard]] spec::EssentialFieldResolver essential_field_resolver(
     std::shared_ptr<const Registry> registry);
+
+// ADR-015: the spec compiler's field catalogue resolver and family contradiction rules, backed by a
+// registry in the same way (shared ownership).
+[[nodiscard]] spec::FieldCatalogueResolver field_catalogue_resolver(
+    std::shared_ptr<const Registry> registry);
+[[nodiscard]] spec::SpecCheckResolver spec_check_resolver(std::shared_ptr<const Registry> registry);
+
+// Compiler options with every resolver backed by `registry` and no defaults (SPEC-007).
+[[nodiscard]] spec::CompilerOptions compiler_options(
+    const std::shared_ptr<const Registry>& registry, bool autonomous_mode = false);
 
 }  // namespace cemkit::product

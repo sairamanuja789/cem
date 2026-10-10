@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -9,6 +10,7 @@
 #include "cemkit/core/result.hpp"
 #include "cemkit/core/version.hpp"
 #include "cemkit/product/parameter_space.hpp"
+#include "cemkit/spec/catalogue.hpp"
 #include "cemkit/spec/spec.hpp"
 #include "cemkit/spec/units.hpp"
 
@@ -92,6 +94,16 @@ struct SimulationCase {
   bool operator==(const SimulationCase&) const = default;
 };
 
+// What a family's feasibility gate reports for a compiled spec (SEL-004, ADR-015 rule 4): the
+// inputs it used (each with its value, unit and where it came from) and its report (a "verdict" and
+// a list of "checks"). The platform passes both on without interpreting them.
+struct FeasibilityOutcome {
+  nlohmann::ordered_json inputs;
+  nlohmann::ordered_json report;
+
+  bool operator==(const FeasibilityOutcome&) const = default;
+};
+
 // A product family plugin (FAM-001). Every family implements this one interface; the platform and
 // the orchestration only ever see it. Implementations are stateless after construction, and every
 // operation is pure and deterministic: the same inputs give the same outputs.
@@ -117,6 +129,16 @@ class Family {
   [[nodiscard]] virtual std::vector<std::string> essential_fields() const = 0;
   // Duty range the family is fit for (SEL-002).
   [[nodiscard]] virtual FeasibleRange feasible_range() const = 0;
+  // ADR-015 rule 3: every field the family's specs may carry under "product", the single source of
+  // its JSON schema. The compiler rejects any other product field.
+  [[nodiscard]] virtual spec::FieldCatalogue field_catalogue() const = 0;
+  // ADR-015 rule 4, SPEC-010: the family's contradiction rules for a compiled spec; an error
+  // rejects the spec.
+  [[nodiscard]] virtual core::Status spec_checks(const spec::Spec& spec) const = 0;
+  // ADR-015 rule 4, SEL-004: the family's L0 feasibility gate for a compiled spec. A family without
+  // one returns not_implemented with the detail capability = "<family>.feasibility" (D4).
+  [[nodiscard]] virtual core::Result<FeasibilityOutcome> feasibility(
+      const spec::Spec& spec) const = 0;
 
   [[nodiscard]] virtual core::Result<Design> initial_design(const spec::Spec& spec) const = 0;
   [[nodiscard]] virtual core::Result<Evaluation> evaluate_l1(const spec::Spec& spec,

@@ -58,6 +58,24 @@ class StubFamily final : public product::Family {
                                            .upper = 1.0,
                                            .source = std::string(k_test_source)}}};
   }
+  [[nodiscard]] spec::FieldCatalogue field_catalogue() const override {
+    // Test parameters (ADR-015): the fields the stub's test specs carry, nothing more.
+    return {
+        .title = "stub family (test fixture)",
+        .description = "Test parameters only; not engineering data.",
+        .fields = {{.path = "product.duty.flow", .kind = QuantityKind::volume_flow_rate},
+                   {.path = "product.nominal_size", .kind = QuantityKind::length},
+                   {.path = "product.rotational_speed", .kind = QuantityKind::angular_velocity}},
+        .containers = {}};
+  }
+  [[nodiscard]] core::Status spec_checks(const spec::Spec& /*spec*/) const override { return {}; }
+  [[nodiscard]] core::Result<product::FeasibilityOutcome> feasibility(
+      const spec::Spec& /*spec*/) const override {
+    return core::fail(core::ErrorCode::not_implemented, "the stub family has no feasibility gate",
+                      "family",
+                      {{"capability", std::string(k_family_id) + ".feasibility"},
+                       {"family", std::string(k_family_id)}});
+  }
   [[nodiscard]] core::Result<product::Design> initial_design(
       const spec::Spec& /*spec*/) const override {
     return space_.default_design();

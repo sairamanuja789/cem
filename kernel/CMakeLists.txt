@@ -10,8 +10,9 @@ add_subdirectory(cemkit/geometry/port)
 add_subdirectory(cemkit/geometry/occt)
 add_subdirectory(cemkit/capi)
 
-# Product domains.
-add_subdirectory(products/fans)
+# Product domains: every kernel/products/<product>/, and the generated register_products() entry
+# point the C ABI calls (ADR-015 rule 5).
+cemkit_add_products()
 
 add_subdirectory(testing)
 

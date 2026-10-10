@@ -440,7 +440,10 @@ def test_schema_loading_rejects_duplicate_ids_and_families(tmp_path: Path) -> No
 
 @pytest.mark.req("SPEC-001")
 def test_each_family_has_exactly_one_product_schema() -> None:
-    assert dict(SET.families) == {"fans.axial_ducted": "urn:cemkit:schema:products:fans:v1:spec"}
+    # ADR-015 rule 3: one generated schema per family, named after it.
+    assert dict(SET.families) == {
+        "fans.axial_ducted": "urn:cemkit:schema:products:fans:v1:families:axial_ducted"
+    }
     assert SET.spec_errors([]) != []
 
 

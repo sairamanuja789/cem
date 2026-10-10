@@ -1,0 +1,12 @@
+{
+ "body": {
+  "error": {
+   "code": "invalid_input",
+   "describe": "invalid_input at cases[0].omega: must be a number: omega",
+   "details": {},
+   "message": "must be a number: omega",
+   "subject": "cases[0].omega"
+  }
+ },
+ "status": 1
+}

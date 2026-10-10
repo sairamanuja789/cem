@@ -4,7 +4,9 @@
 #include <nlohmann/json.hpp>
 
 #include "cemkit/core/error.hpp"
+#include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"
+#include "products/fans/families/axial_ducted/axial_ducted.hpp"
 
 using Catch::Matchers::WithinRel;
 using json = nlohmann::json;
@@ -21,8 +23,9 @@ Field field_or_empty(const Spec& spec, std::string_view path) {
   return spec.field(path).value_or(Field{});
 }
 
-// Stands in for a family plugin (SPEC-006): the platform has no built-in essential-field list, so
-// every compiler here is given this resolver. The fans.axial_ducted list is ADR-003's; any other
+// The spec compiler on fans.axial_ducted specs (moved from cemkit/spec/tests by ADR-015: the field
+// catalogue and the contradiction rules now come from the family). The essential fields come from
+// this resolver so that tests can inject others: the fans.axial_ducted list is ADR-003's; any other
 // family is unknown, as it is for the family registry (cemkit/product). The registry-backed
 // resolver is tested in cemkit/product/tests and kernel/testing/stub_product.
 cemkit::core::Result<std::vector<std::string>> fixture_essentials(std::string_view family) {
@@ -32,8 +35,13 @@ cemkit::core::Result<std::vector<std::string>> fixture_essentials(std::string_vi
   return cemkit::core::fail(cemkit::core::ErrorCode::spec_rejected, "unknown family", "family");
 }
 
-CompilerOptions fixture_options() {
-  return CompilerOptions{.essential_resolver = fixture_essentials};
+// The real family's field catalogue and contradiction rules (ADR-015), with fixture_essentials.
+CompilerOptions fixture_options(bool autonomous_mode = false) {
+  auto registry = std::make_shared<cemkit::product::Registry>();
+  REQUIRE(cemkit::fans::axial_ducted::register_family(*registry).has_value());
+  CompilerOptions options = cemkit::product::compiler_options(registry, autonomous_mode);
+  options.essential_resolver = fixture_essentials;
+  return options;
 }
 
 json base_valid_spec() {
@@ -203,7 +211,8 @@ TEST_CASE("pressure semantics: accept only fan_total and fan_static, reject stat
     const auto res = compiler.compile(doc);
     REQUIRE(res.has_value());
     REQUIRE(res->field("product.duty.pressure").has_value());
-    CHECK(field_or_empty(*res, "product.duty.pressure").pressure_kind == "fan_total");
+    CHECK(field_or_empty(*res, "product.duty.pressure").qualifier ==
+          Qualifier{.name = "pressure_kind", .value = "fan_total"});
   }
 }
 
@@ -250,16 +259,14 @@ TEST_CASE("spec with unresolved essential unknowns cannot start campaign unless 
       json{{"value", nullptr}, {"unit", "Pa"}, {"provenance", "unknown"}};
 
   // Normal mode: has unresolved essential unknowns
-  SpecCompiler normal_compiler(
-      CompilerOptions{.autonomous_mode = false, .essential_resolver = fixture_essentials});
+  SpecCompiler normal_compiler(fixture_options(false));
   auto res1 = normal_compiler.compile(doc);
   REQUIRE(res1.has_value());
   CHECK(res1->has_unresolved_essential_unknowns());
   CHECK(res1->questions().size() == 2);
 
   // Autonomous mode without default resolver still has unresolved unknowns
-  SpecCompiler auto_compiler_no_defaults(
-      CompilerOptions{.autonomous_mode = true, .essential_resolver = fixture_essentials});
+  SpecCompiler auto_compiler_no_defaults(fixture_options(true));
   auto res2 = auto_compiler_no_defaults.compile(doc);
   REQUIRE(res2.has_value());
   CHECK(res2->has_unresolved_essential_unknowns());

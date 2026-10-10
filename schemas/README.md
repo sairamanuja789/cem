@@ -10,7 +10,7 @@ refer to each other by those URNs, not by file paths.
 | `cemkit/v1/candidate.schema.json` | `urn:cemkit:schema:v1:candidate` | One design candidate |
 | `cemkit/v1/result.schema.json` | `urn:cemkit:schema:v1:result` | The outcome of evaluating a candidate |
 | `cemkit/v1/error-codes.json` | `urn:cemkit:schema:v1:error-codes` | Failure codes. **Generated**; never edit (see below) |
-| `products/fans/v1/spec.schema.json` | `urn:cemkit:schema:products:fans:v1:spec` | The `product` block of a `fans.axial_ducted` spec |
+| `products/fans/v1/families/axial_ducted.schema.json` | `urn:cemkit:schema:products:fans:v1:families:axial_ducted` | The `product` block of a `fans.axial_ducted` spec. **Generated** from the family's field catalogue; never edit (see below) |
 
 Example: `examples/axial_120.yaml`, the v1 product from requirements section 7. Tests:
 `tests/python/test_schemas.py`.
@@ -27,6 +27,10 @@ Example: `examples/axial_120.yaml`, the v1 product from requirements section 7. 
   `SchemaSet.spec_errors` runs both checks.
 - **Families.** Each product schema lists the families it covers in `x-cemkit-families`. Adding a
   family therefore touches only its own schema file (FAM-002).
+- **Generated family schemas (ADR-015 rule 3).** `products/<product>/v1/families/<family>.schema.json`
+  is generated from the family's `Family::field_catalogue()` in the kernel, the single source of
+  truth for its fields. Regenerate with `scripts/gen_family_schemas.sh` (dev container, after
+  building gcc-debug); the ctest `family_schemas_up_to_date` fails if the committed file differs.
 - **References.** The platform schemas never reference product schemas (ADR-009); a test enforces
   this. Product schemas may reference platform definitions.
 

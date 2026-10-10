@@ -19,6 +19,14 @@ struct Tolerance {
   bool operator==(const Tolerance&) const = default;
 };
 
+// The value of a field's qualifier (catalogue QualifierRule), reported under `name`.
+struct Qualifier {
+  std::string name;   // e.g. "pressure_kind"
+  std::string value;  // e.g. "fan_total"
+
+  bool operator==(const Qualifier&) const = default;
+};
+
 struct Field {
   std::string path;
   std::optional<double> original_value;
@@ -31,7 +39,7 @@ struct Field {
   bool provisional{false};
   std::optional<Tolerance> tolerance;
   std::optional<std::string> note;
-  std::optional<std::string> pressure_kind;  // "fan_total" or "fan_static"
+  std::optional<Qualifier> qualifier;  // set when the family declares one (ADR-015)
 
   bool operator==(const Field&) const = default;
 };

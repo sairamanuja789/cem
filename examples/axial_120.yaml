@@ -1,6 +1,6 @@
 # 120 mm ducted axial fan: the v1 product spec (requirements section 7).
 # Schemas: schemas/cemkit/v1/spec.schema.json (this document) and
-# schemas/products/fans/v1/spec.schema.json (the "product" block).
+# schemas/products/fans/v1/families/axial_ducted.schema.json (the "product" block; generated, ADR-015).
 # Every value is a field object: value, unit, provenance, and optional tolerance, confidence (image
 # only), provisional flag and note. The duty point is unknown: it must be supplied before the first
 # campaign (AX-003, AX-004). AX-013 (noise proxies), AX-016 (deliverables) and AX-017 (validation)

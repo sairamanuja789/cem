@@ -6,26 +6,18 @@
 // cemkit.cpp turns into invalid_input at the boundary; nothing else here throws by design.
 
 #include <nlohmann/json.hpp>
-#include <stdexcept>
 #include <string>
 
 #include "cemkit/core/error.hpp"
 #include "cemkit/core/result.hpp"
+#include "cemkit/product/json_io.hpp"
 
 namespace cemkit::capi::detail {
 
-using Json = nlohmann::ordered_json;
+using Json = product::Json;
 
 // A request that does not have the documented shape; subject names the offending key.
-class BadRequest : public std::runtime_error {
- public:
-  BadRequest(std::string subject, const std::string& message)
-      : std::runtime_error{message}, subject_{std::move(subject)} {}
-  [[nodiscard]] const std::string& subject() const noexcept { return subject_; }
-
- private:
-  std::string subject_;
-};
+using BadRequest = product::BadRequest;
 
 [[nodiscard]] Json error_json(const core::Error& error);
 

@@ -49,23 +49,28 @@ core::Status register_operations(product::Operations& operations) {
   const auto one = mp_units::one;
   const std::vector<std::pair<const char*, product::Operation>> table{
       {"tip_speed",
-       [ms](const Json& c) {
+       [ms](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(tip_speed(omega_of(number(a, "omega")), length_of(number(a, "d_tip"))),
                          ms);
        }},
       {"max_fan_total_pressure",
-       [pa](const Json& c) { return labelled(max_fan_total_pressure(air(c)), pa); }},
-      {"max_tip_speed", [ms](const Json& c) { return labelled(max_tip_speed(air(c)), ms); }},
+       [pa](const Json& c, const product::OperationContext& /*context*/) {
+         return labelled(max_fan_total_pressure(air(c)), pa);
+       }},
+      {"max_tip_speed",
+       [ms](const Json& c, const product::OperationContext& /*context*/) {
+         return labelled(max_tip_speed(air(c)), ms);
+       }},
       {"flow_coefficient",
-       [one](const Json& c) {
+       [one](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(flow_coefficient(flow_of(number(a, "flow")), length_of(number(a, "d_tip")),
                                           omega_of(number(a, "omega")), air(c)),
                          one);
        }},
       {"pressure_coefficient",
-       [one](const Json& c) {
+       [one](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(pressure_coefficient(total_of(number(a, "fan_total_pressure")),
                                               length_of(number(a, "d_tip")),
@@ -73,14 +78,14 @@ core::Status register_operations(product::Operations& operations) {
                          one);
        }},
       {"specific_speed",
-       [one](const Json& c) {
+       [one](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(specific_speed(omega_of(number(a, "omega")), flow_of(number(a, "flow")),
                                         total_of(number(a, "fan_total_pressure")), air(c)),
                          one);
        }},
       {"specific_diameter",
-       [one](const Json& c) {
+       [one](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(
              specific_diameter(length_of(number(a, "d_tip")), flow_of(number(a, "flow")),
@@ -88,14 +93,14 @@ core::Status register_operations(product::Operations& operations) {
              one);
        }},
       {"conventional_dynamic_pressure",
-       [pa](const Json& c) {
+       [pa](const Json& c, const product::OperationContext& /*context*/) {
          const Json& a = args_of(c);
          return labelled(conventional_dynamic_pressure(flow_of(number(a, "flow")),
                                                        length_of(number(a, "d_duct")), air(c)),
                          pa);
        }},
       {"fan_total_from_static",
-       [pa](const Json& c) -> core::Result<Json> {
+       [pa](const Json& c, const product::OperationContext& /*context*/) -> core::Result<Json> {
          const Json& a = args_of(c);
          const auto r = fan_total_from_static(
              number(a, "fan_static_pressure") * fan_static_pressure[si::pascal],
@@ -109,7 +114,7 @@ core::Status register_operations(product::Operations& operations) {
          return out;
        }},
       {"scale_fan_laws",
-       [pa](const Json& c) -> core::Result<Json> {
+       [pa](const Json& c, const product::OperationContext& /*context*/) -> core::Result<Json> {
          const Json& a = args_of(c);
          const physics::Air air_old = air(c);
          const Json& p = member(a, "point");
@@ -136,7 +141,7 @@ core::Status register_operations(product::Operations& operations) {
                      {"model", core::to_string(r->flow.model())}};
        }},
       {"check_feasibility",
-       [](const Json& c) -> core::Result<Json> {
+       [](const Json& c, const product::OperationContext& /*context*/) -> core::Result<Json> {
          const auto r = run_feasibility(args_of(c), air(c), member(c, "range"));
          if (!r) {
            return std::unexpected(r.error());

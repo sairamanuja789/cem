@@ -31,11 +31,12 @@ Requirements: PERF-002 (batches in one call), MAINT-005 (semantic versioning), P
 
 ## Versioning (MAINT-005)
 
-`CEMKIT_ABI_VERSION_{MAJOR,MINOR,PATCH}` = 0.2.0, returned by `cemkit_abi_version()` (0.2.0, T14:
+`CEMKIT_ABI_VERSION_{MAJOR,MINOR,PATCH}` = 0.3.0, returned by `cemkit_abi_version()` (0.2.0, T14:
 responses gained `models`, `plugins` and `fidelity_label`, air keys became optional, geometry smoke
-gained `include_data`). A breaking
+gained `include_data`; 0.3.0, ADR-015: `cemkit_product_operation` added, spec fields gained
+`qualifier`). A breaking
 change to a signature or to a JSON format bumps MAJOR; an added function or key bumps MINOR.
-`cemkit.kernel.ABI_REQUIRED` = (0, 2): the loaded library must have the same MAJOR and at least
+`cemkit.kernel.ABI_REQUIRED` = (0, 3): the loaded library must have the same MAJOR and at least
 that MINOR (`cemkit.kernel.check_abi()`).
 
 ## Calls
@@ -103,7 +104,7 @@ family registry (`register_fan_families`); an unknown family is `spec_rejected` 
 `family`. Response `spec`: `schema_version`,
 `spec_id`, `revision`, `parent`, `family`, `title`, `fields` (by path: `provenance`, `provisional`,
 `original_value`, `original_unit`, `si_value`, `si_unit`, `text_value`, `confidence`, `note`,
-`pressure_kind` — one member per qualifier name the family declares, null where absent, kept for ABI 0.2.0 — `qualifier` (`{"name", "value"}` or null; ADR-015), `tolerance`), `questions`, `conflicts`, `has_unresolved_essential_unknowns`.
+`pressure_kind` — one member per qualifier name the family declares, null where absent, kept from ABI 0.2.0 — `qualifier` (`{"name", "value"}` or null; ADR-015), `tolerance`), `questions`, `conflicts`, `has_unresolved_essential_unknowns`.
 
 ### `cemkit_geometry_smoke` / `kernel.geometry_smoke(request)` (GEO-001, GEO-002, GEO-004)
 
@@ -123,3 +124,17 @@ Request: `{"hub_radius", "hub_length", "sections": [{"radius", "chord", "thickne
 - Benchmark: `PYTHONPATH=python uv run python scripts/bench_l0_batch.py`. On 2026-10-10 in the dev
   container (release build), 143 020 cases: JSON encode 394 ms, kernel call 1 224 ms (8.6 µs per
   case including JSON parse and serialisation), JSON decode 150 ms.
+
+## cemkit_product_operation (ABI 0.3, ADR-015)
+
+`{"operation": "<name>", ...}` runs an operation a product registered (`product::Operations`) with
+this library's geometry backend; the response has the versions, `backend`, `operation` and
+`result`. Unknown names are `invalid_input` (subject `operation`).
+
+`ducted_fan_geometry` (fans): `{"args": {"blade_count", "hub_radius", "hub_length",
+"duct_inner_radius", "duct_wall", "duct_length", ["root_fillet"], "stations": [{"radius", "chord",
+"stagger", "camber", "thickness"}, ...]}, ["exports"], ["include_data"]}`, lengths in m and angles
+in rad. `result`: `basis` (geometry from stated parameters only; no performance), `tip_clearance`
+(m), and `parts` (`rotor`, `duct`), each with `validity`, `topology`, `mass_properties` and
+`exports` as in `cemkit_geometry_smoke`. A bad parameter is `geometry_failed` naming its path, for
+example `stations[2].radius` when the tip is not inside the duct.

@@ -125,6 +125,90 @@ def run_guarded(body: Callable[[], None]) -> None:
         raise typer.Exit(3) from None
 
 
+# Test tessellation for STL exports when the parameter file states none (the same arbitrary test
+# values as geometry smoke: 0.05 mm chordal deviation, 0.2 rad between normals).
+FAN_EXPORTS: list[Json] = [
+    {"format": "step"},
+    {"format": "stl", "linear_deflection": 5e-5, "angular_deflection": 0.2},
+]
+
+
+def fan_output(response: Json) -> tuple[Json, list[tuple[str, Json, bytes]]]:
+    """The recorded output (no versions, no file bytes) and each part's exported files."""
+    files: list[tuple[str, Json, bytes]] = []
+    for part in response["result"]["parts"]:
+        for export in part["exports"]:
+            data = export.pop("data_base64", None)
+            if data is not None:
+                files.append((part["name"], export, base64.b64decode(data)))
+    return without_versions(response), files
+
+
+@geometry_app.command("fan")
+def geometry_fan(
+    params: Annotated[
+        Path, typer.Argument(help="Fan geometry parameters (JSON or YAML, m and rad)")
+    ],
+    store: Annotated[Path, typer.Option(envvar=STORE_ENV, help="Store directory")] = Path(
+        DEFAULT_STORE
+    ),
+    out: Annotated[
+        Path | None, typer.Option(help="Also write <part>-<sha256>.<ext> files to this directory")
+    ] = None,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Print one JSON document on stdout instead of text")
+    ] = False,
+) -> None:
+    """Build a ducted fan's rotor and duct from stated parameters and export STEP and STL
+    (ADR-015 M3; GEO-001, GEO-002, GEO-004). Geometry only: no performance is computed."""
+
+    def body() -> None:
+        loaded = load_spec_file(params)
+        exports = loaded.pop("exports", FAN_EXPORTS)
+        request = {"operation": "ducted_fan_geometry", "args": loaded, "exports": exports}
+        response = kernel.product_operation({**request, "include_data": True})
+        output, files = fan_output(response)
+        with store_at(store) as opened:
+            run_id = record_run(opened, "geometry fan", request, output)
+            run = opened.run(run_id)
+            paths = []
+            for part, export, data in files:
+                name = f"{part}-{export['sha256']}.{export['format']}"
+                opened.record_artifact(run, data, name, MEDIA_TYPES[export["format"]])
+                where = write_named(out, name, data) if out is not None else None
+                paths.append((name, export["size_bytes"], where))
+        if as_json:
+            document = {
+                "command": "geometry fan",
+                "run": run_id,
+                "output": output,
+                "files": [
+                    {"name": n, "size_bytes": size, "path": str(where) if where else None}
+                    for n, size, where in paths
+                ],
+            }
+            emit([json.dumps(document, sort_keys=True)])
+            return
+        result = response["result"]
+        lines = [
+            f"geometry fan ({response['backend']} backend): run {run_id}",
+            f"basis: {result['basis']}",
+            f"tip clearance: {num(result['tip_clearance'])} m (stated geometry)",
+        ]
+        for part in result["parts"]:
+            v, t, m = part["validity"], part["topology"], part["mass_properties"]
+            lines.append(
+                f"{part['name']}: validity {'ok' if v['ok'] else 'FAILED'}, {t['faces']} faces, "
+                f"volume {num(m['volume'])} m3 (geometry, no fidelity label)"
+            )
+        lines.append("exports (content-hash names, stored as artifacts):")
+        for name, size, where in paths:
+            lines.append(f"  {name}  {size} bytes" + (f"  -> {where}" if where else ""))
+        emit(lines)
+
+    run_guarded(body)
+
+
 # --- runs ----------------------------------------------------------------------------------------
 
 
@@ -474,6 +558,8 @@ def recompute(command: Json) -> Json:
     if name == "geometry smoke":
         response = without_versions(kernel.geometry_smoke(inputs))
         return response
+    if name == "geometry fan":
+        return fan_output(kernel.product_operation(inputs))[0]
     raise Failure(f"cannot reproduce command {name!r}")
 
 

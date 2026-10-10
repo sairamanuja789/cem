@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #define CEMKIT_ABI_VERSION_MAJOR 0
-#define CEMKIT_ABI_VERSION_MINOR 2
+#define CEMKIT_ABI_VERSION_MINOR 3
 #define CEMKIT_ABI_VERSION_PATCH 0
 
 typedef enum cemkit_status {
@@ -47,6 +47,12 @@ cemkit_status cemkit_l0_batch(const char* request_json, char** out_json);
 /* Builds the geometry test solid (GEO-001, GEO-002) and reports validity, topology, mass
  * properties and the SHA-256 and size of the requested exports (GEO-004). Writes no files. */
 cemkit_status cemkit_geometry_smoke(const char* request_json, char** out_json);
+
+/* Runs a named product operation with this library's geometry backend (ABI 0.3, ADR-015):
+ * {"operation": "<name>", ...the operation's request} -> versions, "backend", "operation" and
+ * "result". For example "ducted_fan_geometry" builds a fan rotor and duct from stated parameters
+ * (docs/capi.md). */
+cemkit_status cemkit_product_operation(const char* request_json, char** out_json);
 
 /* Releases a string returned by this library. NULL is ignored. */
 void cemkit_free(char* json);

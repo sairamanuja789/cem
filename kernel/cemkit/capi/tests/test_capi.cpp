@@ -112,7 +112,7 @@ TEST_CASE("a batch evaluates every case in one call, errors per case", "[PERF-00
         "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), "
         "model=fans.l0@1.0.0, value=0)");
   CHECK(results[2]["id"] == 2);  // no id: the position
-  CHECK(r.body["abi_version"] == "0.2.0");
+  CHECK(r.body["abi_version"] == "0.3.0");
 }
 
 TEST_CASE("feasibility through the ABI reports range unsourced", "[SEL-004][SEL-002]") {

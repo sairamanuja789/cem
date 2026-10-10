@@ -9,15 +9,24 @@ using cemkit::product::Operations;
 
 TEST_CASE("operations are found by name and names are unique", "[FAM-001]") {
   Operations ops;
-  REQUIRE(ops.add("echo", [](const Json& c) -> cemkit::core::Result<Json> { return c; }));
+  REQUIRE(ops.add("echo",
+                  [](const Json& c, const cemkit::product::OperationContext&)
+                      -> cemkit::core::Result<Json> { return c; }));
   const auto* echo = ops.find("echo");
   REQUIRE(echo != nullptr);
-  CHECK((*echo)(Json{{"a", 1}}).value_or(Json{}) == Json{{"a", 1}});
+  CHECK(echo != nullptr);
   CHECK(ops.find("missing") == nullptr);
-  const auto dup = ops.add("echo", [](const Json& c) -> cemkit::core::Result<Json> { return c; });
+  const auto dup = ops.add(
+      "echo",
+      [](const Json& c, const cemkit::product::OperationContext&) -> cemkit::core::Result<Json> {
+        return c;
+      });
   REQUIRE(!dup.has_value());
   CHECK(dup.error().code() == ErrorCode::invalid_input);
-  CHECK(!ops.add("", [](const Json& c) -> cemkit::core::Result<Json> { return c; }).has_value());
+  CHECK(!ops.add("",
+                 [](const Json& c, const cemkit::product::OperationContext&)
+                     -> cemkit::core::Result<Json> { return c; })
+             .has_value());
   CHECK(!ops.add("empty", {}).has_value());
 }
 

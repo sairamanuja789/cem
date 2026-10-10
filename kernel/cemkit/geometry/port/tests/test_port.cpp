@@ -48,6 +48,37 @@ class FixedBackend final : public port::GeometryBackend {
       const port::Solid& /*solid*/) const override {
     return cemkit::core::fail(ErrorCode::internal_error, "not used");
   }
+  // Construction operations are not used by these tests.
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> loft(
+      const std::vector<port::SplineSection>& /*sections*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> revolve(
+      const port::RevolveProfile& /*profile*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> fuse_circular_pattern(
+      const port::Solid& /*base*/, const port::Solid& /*item*/,
+      std::size_t /*count*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> fuse(const port::Solid& /*a*/,
+                                                          const port::Solid& /*b*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> cut(const port::Solid& /*a*/,
+                                                         const port::Solid& /*b*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<port::EdgeSelection> select(
+      const port::Solid& /*solid*/, const port::EdgesOnCylinder& /*rule*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
+  [[nodiscard]] Result<std::unique_ptr<port::Solid>> fillet(
+      const port::Solid& /*solid*/, const port::EdgesOnCylinder& /*rule*/,
+      cemkit::core::Length /*radius*/) const override {
+    return cemkit::core::fail(ErrorCode::internal_error, "not used");
+  }
   [[nodiscard]] Result<std::string> export_bytes(
       const port::Solid& /*solid*/, const port::ExportRequest& /*request*/) const override {
     return bytes_;

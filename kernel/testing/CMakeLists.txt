@@ -76,3 +76,12 @@ add_test(NAME family_schemas_up_to_date
   COMMAND cemkit_gen_family_schemas ${PROJECT_SOURCE_DIR})
 set_tests_properties(family_schemas_up_to_date PROPERTIES
   LABELS "testing/family_schemas;SPEC-001;FAM-002")
+
+# ADR-015 M3: the ducted fan geometry recipe on the OpenCascade backend (a family may not depend on
+# an adapter, so these tests live here).
+add_executable(cemkit_testing_fan_geometry_tests fan_geometry/test_fan_geometry.cpp)
+target_link_libraries(cemkit_testing_fan_geometry_tests PRIVATE
+  cemkit_fans cemkit_geometry_occt Catch2::Catch2WithMain
+  cemkit_warnings cemkit_instrumentation)
+catch_discover_tests(cemkit_testing_fan_geometry_tests
+  PROPERTIES LABELS "testing/fan_geometry;GEO-001;GEO-002")

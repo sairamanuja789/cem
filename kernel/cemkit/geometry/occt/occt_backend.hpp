@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "cemkit/core/result.hpp"
 #include "cemkit/geometry/port/backend.hpp"
@@ -37,6 +38,21 @@ class OcctBackend final : public port::GeometryBackend {
   [[nodiscard]] core::Result<port::Topology> topology(const port::Solid& solid) const override;
   [[nodiscard]] core::Result<port::MassProperties> mass_properties(
       const port::Solid& solid) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> loft(
+      const std::vector<port::SplineSection>& sections) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> revolve(
+      const port::RevolveProfile& profile) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> fuse_circular_pattern(
+      const port::Solid& base, const port::Solid& item, std::size_t count) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> fuse(
+      const port::Solid& a, const port::Solid& b) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> cut(const port::Solid& a,
+                                                               const port::Solid& b) const override;
+  [[nodiscard]] core::Result<port::EdgeSelection> select(
+      const port::Solid& solid, const port::EdgesOnCylinder& rule) const override;
+  [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> fillet(
+      const port::Solid& solid, const port::EdgesOnCylinder& rule,
+      core::Length radius) const override;
   [[nodiscard]] core::Result<std::string> export_bytes(
       const port::Solid& solid, const port::ExportRequest& request) const override;
 };

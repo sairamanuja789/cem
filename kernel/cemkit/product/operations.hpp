@@ -7,6 +7,7 @@
 
 #include "cemkit/core/result.hpp"
 #include "cemkit/core/version.hpp"
+#include "cemkit/geometry/port/backend.hpp"
 #include "cemkit/product/json_io.hpp"
 
 namespace cemkit::product {
@@ -15,7 +16,14 @@ namespace cemkit::product {
 // 5), so the C ABI never names a product. It takes one case ({"function", "args", "air", ...};
 // docs/capi.md) and returns the case's result members or the model's classified error; a
 // malformed case throws BadRequest.
-using Operation = std::function<core::Result<Json>(const Json& case_)>;
+// What the caller (the C ABI) lends an operation: the geometry backend it must build with, so that
+// products never depend on an engine (ADR-009).
+struct OperationContext {
+  const geometry::port::GeometryBackend& geometry;
+};
+
+using Operation =
+    std::function<core::Result<Json>(const Json& case_, const OperationContext& context)>;
 
 // The operations and model identities the compiled-in products register (ADR-015 rule 5). Like the
 // Registry it is owned by the caller; there is no global table.

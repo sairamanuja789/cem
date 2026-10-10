@@ -47,4 +47,6 @@ NB_MODULE(_kernel, m) {
   m.def("feasibility", [](const std::string& r) { return invoke(&cemkit_feasibility, r); });
   m.def("l0_batch", [](const std::string& r) { return invoke(&cemkit_l0_batch, r); });
   m.def("geometry_smoke", [](const std::string& r) { return invoke(&cemkit_geometry_smoke, r); });
+  m.def("product_operation",
+        [](const std::string& r) { return invoke(&cemkit_product_operation, r); });
 }

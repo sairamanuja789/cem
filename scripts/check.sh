@@ -113,7 +113,7 @@ stage "clang-debug"           preset_stage clang-debug
 stage "clang-asan"            preset_stage clang-asan
 stage "gcc-coverage"          preset_stage gcc-coverage
 stage "release"               preset_stage release
-stage "wheel (ADR-012)"       wheel_build
+stage "wheel (ADR-013)"       wheel_build
 stage "boundaries (ADR-009)"  boundaries
 stage "clang-tidy"            clang_tidy
 stage "clang-format"          clang_format_check

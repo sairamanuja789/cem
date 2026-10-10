@@ -1,5 +1,5 @@
 /* cemkit C ABI (T11; MAINT-005, PERF-002). Stable boundary between the C++ kernel and every
- * caller (the Python binding cemkit._kernel first). Rules (kernel/CLAUDE.md, ADR-012):
+ * caller (the Python binding cemkit._kernel first). Rules (kernel/CLAUDE.md, ADR-013):
  * - plain C: no C++ types, no exceptions cross this boundary;
  * - JSON (UTF-8) in and out; numbers in coherent SI units; the formats are in docs/capi.md;
  * - every call returns a cemkit_status; on CEMKIT_OK and CEMKIT_FAILED *out_json is a string the

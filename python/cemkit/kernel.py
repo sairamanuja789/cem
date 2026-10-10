@@ -1,4 +1,4 @@
-"""Typed Python API of the C++ kernel (T11; PERF-002, MAINT-005; ADR-012).
+"""Typed Python API of the C++ kernel (T11; PERF-002, MAINT-005; ADR-013).
 
 The only way Python reaches the kernel: every function sends one JSON request through the
 nanobind module cemkit._kernel (a thin wrapper of the C ABI, kernel/cemkit/capi/cemkit.h) and

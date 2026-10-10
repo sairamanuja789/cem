@@ -1,4 +1,4 @@
-# nanobind module cemkit._kernel (T11; PERF-002; ADR-012): a thin wrapper over the C ABI
+# nanobind module cemkit._kernel (T11; PERF-002; ADR-013): a thin wrapper over the C ABI
 # (kernel/cemkit/capi/cemkit.h). No logic: each function passes a JSON string in and returns the
 # status code and the JSON string out; python/cemkit/kernel.py decodes them.
 find_package(Python 3.13 REQUIRED COMPONENTS Interpreter Development.Module)

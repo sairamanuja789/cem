@@ -1,7 +1,7 @@
 # cemkit C ABI and Python binding (T11)
 
 Header: `kernel/cemkit/capi/cemkit.h`. Python: `cemkit.kernel` (typed API) over the nanobind
-module `cemkit._kernel` (`bindings/python/module.cpp`). Decisions: ADR-012 (proposed).
+module `cemkit._kernel` (`bindings/python/module.cpp`). Decisions: ADR-013 (proposed).
 Requirements: PERF-002 (batches in one call), MAINT-005 (semantic versioning), PHY-005.
 
 ## Conventions
@@ -95,7 +95,7 @@ Response: `backend`, `validity`, `topology`, `mass_properties` (`volume`, `area`
   `scripts/check.sh` builds it before pytest. `tests/python/test_kernel_bindings.py` sends the
   whole cross-check population (hand calculations, edge cases, 10 000 in-range and 1 000
   out-of-range random states: 143 020 cases) in one call and compares it with the reference.
-- Wheels: `uv build --wheel` (scikit-build-core; check.sh stage "wheel (ADR-012)").
+- Wheels: `uv build --wheel` (scikit-build-core; check.sh stage "wheel (ADR-013)").
 - Benchmark: `PYTHONPATH=python uv run python scripts/bench_l0_batch.py`. On 2026-10-10 in the dev
   container (release build), 143 020 cases: JSON encode 394 ms, kernel call 1 224 ms (8.6 µs per
   case including JSON parse and serialisation), JSON decode 150 ms.

@@ -1,5 +1,5 @@
 """T11: the Python binding cemkit._kernel and its typed API cemkit.kernel (PERF-002, MAINT-005,
-PHY-005; ADR-012).
+PHY-005; ADR-013).
 
 The module is built by the "release" CMake preset into python/cemkit/ (scripts/check.sh builds it
 before pytest). The batch test sends every hand calculation, edge case and 10 000 random in-range

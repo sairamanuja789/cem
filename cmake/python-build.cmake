@@ -1,4 +1,4 @@
-# Configuration for the Python wheel / editable build (scikit-build-core, T11, ADR-012). Included
+# Configuration for the Python wheel / editable build (scikit-build-core, T11, ADR-013). Included
 # by the top-level CMakeLists.txt before project() when SKBUILD is set, so that the module is
 # built with the same toolchain as the "release" preset: vcpkg (with the OCCT overlay port from
 # vcpkg.json), GCC 13 chainloaded, -O2, ccache.

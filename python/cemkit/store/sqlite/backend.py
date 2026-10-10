@@ -452,6 +452,26 @@ class SqliteStore:
     def artifact_records(self) -> tuple[ArtifactRecord, ...]:
         return tuple(ArtifactRecord(*row) for row in self._db.execute(f"{_ARTIFACT} ORDER BY 1"))
 
+    def run(self, run_pk: int) -> Run:
+        """The run with this key; StoreError if there is none."""
+        row = self._db.execute(f"{_RUN} WHERE run_pk = ?", (run_pk,)).fetchone()
+        if row is None:
+            raise StoreError(f"no run {run_pk}")
+        return _run(row)
+
+    def spec_records(self, spec_id: str) -> tuple[SpecRecord, ...]:
+        """Every recorded revision of a spec, oldest first (empty if the spec is unknown)."""
+        rows = self._db.execute(f"{_SPEC} WHERE spec_id = ? ORDER BY revision", (spec_id,))
+        return tuple(SpecRecord(*row) for row in rows)
+
+    def run_specs(self, run: Run) -> tuple[SpecRecord, ...]:
+        rows = self._db.execute(f"{_SPEC} WHERE run_pk = ? ORDER BY spec_pk", (run.run_pk,))
+        return tuple(SpecRecord(*row) for row in rows)
+
+    def run_artifacts(self, run: Run) -> tuple[ArtifactRecord, ...]:
+        rows = self._db.execute(f"{_ARTIFACT} WHERE run_pk = ? ORDER BY artifact_pk", (run.run_pk,))
+        return tuple(ArtifactRecord(*row) for row in rows)
+
     # --- job queue (T13; ORC-001..004) -------------------------------------------------------
 
     def enqueue_job(

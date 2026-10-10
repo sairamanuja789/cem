@@ -79,6 +79,18 @@ def l0_batch(cases: Sequence[Json]) -> list[Json]:
     return results
 
 
+def versions() -> Json:
+    """ABI, kernel, model and plugin versions, as every kernel response reports them (STORE-002)."""
+    response = _call(_kernel.l0_batch, {"cases": []})
+    return {key: response[key] for key in ("abi_version", "kernel_version", "models", "plugins")}
+
+
+def feasibility_for_spec(spec: Json) -> Json:
+    """UC-03: the kernel compiles the spec, maps its duty point and air onto the L0 gate and runs
+    the family's feasibility hook. Returns the whole response: spec, inputs, report, versions."""
+    return _call(_kernel.feasibility, {"spec": spec})
+
+
 def feasibility(request: Json) -> Json:
     """The L0 feasibility gate report for one duty (SEL-004)."""
     report: Json = _call(_kernel.feasibility, request)["report"]

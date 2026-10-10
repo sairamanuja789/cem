@@ -7,6 +7,7 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <string_view>
 
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"
@@ -124,23 +125,27 @@ TEST_CASE("the family's feasibility hook reports range unsourced", "[SEL-002][SE
   CHECK(report->checks[2].status == fans::CheckStatus::range_unsourced);
 }
 
-TEST_CASE("every other family operation is not implemented, never a number", "[FAM-001]") {
+TEST_CASE("every other family operation is not implemented, never a number", "[FAM-001][REL-002]") {
   const auto family = axial::make_family();
   REQUIRE(family.has_value());
   const auto& f = **family;
   const cemkit::spec::Spec spec;
   const cemkit::product::Design design;
   const cemkit::product::Evaluation evaluation;
-  const auto expect = [](const auto& result) {
+  const auto expect = [](const auto& result, std::string_view capability) {
     REQUIRE(!result.has_value());
     CHECK(result.error().code() == core::ErrorCode::not_implemented);
     CHECK(result.error().subject() == "fans.axial_ducted");
+    // D4: not_implemented always names the missing capability.
+    const auto& details = result.error().details();
+    REQUIRE(details.contains("capability"));
+    CHECK(details.at("capability") == capability);
   };
-  expect(f.initial_design(spec));
-  expect(f.evaluate_l1(spec, design));
-  expect(f.check_constraints(spec, design, evaluation));
-  expect(f.geometry_recipe(design));
-  expect(f.simulation_case(spec, design));
+  expect(f.initial_design(spec), "fans.axial_ducted.initial_design");
+  expect(f.evaluate_l1(spec, design), "fans.axial_ducted.evaluate_l1");
+  expect(f.check_constraints(spec, design, evaluation), "fans.axial_ducted.check_constraints");
+  expect(f.geometry_recipe(design), "fans.axial_ducted.geometry_recipe");
+  expect(f.simulation_case(spec, design), "fans.axial_ducted.simulation_case");
 }
 
 TEST_CASE("D6: the rotor tip diameter is the duct diameter minus twice the spec's tip clearance",

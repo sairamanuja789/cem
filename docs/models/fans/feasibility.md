@@ -49,6 +49,9 @@ For `fans.axial_ducted`, `axial_ducted::rotor_tip_diameter(spec)` gives check 2 
 - A non-positive nominal size is `spec_rejected` on `product.nominal_size`; a clearance below zero
   or of half the duct diameter or more is `spec_rejected` on `product.tip_clearance_min`.
 
+The C ABI's spec form of `cemkit_feasibility` (and so `cemkit feasibility`) takes this D through
+`fans::family_rotor_tip_diameter` and reports it under `inputs.d_tip` (docs/capi.md).
+
 Open item HI-023: the owner confirms frame vs rotor diameter (AX-001).
 
 ## Family ranges (SEL-002)

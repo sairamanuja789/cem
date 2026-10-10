@@ -63,7 +63,7 @@
     {
       "const": "not_implemented",
       "x-cemkit-code": 12,
-      "description": "The operation exists in the interface but this family or module does not provide it yet; no value is returned."
+      "description": "A capability the spec declares (a requested family or a hook of that family) is not provided by this release; the details name it under capability. Never a placeholder for unfinished code; no value is returned."
     }
   ]
 }

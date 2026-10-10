@@ -227,3 +227,104 @@ TEST_CASE("geometry smoke can return the export bytes", "[GEO-004]") {
   CHECK(encoded.size() == (size + 2) / 3 * 4);
   CHECK(encoded.starts_with("SVNPLTEwMzAz"));  // "ISO-10303" (a STEP file)
 }
+
+TEST_CASE("feasibility from a spec maps the duty and uses the family hook", "[SEL-004][UC-03]") {
+  json spec = minimal_spec();
+  spec["product"]["duty"] = {{"flow",
+                              {{"value", 0.05},
+                               {"unit", "m3/s"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"relative", 0.05}}}}},
+                             {"pressure",
+                              {{"value", 120.0},
+                               {"unit", "Pa"},
+                               {"kind", "fan_static"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"minus", 0.0}, {"plus", 10.0}}}}}};
+  spec["product"]["size_reference"] = {{"value", "duct_inner_diameter"}, {"provenance", "user"}};
+  spec["product"]["rotational_speed"] = {
+      {"value", 2000.0}, {"unit", "rpm"}, {"provenance", "user"}};
+  const auto r = call(&cemkit_feasibility, json{{"spec", spec}});
+  REQUIRE(r.status == CEMKIT_OK);
+  // l0_005: 120 Pa static + 11.5315 Pa dynamic through the 0.12 m duct.
+  const auto& total = r.body["inputs"]["fan_total_pressure"];
+  CHECK_THAT(total["value"].get<double>(), WithinRel(131.53153903336792, 1e-12));
+  CHECK(total["provenance"] == "derived");
+  CHECK(total["fidelity"] == "l0_predicted");
+  CHECK(r.body["report"]["verdict"] == "unconfirmed");
+  CHECK(r.body["report"]["checks"][1]["status"] == "not_computable");
+  CHECK(r.body["report"]["checks"][2]["status"] == "range_unsourced");
+
+  const auto unknown = call(&cemkit_feasibility, json{{"spec", minimal_spec()}});
+  CHECK(unknown.status == CEMKIT_FAILED);
+  CHECK(unknown.body["error"]["subject"] == "product.duty.flow");
+
+  json no_reference = spec;
+  no_reference["product"].erase("size_reference");
+  const auto e = call(&cemkit_feasibility, json{{"spec", no_reference}});
+  CHECK(e.status == CEMKIT_FAILED);
+  CHECK(e.body["error"]["subject"] == "product.size_reference");
+
+  json impossible = spec;
+  impossible["product"]["duty"]["pressure"]["value"] = 1500.0;
+  impossible["product"]["duty"]["pressure"]["kind"] = "fan_total";
+  const auto i = call(&cemkit_feasibility, json{{"spec", impossible}});
+  REQUIRE(i.status == CEMKIT_OK);
+  CHECK(i.body["report"]["verdict"] == "infeasible");
+  CHECK(i.body["report"]["checks"][0]["violation"]["details"]["bounds"] == "(0, 1418.55]");
+}
+
+TEST_CASE("feasibility from a spec computes the tip-speed check from the D6 tip diameter",
+          "[SEL-004][AX-001][AX-009]") {
+  json spec = minimal_spec();
+  spec["product"]["duty"] = {{"flow",
+                              {{"value", 0.05},
+                               {"unit", "m3/s"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"relative", 0.05}}}}},
+                             {"pressure",
+                              {{"value", 150.0},
+                               {"unit", "Pa"},
+                               {"kind", "fan_total"},
+                               {"provenance", "user"},
+                               {"tolerance", {{"minus", 0.0}, {"plus", 10.0}}}}}};
+  spec["product"]["size_reference"] = {{"value", "duct_inner_diameter"}, {"provenance", "user"}};
+  spec["product"]["tip_clearance_min"] = {{"value", 0.5}, {"unit", "mm"}, {"provenance", "user"}};
+  spec["product"]["rotational_speed"] = {
+      {"value", 2000.0}, {"unit", "rpm"}, {"provenance", "user"}};
+  const auto r = call(&cemkit_feasibility, json{{"spec", spec}});
+  REQUIRE(r.status == CEMKIT_OK);
+  // Owner decision D6: D_tip = 0.12 m - 2 x 0.0005 m, provenance default, provisional.
+  const auto& d_tip = r.body["inputs"]["d_tip"];
+  CHECK_THAT(d_tip["value"].get<double>(), WithinRel(0.12 - (2.0 * 0.0005), 1e-12));
+  CHECK(d_tip["unit"] == "m");
+  CHECK(d_tip["provenance"] == "default");
+  CHECK(d_tip["provisional"] == true);
+  CHECK(d_tip["from"] == json::array({"product.nominal_size", "product.size_reference",
+                                      "product.tip_clearance_min"}));
+  const auto tip_check = [](const json& report) {
+    for (const auto& check : report["checks"]) {
+      if (check["limit"] == "incompressible_tip_speed") {
+        return check;
+      }
+    }
+    FAIL("no incompressible_tip_speed check");
+    return json{};
+  };
+  CHECK(tip_check(r.body["report"])["status"] == "pass");
+
+  json no_clearance = spec;
+  no_clearance["product"].erase("tip_clearance_min");
+  const auto n = call(&cemkit_feasibility, json{{"spec", no_clearance}});
+  REQUIRE(n.status == CEMKIT_OK);
+  CHECK(!n.body["inputs"].contains("d_tip"));
+  CHECK(tip_check(n.body["report"])["status"] == "not_computable");
+
+  // A clearance of half the duct diameter leaves no rotor: rejected on its field, never a number.
+  json too_wide = spec;
+  too_wide["product"]["tip_clearance_min"]["value"] = 60.0;
+  const auto w = call(&cemkit_feasibility, json{{"spec", too_wide}});
+  CHECK(w.status == CEMKIT_FAILED);
+  CHECK(w.body["error"]["code"] == "spec_rejected");
+  CHECK(w.body["error"]["subject"] == "product.tip_clearance_min");
+}

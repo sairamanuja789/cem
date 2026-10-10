@@ -7,4 +7,5 @@ cemkit_add_module(
   PATH products/fans
   SOURCES register.cpp
   DEPS cemkit_product ${fan_family_targets}
+  TESTS tests/test_register.cpp
 )

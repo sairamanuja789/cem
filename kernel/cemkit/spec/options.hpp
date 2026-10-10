@@ -15,7 +15,8 @@ using DefaultFieldResolver =
 
 struct CompilerOptions {
   bool autonomous_mode{false};
-  EssentialFieldResolver essential_resolver{default_essential_fields};
+  // Required: compile() fails with invalid_input while it is empty (no built-in list, SPEC-006).
+  EssentialFieldResolver essential_resolver{};
   DefaultFieldResolver default_resolver{};
 };
 

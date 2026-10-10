@@ -13,7 +13,7 @@ working: |
 
   Case 2. Q = 1.0 m3/s through the same duct.
   v     = 1.0 / 0.01130973355                         = 88.41941283 m/s
-  p_d   = 0.5 x 1.18 x 7818.0925                      = 4612.615613 Pa
+  p_d   = 0.5 x 1.18 x 7817.992565                     = 4612.615613 Pa
   Limit: p_d / (gamma p1) = M_out^2 / 2 <= epsilon, so p_d <= epsilon gamma p1 = 1418.55 Pa
   (v <= sqrt(2 x 1418.55 / 1.18) = 49.03 m/s). 4612.6 Pa > 1418.55 Pa, so out_of_validity.
 checks:

@@ -38,4 +38,6 @@ also in the locked dev group for the preset build); the wheel build limits Ninja
   contains `cemkit/_kernel*.so`; it recompiles the kernel in `build/python/`.
 - The JSON batch costs about 4 µs per case for encoding and decoding in Python on top of about
   9 µs in the C ABI (docs/capi.md). If L1 populations need less, add a columnar call (MINOR bump).
-- Scripts that import `cemkit` run with `PYTHONPATH=python` (the ctest sets it).
+- Scripts that import `cemkit` run with `PYTHONPATH=python` (the ctest sets it; `scripts/cemkit`
+  sets it; `tests/python/conftest.py` exports it so that child processes started by tests, such as
+  the T13 orchestration fakes, can import cemkit).

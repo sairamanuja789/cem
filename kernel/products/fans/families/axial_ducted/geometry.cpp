@@ -174,6 +174,7 @@ core::Result<FanGeometry> build_fan_geometry(const port::GeometryBackend& b,
   }
   return FanGeometry{.rotor = std::move(*rotor),
                      .duct = std::move(*duct),
+                     .blade = std::move(*blade),
                      .tip_clearance = len(m(p.duct_inner_radius) - m(p.stations.back().radius))};
 }
 
@@ -219,9 +220,28 @@ core::Status register_geometry_operation(product::Operations& operations) {
         if (!g) {
           return std::unexpected(g.error());
         }
+        // "parts" (optional): which solids to report and export, default rotor and duct; "blade"
+        // is one unpatterned blade including its root station inside the hub (M5 meshing).
+        std::vector<std::string> names{"rotor", "duct"};
+        if (c.contains("parts")) {
+          const Json& requested = c.at("parts");
+          if (!requested.is_array() || requested.empty()) {
+            throw product::BadRequest{"parts", "must be a non-empty array: parts"};
+          }
+          names.clear();
+          for (const auto& n : requested) {
+            if (!n.is_string() || (n != "rotor" && n != "duct" && n != "blade")) {
+              throw product::BadRequest{"parts", "each part must be rotor, duct or blade: parts"};
+            }
+            names.push_back(n.get<std::string>());
+          }
+        }
+        const auto solid_of = [&g](const std::string& n) {
+          return n == "rotor" ? g->rotor.get() : n == "duct" ? g->duct.get() : g->blade.get();
+        };
         Json parts = Json::array();
-        for (const auto& [name, solid] :
-             {std::pair{"rotor", g->rotor.get()}, std::pair{"duct", g->duct.get()}}) {
+        for (const auto& name : names) {
+          const geometry::port::Solid* solid = solid_of(name);
           auto report = product::solid_json(context.geometry, *solid, options);
           if (!report) {
             return std::unexpected(report.error());

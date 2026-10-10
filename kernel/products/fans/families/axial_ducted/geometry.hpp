@@ -48,6 +48,9 @@ struct FanGeometryParams {
 struct FanGeometry {
   std::unique_ptr<geometry::port::Solid> rotor;
   std::unique_ptr<geometry::port::Solid> duct;
+  // One blade before patterning and fusing, root station included (it reaches into the hub): the
+  // blade surface a CFD mesher cuts the fluid domain with (M5).
+  std::unique_ptr<geometry::port::Solid> blade;
   core::Length tip_clearance;  // duct_inner_radius - tip radius
 };
 

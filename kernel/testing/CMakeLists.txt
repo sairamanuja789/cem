@@ -40,3 +40,18 @@ if(CEMKIT_ENABLE_SANITIZERS)
     # Exit normally (not by signal) so ctest evaluates the regular expression instead of flagging a crash.
     ENVIRONMENT "ASAN_OPTIONS=halt_on_error=1:abort_on_error=0:symbolize=1")
 endif()
+
+# --- Family plugins (FAM-002, UC-09) ------------------------------------------------------------
+# The stub product and its stub family: a product laid out like kernel/products/<product>/.
+add_subdirectory(stub_product)
+
+# Every folder under products/*/families/ (and testing/*/families/) must be in the registry built by
+# the products' registration functions. KERNEL_ROOT tells the test where to look.
+add_executable(cemkit_testing_family_registry_tests family_registry/test_family_folders.cpp)
+target_link_libraries(cemkit_testing_family_registry_tests PRIVATE
+  cemkit_fans cemkit_testing_stub_product Catch2::Catch2WithMain
+  cemkit_warnings cemkit_instrumentation)
+target_compile_definitions(cemkit_testing_family_registry_tests PRIVATE
+  CEMKIT_KERNEL_ROOT="${CEMKIT_KERNEL_ROOT}")
+catch_discover_tests(cemkit_testing_family_registry_tests
+  PROPERTIES LABELS "testing/family_registry;FAM-002")

@@ -94,3 +94,32 @@ function(cemkit_write_module_manifest)
   list(JOIN modules "\n" text)
   file(WRITE "${CMAKE_BINARY_DIR}/cemkit_modules.txt" "${text}\n")
 endfunction()
+
+# cemkit_add_families(<out_var>): adds every family folder of the current product
+# (<product>/families/<family>/ with a CMakeLists.txt), in sorted folder order, and returns their
+# module targets in <out_var> for the product's registration module to link (ADR-009, ADR-012).
+# Build discovery only: registration stays explicit, one call per family in the product's
+# register.cpp. A new family folder therefore needs no CMake edit outside itself (FAM-002).
+function(cemkit_add_families out)
+  file(GLOB lists CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/families/*/CMakeLists.txt")
+  list(SORT lists)
+  set(targets "")
+  foreach(list_file IN LISTS lists)
+    get_filename_component(dir "${list_file}" DIRECTORY)
+    file(RELATIVE_PATH rel "${CEMKIT_KERNEL_ROOT}" "${dir}")
+    add_subdirectory("${dir}")
+    cemkit_module_target(target "${rel}")
+    list(APPEND targets ${target})
+  endforeach()
+  set(${out} "${targets}" PARENT_SCOPE)
+endfunction()
+
+# cemkit_add_family([SOURCES ...] [DEPS ...] [TESTS ...]): a family folder's whole CMakeLists.txt.
+# The module path is the folder's own path under kernel/, so a family folder can be copied or renamed
+# without editing its build file.
+function(cemkit_add_family)
+  cmake_parse_arguments(F "" "" "SOURCES;DEPS;TESTS;TEST_DEPS" ${ARGN})
+  file(RELATIVE_PATH rel "${CEMKIT_KERNEL_ROOT}" "${CMAKE_CURRENT_SOURCE_DIR}")
+  cemkit_add_module(PATH "${rel}" SOURCES ${F_SOURCES} DEPS cemkit_product ${F_DEPS}
+    TESTS ${F_TESTS} TEST_DEPS ${F_TEST_DEPS})
+endfunction()

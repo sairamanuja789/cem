@@ -112,6 +112,48 @@ struct ExportedFile {
   std::uintmax_t size_bytes = 0;
 };
 
+// --- Typed construction operations (ADR-015 rule 7, M2) ------------------------------------------
+// Added as the axial fan recipe needs them. Product-specific construction (blade sections, ducts)
+// stays in the product; these are generic geometry. Coordinates are in the backend's global frame.
+
+struct Point3 {
+  core::Length x;
+  core::Length y;
+  core::Length z;
+};
+
+// A closed loft section made of two smooth curves from the leading point to the trailing point
+// (each an interpolating B-spline through its points, at least 2 points each, the same first and
+// last points not required), joined at both ends by straight lines: upper[0] - ... - upper[n-1] -
+// lower[m-1] - ... - lower[0] - upper[0]. Sharp ends are allowed, so a thin plate with blunt edges
+// is representable without a periodic spline.
+struct SplineSection {
+  std::vector<Point3> upper;
+  std::vector<Point3> lower;
+};
+
+// A closed polygon in the half plane r >= 0 of a meridian (r radial, z axial), revolved 360 degrees
+// about the z axis. Points are (r, z) pairs in order; the polygon closes itself.
+struct RevolveProfile {
+  std::vector<std::array<core::Length, 2>> rz;
+};
+
+// Rule-based edge selection (never by index, which changes with any parameter change): the open
+// edges whose every sampled point lies within `tolerance` of the cylinder of `radius` about the z
+// axis, for example the edges where blades meet a cylindrical hub. Closed edges (a full circle such
+// as a hub's end edge) are never selected.
+struct EdgesOnCylinder {
+  core::Length radius;
+  core::Length tolerance;
+};
+
+// What a rule selected: the number of edges (engine topology: a seam or a boolean may split one
+// geometric edge in two) and their total length (geometry: independent of how edges are split).
+struct EdgeSelection {
+  std::size_t count = 0;
+  core::Length length;
+};
+
 // A solid owned by the backend that built it. Opaque: only that backend can read it.
 class Solid {
  public:
@@ -149,6 +191,31 @@ class GeometryBackend {
   [[nodiscard]] virtual core::Result<ValidityReport> check_validity(const Solid& solid) const = 0;
   [[nodiscard]] virtual core::Result<Topology> topology(const Solid& solid) const = 0;
   [[nodiscard]] virtual core::Result<MassProperties> mass_properties(const Solid& solid) const = 0;
+
+  // Construction operations (M2). Each returns one valid solid (GEO-002) or geometry_failed with
+  // the reason, and never changes its inputs.
+  // A smooth (not ruled) solid lofted through at least two sections, in order.
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> loft(
+      const std::vector<SplineSection>& sections) const = 0;
+  // A solid of revolution about the z axis.
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> revolve(
+      const RevolveProfile& profile) const = 0;
+  // `base` fused with `count` copies of `item` (count >= 1) rotated by k * 360/count degrees,
+  // k = 0..count-1, about the z axis (for example a hub and its blades); the result must be one
+  // solid.
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> fuse_circular_pattern(
+      const Solid& base, const Solid& item, std::size_t count) const = 0;
+  // Boolean union and difference; the result must be one solid.
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> fuse(const Solid& a,
+                                                                  const Solid& b) const = 0;
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> cut(const Solid& a,
+                                                                 const Solid& b) const = 0;
+  // The edges a rule selects (for tests and reports).
+  [[nodiscard]] virtual core::Result<EdgeSelection> select(const Solid& solid,
+                                                           const EdgesOnCylinder& rule) const = 0;
+  // Rounds the edges a rule selects with a constant radius; no selected edge is geometry_failed.
+  [[nodiscard]] virtual core::Result<std::unique_ptr<Solid>> fillet(
+      const Solid& solid, const EdgesOnCylinder& rule, core::Length radius) const = 0;
 
   // GEO-004: the exported file's bytes. Identical solids and requests give identical bytes.
   [[nodiscard]] virtual core::Result<std::string> export_bytes(

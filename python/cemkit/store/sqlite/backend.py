@@ -469,9 +469,7 @@ class SqliteStore:
         return tuple(SpecRecord(*row) for row in rows)
 
     def run_artifacts(self, run: Run) -> tuple[ArtifactRecord, ...]:
-        rows = self._db.execute(
-            f"{_ARTIFACT} WHERE run_pk = ? ORDER BY artifact_pk", (run.run_pk,)
-        )
+        rows = self._db.execute(f"{_ARTIFACT} WHERE run_pk = ? ORDER BY artifact_pk", (run.run_pk,))
         return tuple(ArtifactRecord(*row) for row in rows)
 
     # --- job queue (T13; ORC-001..004) -------------------------------------------------------

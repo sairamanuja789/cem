@@ -12,8 +12,9 @@ constexpr core::SemVer k_version{.major = 0, .minor = 1, .patch = 0};
 
 core::Error not_implemented(std::string_view operation) {
   return core::Error{core::ErrorCode::not_implemented,
-                     std::string{operation} + " is not implemented for fans.axial_ducted yet "
-                                              "(axial L1 milestone)",
+                     std::string{operation} +
+                         " is not implemented for fans.axial_ducted yet "
+                         "(axial L1 milestone)",
                      std::string{k_family_id}};
 }
 

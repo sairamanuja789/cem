@@ -24,6 +24,7 @@
 #include "cemkit/spec/compiler.hpp"
 #include "products/fans/common/feasibility.hpp"
 #include "products/fans/common/l0.hpp"
+#include "products/fans/families/axial_ducted/axial_ducted.hpp"
 #include "products/fans/register.hpp"
 
 namespace cemkit::capi::detail {
@@ -426,6 +427,114 @@ port::ExportRequest export_request_of(const Json& e) {
   throw BadRequest{"format", "unknown export format: " + format};
 }
 
+core::Result<spec::Spec> compile_spec(const Json& request) {
+  bool autonomous = false;
+  if (request.contains("autonomous_mode")) {
+    if (!request["autonomous_mode"].is_boolean()) {
+      throw BadRequest{"autonomous_mode", "must be a boolean: autonomous_mode"};
+    }
+    autonomous = request["autonomous_mode"].get<bool>();
+  }
+  // The spec compiler takes nlohmann::json (unordered keys); the conversion keeps every value.
+  const nlohmann::json document = member(request, "spec");
+  const spec::SpecCompiler compiler{spec::CompilerOptions{
+      .autonomous_mode = autonomous,
+      .essential_resolver = product::essential_field_resolver(family_registry()),
+      .default_resolver = {}}};
+  return compiler.compile(document);
+}
+
+std::optional<double> si_of(const spec::Spec& s, std::string_view path) {
+  const auto f = s.field(path);
+  return f ? f->si_value : std::nullopt;
+}
+
+Json input_json(double value, const char* unit, const char* from) {
+  return Json{{"value", value}, {"unit", unit}, {"from", from}};
+}
+
+// SEL-004 for a compiled spec: the duty point and air from the spec, the family's feasibility hook
+// (docs/capi.md). Fan static pressure is converted to fan total with the duct diameter, which is
+// product.nominal_size when product.size_reference is duct_inner_diameter (AX-001). The rotor tip
+// diameter is not derived here, so the tip-speed check is not computable from a spec.
+core::Result<Json> feasibility_from_spec(const Json& request) {
+  auto compiled = compile_spec(request);
+  if (!compiled) {
+    return std::unexpected(compiled.error());
+  }
+  const spec::Spec& s = *compiled;
+  const auto flow = si_of(s, "product.duty.flow");
+  if (!flow) {
+    return core::fail(core::ErrorCode::spec_rejected,
+                      "the duty point flow is unknown: answer the spec's questions first",
+                      "product.duty.flow");
+  }
+  const auto pressure_field = s.field("product.duty.pressure");
+  const auto pressure = si_of(s, "product.duty.pressure");
+  if (!pressure_field || !pressure) {
+    return core::fail(core::ErrorCode::spec_rejected,
+                      "the duty point pressure is unknown: answer the spec's questions first",
+                      "product.duty.pressure");
+  }
+  physics::Air air = physics::default_air();
+  if (auto rho = si_of(s, "air.density")) {
+    air.density = *rho * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)];
+  }
+  if (auto t = si_of(s, "air.temperature")) {
+    air.temperature = mp_units::point<isq::thermodynamic_temperature[si::kelvin]>(*t);
+  }
+
+  Json inputs = Json::object();
+  inputs["flow"] = input_json(*flow, "m3/s", "product.duty.flow");
+  double total = *pressure;
+  if (pressure_field->pressure_kind.value_or("") == "fan_static") {
+    const auto reference = s.field("product.size_reference");
+    const auto d_duct = si_of(s, "product.nominal_size");
+    const bool duct = reference && reference->text_value.value_or("") == "duct_inner_diameter";
+    if (!duct || !d_duct) {
+      return core::fail(core::ErrorCode::spec_rejected,
+                        "fan static pressure needs the duct diameter: product.size_reference must "
+                        "be duct_inner_diameter and product.nominal_size known",
+                        "product.size_reference");
+    }
+    const auto converted = fans::fan_total_from_static(
+        *pressure * fans::fan_static_pressure[si::pascal], flow_of(*flow), length_of(*d_duct), air);
+    if (!converted) {
+      return std::unexpected(converted.error());
+    }
+    total = converted->value.value().numerical_value_in(si::pascal);
+    Json derived = labelled_json(converted->value, si::pascal);
+    derived["unit"] = "Pa";
+    derived["provenance"] = std::string{core::to_string(converted->provenance)};
+    derived["rule"] = std::string{converted->rule};
+    derived["from"] =
+        Json::array({"product.duty.pressure", "product.duty.flow", "product.nominal_size"});
+    inputs["fan_total_pressure"] = std::move(derived);
+  } else {
+    inputs["fan_total_pressure"] = input_json(*pressure, "Pa", "product.duty.pressure");
+  }
+  std::optional<core::AngularVelocity> omega;
+  if (auto w = si_of(s, "product.rotational_speed")) {
+    omega = omega_of(*w);
+    inputs["omega"] = input_json(*w, "rad/s", "product.rotational_speed");
+  }
+
+  const fans::Duty duty{.flow = flow_of(*flow), .pressure = total_of(total)};
+  core::Result<fans::FeasibilityReport> report =
+      core::fail(core::ErrorCode::not_implemented, "no feasibility hook for this family", "family");
+  if (s.family() == fans::axial_ducted::k_family_id) {
+    report = fans::axial_ducted::check_feasibility(duty, air, omega, std::nullopt);
+  }
+  if (!report) {
+    return std::unexpected(report.error());
+  }
+  Json out = versions();
+  out["spec"] = Json{{"spec_id", s.spec_id()}, {"revision", s.revision()}, {"family", s.family()}};
+  out["inputs"] = std::move(inputs);
+  out["report"] = report_json(*report);
+  return out;
+}
+
 }  // namespace
 
 Json error_json(const core::Error& error) {
@@ -441,20 +550,7 @@ Json error_json(const core::Error& error) {
 }
 
 core::Result<Json> spec_compile(const Json& request) {
-  bool autonomous = false;
-  if (request.contains("autonomous_mode")) {
-    if (!request["autonomous_mode"].is_boolean()) {
-      throw BadRequest{"autonomous_mode", "must be a boolean: autonomous_mode"};
-    }
-    autonomous = request["autonomous_mode"].get<bool>();
-  }
-  // The spec compiler takes nlohmann::json (unordered keys); the conversion keeps every value.
-  const nlohmann::json document = member(request, "spec");
-  const spec::SpecCompiler compiler{
-      spec::CompilerOptions{.autonomous_mode = autonomous,
-                            .essential_resolver = product::essential_field_resolver(family_registry()),
-                            .default_resolver = {}}};
-  auto compiled = compiler.compile(document);
+  auto compiled = compile_spec(request);
   if (!compiled) {
     return std::unexpected(compiled.error());
   }
@@ -464,6 +560,9 @@ core::Result<Json> spec_compile(const Json& request) {
 }
 
 core::Result<Json> feasibility(const Json& request) {
+  if (request.contains("spec")) {
+    return feasibility_from_spec(request);
+  }
   const auto r = run_feasibility(request, air_of(request, "air"), member(request, "range"));
   if (!r) {
     return std::unexpected(r.error());

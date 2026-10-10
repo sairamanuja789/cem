@@ -81,6 +81,17 @@ Request: `{"flow", "fan_total_pressure", ["omega"], ["d_tip"], ["air"], "range":
 (`limit`, `status`, `message`, `violation`, `nearest_feasible` with labelled `flow` and
 `fan_total_pressure`). Rules: `docs/models/fans/feasibility.md`.
 
+Spec form (UC-03): `{"spec": <spec document>}`. The kernel compiles the spec and takes the duty
+from `product.duty.flow` and `product.duty.pressure`, the speed from `product.rotational_speed`
+and the air density and temperature from `air.*` (the rest of the air from the kernel's defaults).
+A fan static pressure is converted to fan total (ADR-003 D1) with the duct diameter
+`product.nominal_size`, which requires `product.size_reference` = `duct_inner_diameter` (AX-001);
+the converted value is reported under `inputs.fan_total_pressure`, labelled and `derived`. The
+rotor tip diameter is not derived, so the tip-speed check is `not_computable`. The family's own
+feasibility hook supplies the range (`fans.axial_ducted`: `UNSOURCED`). An unknown duty point is
+`spec_rejected` naming the field. The response adds `spec` (`spec_id`, `revision`, `family`) and
+`inputs` (each value with its unit and the spec field it came from).
+
 ### `cemkit_spec_compile` / `kernel.spec_compile(spec, autonomous_mode)` (SPEC-001..011)
 
 Request `{"spec": <spec document>, "autonomous_mode": false}`. Essential fields come from the

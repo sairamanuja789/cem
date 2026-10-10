@@ -1,6 +1,6 @@
 #pragma once
 // OpenFOAM v2512 case writer (simulation adapter, ADR-006, ADR-009): template
-// cemkit.openfoam.rotor_sector_mrf@0.1.0 (docs/models/platform/openfoam-rotor-sector.md).
+// cemkit.openfoam.rotor_sector_mrf@0.2.0 (docs/models/platform/openfoam-rotor-sector.md).
 // One blade passage: blockMesh annular sector in three axial blocks (upstream, rotor, downstream)
 // with rotationally periodic cyclicAMI sides, snappyHexMesh refinement at the blade, a topoSet
 // rotating zone that ends on block faces, simpleFoam with MRF and k-omega SST, and function

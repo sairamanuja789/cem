@@ -27,8 +27,8 @@ RotorSectorCase trial() {
       .blade_refinement = 3,
       .rotor_refinement = 1,
       .omega = 209.43951023931953 * isq::angular_velocity[si::radian / si::second],
-      .flow = 0.028 *
-              cemkit::core::units::volume_flow_rate[mp_units::cubic(si::metre) / si::second],
+      .flow =
+          0.028 * cemkit::core::units::volume_flow_rate[mp_units::cubic(si::metre) / si::second],
       .dynamic_viscosity = 1.8e-5 * isq::dynamic_viscosity[si::pascal * si::second],
       .density = 1.18 * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)],
       .inlet_turbulence_intensity = 0.05,
@@ -48,13 +48,14 @@ TEST_CASE("the rotor sector case is deterministic and states its template", "[SI
   REQUIRE(a.has_value());
   REQUIRE(b.has_value());
   CHECK(a->text == b->text);
-  CHECK(cemkit::core::to_string(a->case_template) == "cemkit.openfoam.rotor_sector_mrf@0.1.0");
+  CHECK(cemkit::core::to_string(a->case_template) == "cemkit.openfoam.rotor_sector_mrf@0.2.0");
   CHECK(a->binary.at("constant/triSurface/blade_mm.stl") == std::vector<std::uint8_t>{1, 2, 3});
   REQUIRE(a->steps.size() == 7);
   CHECK(a->steps.back().argv == std::vector<std::string>{"simpleFoam"});
 }
 
-TEST_CASE("blocks end on the rotating zone; passage flow and rotation sense", "[SIM-001][ADR-016]") {
+TEST_CASE("blocks end on the rotating zone; passage flow and rotation sense",
+          "[SIM-001][ADR-016]") {
   const auto files = cemkit::simulation::openfoam::OpenFoamWriter{}.rotor_sector(trial());
   REQUIRE(files.has_value());
   const std::string& mesh = files->text.at("system/blockMeshDict");
@@ -63,6 +64,11 @@ TEST_CASE("blocks end on the rotating zone; passage flow and rotation sense", "[
   CHECK(has(mesh, "(16 14 10)"));
   CHECK(has(mesh, "(16 14 43)"));
   CHECK(has(mesh, "cyclicAMI"));
+  CHECK((has(mesh, "hubUpstream") && has(mesh, "hubRotor") && has(mesh, "hubDownstream")));
+  // Torque on the rotating surfaces only; total pressure weighted by volume flow.
+  const std::string& control = files->text.at("system/controlDict");
+  CHECK(has(control, "patches (blade hubRotor);"));
+  CHECK(has(control, "operation weightedAverage; weightField phi;"));
   CHECK(has(files->text.at("system/topoSetDict"), "p1 (0 0 -0.0125); p2 (0 0 0.0125)"));
   CHECK(has(files->text.at("0/U"), "volumetricFlowRate 0.004;"));  // 0.028 / 7
   // Counter-clockwise viewed from the inlet = about -z (flow along +z).

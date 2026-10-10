@@ -21,10 +21,10 @@
 #include "cemkit/geometry/occt/occt_backend.hpp"
 #include "cemkit/geometry/port/backend.hpp"
 #include "cemkit/physics/air.hpp"
-#include "cemkit/simulation/openfoam/writer.hpp"
 #include "cemkit/product/geometry_json.hpp"
 #include "cemkit/product/products.hpp"
 #include "cemkit/product/registry.hpp"
+#include "cemkit/simulation/openfoam/writer.hpp"
 #include "cemkit/spec/catalogue.hpp"
 #include "cemkit/spec/compiler.hpp"
 
@@ -34,7 +34,6 @@ namespace {
 
 // The solver case writer lent to product operations (M5). Stateless.
 const simulation::openfoam::OpenFoamWriter k_openfoam{};
-
 
 namespace si = mp_units::si;
 namespace isq = mp_units::isq;
@@ -112,16 +111,18 @@ Json evaluate_case(const Json& c, const product::Operations& operations) {
     return result_json(physics::speed_of_sound(air), si::metre / si::second);
   }
   if (fn == "dynamic_viscosity") {
-    return result_json(physics::dynamic_viscosity(mp_units::point<isq::thermodynamic_temperature[si::kelvin]>(
-                           number(args, "temperature"))),
-                       si::pascal * si::second);
+    return result_json(
+        physics::dynamic_viscosity(mp_units::point<isq::thermodynamic_temperature[si::kelvin]>(
+            number(args, "temperature"))),
+        si::pascal * si::second);
   }
   const product::Operation* operation = operations.find(fn);
   if (operation == nullptr) {
     throw BadRequest{"function", "unknown function: " + fn};
   }
   const geometry::occt::OcctBackend backend;
-  auto r = (*operation)(c, product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
+  auto r =
+      (*operation)(c, product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
   if (!r) {
     return Json{{"error", error_json(r.error())}};
   }
@@ -304,7 +305,8 @@ core::Result<Json> feasibility(const Json& request) {
     c["range"] = request["range"];
   }
   const geometry::occt::OcctBackend backend;
-  auto r = (*operation)(c, product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
+  auto r =
+      (*operation)(c, product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
   if (!r) {
     return std::unexpected(r.error());
   }
@@ -366,7 +368,8 @@ core::Result<Json> product_operation(const Json& request) {
     throw BadRequest{"operation", "unknown operation: " + name};
   }
   const geometry::occt::OcctBackend backend;
-  auto r = (*operation)(request, product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
+  auto r = (*operation)(request,
+                        product::OperationContext{.geometry = backend, .case_writer = &k_openfoam});
   if (!r) {
     return std::unexpected(r.error());
   }

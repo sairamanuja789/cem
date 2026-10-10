@@ -34,8 +34,7 @@ core::Status validate(const RotorSectorCase& c) {
         std::pair{"cell_size", m(c.cell_size)},
         std::pair{"inlet_mixing_length", m(c.inlet_mixing_length)},
         std::pair{"omega", c.omega.numerical_value_in(si::radian / si::second)},
-        std::pair{"flow",
-                  c.flow.numerical_value_in(mp_units::cubic(si::metre) / si::second)},
+        std::pair{"flow", c.flow.numerical_value_in(mp_units::cubic(si::metre) / si::second)},
         std::pair{"dynamic_viscosity",
                   c.dynamic_viscosity.numerical_value_in(si::pascal * si::second)},
         std::pair{"density",
@@ -44,6 +43,9 @@ core::Status validate(const RotorSectorCase& c) {
     if (!positive(value)) {
       return bad(subject, std::string{"must be finite and positive: "} + subject);
     }
+  }
+  if (!(c.inlet_turbulence_intensity < 1.0)) {
+    return bad("inlet_turbulence_intensity", "a turbulence intensity is a fraction below 1");
   }
   if (!(m(c.hub_radius) < m(c.duct_radius))) {
     return bad("hub_radius", "the hub must be inside the duct");
@@ -54,8 +56,7 @@ core::Status validate(const RotorSectorCase& c) {
   if (!(m(c.cell_size) < m(c.duct_radius) - m(c.hub_radius))) {
     return bad("cell_size", "the cell size must be less than the annulus height");
   }
-  if (c.blade_refinement < 0 || c.rotor_refinement < 0 ||
-      c.rotor_refinement > c.blade_refinement) {
+  if (c.blade_refinement < 0 || c.rotor_refinement < 0 || c.rotor_refinement > c.blade_refinement) {
     return bad("blade_refinement",
                "refinement levels must be non-negative, the blade's at least the zone's");
   }

@@ -59,6 +59,7 @@ a₁ = √(1.40 × 287.0531 × 298.15) = 346.149 m/s. It is used by the tip-Mach
 
 μ = β T^(3/2) / (T + S) (Sutherland's law as given by the U.S. Standard Atmosphere 1976, eq. (51)).
 At the AX-005 default temperature, 298.15 K: μ = 1.8372 × 10⁻⁵ Pa·s. A separate model id keeps
-platform.air@1.0.0 unchanged. Validity: a finite, strictly positive temperature (the 1976 standard
-does not apply it above 86 km, which is outside every fan's range). Used for the Reynolds number of
+platform.air@1.0.0 unchanged. Validity: the code checks only a finite, strictly positive temperature; the
+temperature range over which eq. (51) holds is to be cited by the owner (HI-028). Fans here use it
+near 250 to 330 K. Used for the Reynolds number of
 CFD cases (M5) when the spec states no `air.dynamic_viscosity`; a stated value wins.

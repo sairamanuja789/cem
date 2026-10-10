@@ -60,14 +60,14 @@ struct TrustThresholds {
   // A monitor's range is divided by max(|mean|, its scale here): a pressure rise near zero would
   // otherwise make any noise look large. Monitors not listed use |mean| alone.
   std::map<std::string, double> monitor_scales;
-  std::vector<std::string> sources;         // where each threshold comes from (or UNSOURCED)
+  std::vector<std::string> sources;  // where each threshold comes from (or UNSOURCED)
 
   bool operator==(const TrustThresholds&) const = default;
 };
 
 struct CaseFiles {
   core::ModelId case_template;
-  std::map<std::string, std::string> text;                 // relative path -> content
+  std::map<std::string, std::string> text;                  // relative path -> content
   std::map<std::string, std::vector<std::uint8_t>> binary;  // relative path -> bytes
   std::vector<Step> steps;
   TrustThresholds thresholds;

@@ -1,11 +1,10 @@
 #include <mp-units/systems/isq.h>
 #include <mp-units/systems/si.h>
 
+#include <cmath>
 #include <string>
 
 #include "cemkit/product/json_io.hpp"
-#include <cmath>
-
 #include "products/fans/families/axial_ducted/free_vortex.hpp"
 #include "products/fans/families/axial_ducted/geometry.hpp"
 #include "products/fans/families/axial_ducted/mean_line.hpp"
@@ -88,8 +87,7 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
   // "camber_scale" (optional, default 1): a DESIGN VARIABLE that multiplies the built sections'
   // camber height (an optimiser may search it, M6). It is not a deviation model: the reported
   // stations keep the zero-deviation camber.
-  const double camber_scale =
-      product::optional_number(a, "camber_scale").value_or(1.0);
+  const double camber_scale = product::optional_number(a, "camber_scale").value_or(1.0);
   if (!(std::isfinite(camber_scale) && camber_scale > 0.0)) {
     throw product::BadRequest{"camber_scale", "must be finite and positive: camber_scale"};
   }

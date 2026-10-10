@@ -24,8 +24,8 @@ RotorSectorCase good() {
       .blade_refinement = 3,
       .rotor_refinement = 1,
       .omega = 209.4 * isq::angular_velocity[si::radian / si::second],
-      .flow = 0.028 *
-              cemkit::core::units::volume_flow_rate[mp_units::cubic(si::metre) / si::second],
+      .flow =
+          0.028 * cemkit::core::units::volume_flow_rate[mp_units::cubic(si::metre) / si::second],
       .dynamic_viscosity = 1.8e-5 * isq::dynamic_viscosity[si::pascal * si::second],
       .density = 1.18 * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)],
       .inlet_turbulence_intensity = 0.05,

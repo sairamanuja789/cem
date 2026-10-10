@@ -43,6 +43,16 @@ negative_sources() { # sources that must fail to compile: format-checked, not cl
   find kernel -name '*.cpp' \( -path '*/testing/gates/*' -o -path '*/compile_fail/*' \) | sort
 }
 
+wheel_build() { # T11: the scikit-build-core wheel builds and contains the nanobind module
+  rm -rf build/wheel \
+    && CEMKIT_JOBS="$jobs" uv build --wheel --out-dir build/wheel \
+    && uv run python -c 'import glob, sys, zipfile
+names = zipfile.ZipFile(glob.glob("build/wheel/cemkit-*.whl")[0]).namelist()
+found = [n for n in names if n.startswith("cemkit/_kernel.") and n.endswith(".so")]
+print("wheel contains", found)
+sys.exit(0 if found and "cemkit/kernel.py" in names else 1)'
+}
+
 clang_tidy() {
   # shellcheck disable=SC2046
   run-clang-tidy -p build/clang-debug -quiet $(kernel_sources '*.cpp')
@@ -103,6 +113,7 @@ stage "clang-debug"           preset_stage clang-debug
 stage "clang-asan"            preset_stage clang-asan
 stage "gcc-coverage"          preset_stage gcc-coverage
 stage "release"               preset_stage release
+stage "wheel (ADR-012)"       wheel_build
 stage "boundaries (ADR-009)"  boundaries
 stage "clang-tidy"            clang_tidy
 stage "clang-format"          clang_format_check

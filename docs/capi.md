@@ -22,15 +22,20 @@ Requirements: PERF-002 (batches in one call), MAINT-005 (semantic versioning), P
   `invalid_input` with the offending key as subject (in a batch: `cases[<i>].<key>`).
 - Strings returned by the library are released with `cemkit_free`. No exception crosses the ABI;
   every function is re-entrant and stateless.
-- Every OK response carries `abi_version` and `kernel_version`.
+- Every OK response carries `abi_version`, `kernel_version`, `models` ({model: version}) and
+  `plugins` ({family: plugin version}), for the run metadata (STORE-002).
+- A labelled value is `{"value", "fidelity", "fidelity_label", "model"}`; `fidelity_label` is the
+  report wording ("L0 predicted").
 - Python: `cemkit.kernel` raises `KernelError` (with `.error`) on `CEMKIT_FAILED` and
   `KernelInternalError` otherwise. The GIL is released while the kernel runs.
 
 ## Versioning (MAINT-005)
 
-`CEMKIT_ABI_VERSION_{MAJOR,MINOR,PATCH}` = 0.1.0, returned by `cemkit_abi_version()`. A breaking
+`CEMKIT_ABI_VERSION_{MAJOR,MINOR,PATCH}` = 0.2.0, returned by `cemkit_abi_version()` (0.2.0, T14:
+responses gained `models`, `plugins` and `fidelity_label`, air keys became optional, geometry smoke
+gained `include_data`). A breaking
 change to a signature or to a JSON format bumps MAJOR; an added function or key bumps MINOR.
-`cemkit.kernel.ABI_REQUIRED` = (0, 1): the loaded library must have the same MAJOR and at least
+`cemkit.kernel.ABI_REQUIRED` = (0, 2): the loaded library must have the same MAJOR and at least
 that MINOR (`cemkit.kernel.check_abi()`).
 
 ## Calls
@@ -45,7 +50,8 @@ Request `{"cases": [case, ...]}`, response `{"results": [row, ...]}` in case ord
  "air_new": {...}, "range": {...}}
 ```
 
-`air` is optional (default: AX-005 air with the 1976 constants); `air_new` is the target air of
+`air` is optional, and so is each of its keys (the kernel's default air, AX-005 with the 1976
+constants, fills the rest); `air_new` is the target air of
 `scale_fan_laws`; `range` is the family range of `check_feasibility`. Functions and `args`:
 
 | function | args |
@@ -77,7 +83,9 @@ Request: `{"flow", "fan_total_pressure", ["omega"], ["d_tip"], ["air"], "range":
 
 ### `cemkit_spec_compile` / `kernel.spec_compile(spec, autonomous_mode)` (SPEC-001..011)
 
-Request `{"spec": <spec document>, "autonomous_mode": false}`. Response `spec`: `schema_version`,
+Request `{"spec": <spec document>, "autonomous_mode": false}`. Essential fields come from the
+family registry (`register_fan_families`); an unknown family is `spec_rejected` with subject
+`family`. Response `spec`: `schema_version`,
 `spec_id`, `revision`, `parent`, `family`, `title`, `fields` (by path: `provenance`, `provisional`,
 `original_value`, `original_unit`, `si_value`, `si_unit`, `text_value`, `confidence`, `note`,
 `pressure_kind`, `tolerance`), `questions`, `conflicts`, `has_unresolved_essential_unknowns`.
@@ -85,9 +93,10 @@ Request `{"spec": <spec document>, "autonomous_mode": false}`. Response `spec`: 
 ### `cemkit_geometry_smoke` / `kernel.geometry_smoke(request)` (GEO-001, GEO-002, GEO-004)
 
 Request: `{"hub_radius", "hub_length", "sections": [{"radius", "chord", "thickness", "stagger"}],
-"exports": [{"format": "step"} | {"format": "stl", "linear_deflection", "angular_deflection"}]}`.
-Response: `backend`, `validity`, `topology`, `mass_properties` (`volume`, `area`, `centroid`) and
-`exports` (`format`, `sha256`, `size_bytes`). No file is written.
+"exports": [{"format": "step"} | {"format": "stl", "linear_deflection", "angular_deflection"}],
+"include_data": false}`. Response: `backend`, `validity`, `topology`, `mass_properties` (`volume`,
+`area`, `centroid`) and `exports` (`format`, `sha256`, `size_bytes`, and `data_base64` when
+`include_data` is true). No file is written.
 
 ## Building and testing
 

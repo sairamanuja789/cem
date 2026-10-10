@@ -21,7 +21,7 @@ from cemkit.errors import Error, error
 
 # The C ABI MAJOR.MINOR this package was written against (MAINT-005): the library must have the
 # same MAJOR and at least this MINOR.
-ABI_REQUIRED = (0, 1)
+ABI_REQUIRED = (0, 2)
 
 CEMKIT_OK = 0
 CEMKIT_FAILED = 1

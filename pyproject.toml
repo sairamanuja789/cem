@@ -47,7 +47,7 @@ known-first-party = ["cemkit"]
 
 [tool.mypy]
 strict = true
-mypy_path = "python:scripts"
+mypy_path = "python:scripts:tests/python"
 files = ["python", "tests/python", "scripts"]
 explicit_package_bases = true
 

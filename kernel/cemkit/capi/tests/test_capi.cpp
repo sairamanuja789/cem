@@ -296,12 +296,12 @@ TEST_CASE("feasibility from a spec computes the tip-speed check from the D6 tip 
   REQUIRE(r.status == CEMKIT_OK);
   // Owner decision D6: D_tip = 0.12 m - 2 x 0.0005 m, provenance default, provisional.
   const auto& d_tip = r.body["inputs"]["d_tip"];
-  CHECK_THAT(d_tip["value"].get<double>(), WithinRel(0.12 - 2.0 * 0.0005, 1e-12));
+  CHECK_THAT(d_tip["value"].get<double>(), WithinRel(0.12 - (2.0 * 0.0005), 1e-12));
   CHECK(d_tip["unit"] == "m");
   CHECK(d_tip["provenance"] == "default");
   CHECK(d_tip["provisional"] == true);
-  CHECK(d_tip["from"] ==
-        json::array({"product.nominal_size", "product.size_reference", "product.tip_clearance_min"}));
+  CHECK(d_tip["from"] == json::array({"product.nominal_size", "product.size_reference",
+                                      "product.tip_clearance_min"}));
   const auto tip_check = [](const json& report) {
     for (const auto& check : report["checks"]) {
       if (check["limit"] == "incompressible_tip_speed") {

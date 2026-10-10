@@ -20,10 +20,9 @@ core::Result<FeasibilityReport> check_family_feasibility(std::string_view family
     return axial_ducted::check_feasibility(duty, air, omega, d_tip);
   }
   // D4: the spec declares a registered family that has no feasibility hook in this release.
-  return core::fail(core::ErrorCode::not_implemented, "no feasibility hook for this family",
-                    "family",
-                    {{"capability", std::string{family} + ".feasibility"},
-                     {"family", std::string{family}}});
+  return core::fail(
+      core::ErrorCode::not_implemented, "no feasibility hook for this family", "family",
+      {{"capability", std::string{family} + ".feasibility"}, {"family", std::string{family}}});
 }
 
 core::Result<std::optional<SpecDerivedLength>> family_rotor_tip_diameter(std::string_view family,

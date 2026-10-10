@@ -5,9 +5,9 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <limits>
 #include <memory>
-#include <string_view>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <string_view>
 
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"

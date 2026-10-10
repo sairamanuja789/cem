@@ -259,8 +259,11 @@ def test_geometry_smoke_json_stdout_is_only_json(tmp_path: Path) -> None:
     # descriptor 1, so a print from C++ (which CliRunner would not see) fails this test.
     environment = {**os.environ, "PYTHONPATH": str(ROOT / "python")}
     child = subprocess.run(
-        [sys.executable, "-m", "cemkit.cli", "geometry", "smoke", "--json"]
-        + ["--store", str(tmp_path / "store")],
+        [
+            sys.executable,
+            *("-m", "cemkit.cli", "geometry", "smoke", "--json"),
+            *("--store", str(tmp_path / "store")),
+        ],
         capture_output=True,
         text=True,
         env=environment,

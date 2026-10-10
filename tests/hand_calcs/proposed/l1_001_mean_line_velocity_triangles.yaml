@@ -1,0 +1,76 @@
+id: l1_001
+title: Loss-free mean-line velocity triangles of the axial rotor at two illustrative duties
+requirements: [PHY-001, PHY-005]
+model: fans.axial.mean_line@0.1.0
+status: proposed
+source: >
+  Euler turbomachinery equation dp_t = rho U (c_theta2 - c_theta1), c_theta1 = 0 (Dixon & Hall,
+  Fluid Mechanics and Thermodynamics of Turbomachinery, 7th ed., ch. 1 and 5; to be confirmed);
+  velocity triangles by trigonometry; mean radius r_m = sqrt((r_t^2 + r_h^2)/2) (definition).
+inputs_note: >
+  Illustrative values, not requirements (the duty point is unknown, AX-003, AX-004): Q = 0.05 m3/s,
+  omega = 2000 rpm (AX-002), r_tip = 0.0595 m (D6: 60 mm duct radius - 0.5 mm clearance),
+  r_hub = 0.020 m (a design parameter, illustrative), rho = 1.18 kg/m3 (AX-005 default air).
+working: |
+  omega = 2000 x 2 pi / 60                          = 209.4395102 rad/s
+  r_t^2 = 0.0595^2 = 0.00354025 m2;  r_h^2 = 0.020^2 = 0.0004 m2
+  A     = pi (r_t^2 - r_h^2) = pi x 0.00314025        = 0.009865386330 m2
+  r_m   = sqrt((0.00354025 + 0.0004) / 2) = sqrt(0.001970125) = 0.04438609016 m
+  U     = omega r_m = 209.4395102 x 0.04438609016     = 9.296200985 m/s
+  c_x   = Q / A = 0.05 / 0.009865386330               = 5.068225240 m/s
+  rho U = 1.18 x 9.296200985                          = 10.96951716 kg/(m2 s)
+  beta1 = atan(U / c_x) = atan(1.834214)              = 1.071651073 rad (61.401 deg)
+  W1    = sqrt(c_x^2 + U^2) = sqrt(25.68690 + 86.41935) = 10.58802436 m/s
+  phi_m = c_x / U                                     = 0.5451931652
+
+  Case A, dp_t = 150 Pa (fan total):
+  c_theta2 = dp_t / (rho U) = 150 / 10.96951716        = 13.67425729 m/s
+  U - c_theta2 = 9.296200985 - 13.67425729            = -4.378056302 m/s
+  beta2  = atan2(-4.378056302, 5.068225240)            = -0.7124652551 rad (-40.821 deg)
+  alpha2 = atan(13.67425729 / 5.068225240)             = 1.215853686 rad (69.663 deg)
+  W2     = sqrt(25.68690 + 19.16738)                   = 6.697334101 m/s
+  psi_E  = c_theta2 / U                                = 1.470951124
+  W2/W1  = 6.697334101 / 10.58802436                   = 0.6325385996
+  Note: psi_E > 1 (outlet swirl above the blade speed) and beta2 < 0: the rotor would have to
+  turn the relative flow past the axial direction. The model reports this; it applies no limit.
+
+  Case B, dp_t = 40 Pa (fan total):
+  c_theta2 = 40 / 10.96951716                          = 3.646468610 m/s
+  U - c_theta2                                         = 5.649732375 m/s
+  beta2  = atan(5.649732375 / 5.068225240)             = 0.8396004263 rad (48.106 deg)
+  alpha2 = atan(3.646468610 / 5.068225240)             = 0.6236781515 rad (35.734 deg)
+  W2     = sqrt(25.68690 + 31.91947)                   = 7.589886889 m/s
+  psi_E  = 3.646468610 / 9.296200985                   = 0.3922536330
+  W2/W1  = 7.589886889 / 10.58802436                   = 0.7168369312
+  Validity: dp_t <= 1418.55 Pa; U_tip = omega r_t = 12.46 m/s <= 48.95 m/s (ADR-003 D3).
+checks:
+  - function: mean_line
+    args: {flow: 0.05, fan_total_pressure: 150.0, omega: 209.43951023931953, r_tip: 0.0595, r_hub: 0.020}
+    expected:
+      annulus_area: 0.009865386330435346
+      mean_radius: 0.04438609016347351
+      blade_speed: 9.29620098527617
+      axial_velocity: 5.068225239770571
+      outlet_swirl: 13.674257287372987
+      relative_inlet_angle: 1.0716510731553368
+      relative_outlet_angle: -0.712465255054917
+      absolute_outlet_angle: 1.2158536859011981
+      relative_inlet_speed: 10.588024359610111
+      relative_outlet_speed: 6.697334101370269
+      flow_coefficient: 0.5451931652293127
+      work_coefficient: 1.4709511239086828
+      de_haller_ratio: 0.6325385996388933
+    rel_tol: 1.0e-9
+  - function: mean_line
+    args: {flow: 0.05, fan_total_pressure: 40.0, omega: 209.43951023931953, r_tip: 0.0595, r_hub: 0.020}
+    expected:
+      outlet_swirl: 3.64646860996613
+      relative_outlet_angle: 0.8396004263421646
+      absolute_outlet_angle: 0.6236781514922547
+      relative_outlet_speed: 7.589886889386027
+      work_coefficient: 0.3922536330423154
+      de_haller_ratio: 0.716836931197381
+    rel_tol: 1.0e-9
+  - function: mean_line
+    args: {flow: 0.05, fan_total_pressure: 40.0, omega: 209.43951023931953, r_tip: 0.0595, r_hub: 0.0595}
+    expected_error: {code: out_of_validity, subject: r_hub}

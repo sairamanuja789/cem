@@ -26,6 +26,8 @@ inline constexpr std::string_view k_step_product_name = "cemkit solid";
 
 class OcctBackend final : public port::GeometryBackend {
  public:
+  OcctBackend();
+
   [[nodiscard]] std::string_view name() const noexcept override { return k_backend_name; }
 
   [[nodiscard]] core::Result<std::unique_ptr<port::Solid>> build_test_solid(

@@ -12,12 +12,16 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <IFSelect_ReturnStatus.hxx>
 #include <IMeshTools_Parameters.hxx>
+#include <Message.hxx>
+#include <Message_Messenger.hxx>
+#include <Message_Printer.hxx>
 #include <NCollection_List.hxx>
 #include <STEPControl_StepModelType.hxx>
 #include <STEPControl_Writer.hxx>
 #include <StepBasic_Product.hxx>
 #include <StepData_StepModel.hxx>
 #include <StlAPI_Writer.hxx>
+#include <TCollection_AsciiString.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
@@ -29,6 +33,7 @@
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -46,6 +51,36 @@ namespace {
 
 namespace si = mp_units::si;
 constexpr auto k_mm = si::milli<si::metre>;
+
+// Route OCCT messages through Message::DefaultMessenger() to std::clog at debug level.
+// Standard output (stdout) must never receive OCCT output so CLI JSON remains clean (D5, HI-013).
+class OcctLogPrinter final : public Message_Printer {
+ public:
+  DEFINE_STANDARD_RTTI_INLINE(OcctLogPrinter, Message_Printer)
+
+  OcctLogPrinter() { SetTraceLevel(Message_Info); }
+
+ protected:
+  void send(const TCollection_AsciiString& theString,
+            const Message_Gravity /*theGravity*/) const override {
+    const char* str = theString.ToCString();
+    if (str != nullptr && str[0] != '\0' && str[0] != '\n') {
+      std::clog << str;
+    }
+  }
+};
+
+void init_occt_messenger() {
+  static const bool initialized = []() {
+    const occ::handle<Message_Messenger>& messenger = Message::DefaultMessenger();
+    if (!messenger.IsNull()) {
+      messenger->ChangePrinters().Clear();
+      messenger->AddPrinter(new OcctLogPrinter());
+    }
+    return true;
+  }();
+  (void)initialized;
+}
 
 class OcctSolid final : public port::Solid {
  public:
@@ -295,6 +330,8 @@ core::Result<std::string> stl_bytes(const TopoDS_Shape& shape,
 }
 
 }  // namespace
+
+OcctBackend::OcctBackend() { init_occt_messenger(); }
 
 core::Result<std::unique_ptr<port::Solid>> OcctBackend::build_test_solid(
     const port::TestSolidParams& params) const {

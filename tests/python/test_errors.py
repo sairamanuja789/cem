@@ -41,7 +41,7 @@ def test_format_number_matches_the_kernel_unit_test_cases() -> None:
 
 @pytest.mark.req("REL-002")
 def test_errors_use_known_codes_and_sorted_details() -> None:
-    assert "out_of_validity" in ERROR_CODES and len(ERROR_CODES) == 11
+    assert "out_of_validity" in ERROR_CODES and len(ERROR_CODES) == 12
     err = error(
         "out_of_validity",
         "tip speed above the model's range",

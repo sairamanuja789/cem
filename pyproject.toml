@@ -1,6 +1,9 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"  # T11 moves to scikit-build-core for the nanobind module
+# T11 (ADR-012): scikit-build-core builds the nanobind module cemkit._kernel with CMake. Both are
+# pre-approved in docs/build-plan.md (T11) and pinned exactly; both releases predate the
+# exclude-newer date below (nanobind 3.1.0: 2026-09-18, scikit-build-core 1.0.3: 2026-07-12).
+requires = ["scikit-build-core==1.0.3", "nanobind==3.1.0"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "cemkit"
@@ -18,6 +21,7 @@ dev = [
   "gcovr",
   "hypothesis",
   "mypy",
+  "nanobind==3.1.0",  # T11: the release preset builds cemkit._kernel against it (ADR-012)
   "pytest",
   "pytest-cov",
   "ruff",
@@ -25,13 +29,28 @@ dev = [
   "types-pyyaml",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["python/cemkit"]
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.28"
+cmake.build-type = "Release"
+ninja.make-fallback = false
+# Persistent build tree, so wheel rebuilds are incremental (with ccache).
+build-dir = "build/python/{wheel_tag}"
+# Only the extension and what it links; the kernel tests are built by the CMake presets.
+build.targets = ["_kernel"]
+install.components = ["python"]
+wheel.packages = ["python/cemkit"]
+editable.mode = "redirect"
 
 [tool.uv]
 default-groups = ["dev"]
 # REPRO-002 / 14-day rule: resolve only versions published before this date (see docs/toolchain.md).
 exclude-newer = "2026-09-25T00:00:00Z"
+# The dev venv does not build or install cemkit (ADR-012): `uv run` must never compile the kernel
+# (it runs on the host too, e.g. the edit hook). The tests import python/ (pytest pythonpath), and
+# the release preset builds cemkit._kernel into python/cemkit/. Wheels still build with
+# scikit-build-core (`uv build`, check.sh stage "wheel").
+package = false
 
 [tool.ruff]
 line-length = 100

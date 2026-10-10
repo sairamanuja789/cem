@@ -153,8 +153,9 @@ point.
   cases (Δp_s = −0.0, an underflowing total, limits), 10 000 seeded random states inside the
   validity range (seed 20261010), each evaluated by every L0 function, both air functions and the
   feasibility gate, and 1 000 further states with one input pushed outside the range. The kernel
-  side is a small test-data tool, `kernel/products/fans/common/tests/l0_crosscheck.cpp`, that reads
-  the cases as JSON and writes the kernel results as JSON; the bindings arrive in T11. Numbers must
+  side is a small test-data tool, `kernel/cemkit/capi/tests/l0_crosscheck.cpp`, that sends the cases
+  through the C ABI (`cemkit_l0_batch`); since T11 the Python binding runs the same comparison
+  in one call (`tests/python/test_kernel_bindings.py`, `cemkit.reference.crosscheck`). Numbers must
   agree to a relative 1e-12, labels, model IDs and provenance exactly, and errors field for field
   with a byte-identical `describe()`. On 2026-10-10 (gcc-debug and release) the largest relative
   difference over 149 451 numbers was 0 (bitwise agreement), and 16 125 errors matched.

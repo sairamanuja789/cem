@@ -96,8 +96,8 @@ struct SimulationCase {
 // the orchestration only ever see it. Implementations are stateless after construction, and every
 // operation is pure and deterministic: the same inputs give the same outputs.
 //
-// Identity: id() is "<product>.<family>", the product and family folder names (for example
-// "fans.axial_ducted"); it is also the value of a spec's "family" field.
+// Identity: id() is "<product>.<family>", the product and family folder names (a family folder
+// name never appears in platform code, FAM-002); it is also the value of a spec's "family" field.
 class Family {
  public:
   Family() = default;

@@ -29,6 +29,7 @@ enum class ErrorCode : std::uint16_t {
   unknown_unit = 9,
   unit_mismatch = 10,
   internal_error = 11,
+  not_implemented = 12,
 };
 
 struct ErrorCodeInfo {
@@ -63,6 +64,9 @@ inline constexpr std::array k_error_codes{
                   "A value's unit has the wrong dimension for the field it was given for."},
     ErrorCodeInfo{ErrorCode::internal_error, "internal_error",
                   "A defect in cemkit itself; it should be reported and fixed."},
+    ErrorCodeInfo{ErrorCode::not_implemented, "not_implemented",
+                  "The operation exists in the interface but this family or module does not "
+                  "provide it yet; no value is returned."},
 };
 
 namespace detail {

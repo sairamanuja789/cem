@@ -59,6 +59,11 @@
       "const": "internal_error",
       "x-cemkit-code": 11,
       "description": "A defect in cemkit itself; it should be reported and fixed."
+    },
+    {
+      "const": "not_implemented",
+      "x-cemkit-code": 12,
+      "description": "The operation exists in the interface but this family or module does not provide it yet; no value is returned."
     }
   ]
 }

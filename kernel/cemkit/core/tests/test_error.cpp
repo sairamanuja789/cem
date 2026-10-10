@@ -15,7 +15,7 @@ using cemkit::core::ErrorCode;
 TEST_CASE("error codes keep their fixed integer and name", "[REL-002]") {
   // Append-only list: this table must only ever grow at the end. Renaming, renumbering or
   // reusing a code breaks stored data and this test.
-  constexpr std::array<std::pair<std::uint16_t, std::string_view>, 11> k_fixed{{
+  constexpr std::array<std::pair<std::uint16_t, std::string_view>, 12> k_fixed{{
       {1, "spec_rejected"},
       {2, "infeasible_requirement"},
       {3, "out_of_validity"},
@@ -27,6 +27,7 @@ TEST_CASE("error codes keep their fixed integer and name", "[REL-002]") {
       {9, "unknown_unit"},
       {10, "unit_mismatch"},
       {11, "internal_error"},
+      {12, "not_implemented"},
   }};
   REQUIRE(cemkit::core::k_error_codes.size() == k_fixed.size());
   for (std::size_t i = 0; i < k_fixed.size(); ++i) {
@@ -46,7 +47,7 @@ TEST_CASE("error code names and integers round-trip", "[REL-002]") {
   CHECK_FALSE(cemkit::core::parse_error_code("failure_cluster").has_value());
   CHECK_FALSE(cemkit::core::parse_error_code("").has_value());
   CHECK_FALSE(cemkit::core::error_code_from_int(0).has_value());
-  CHECK_FALSE(cemkit::core::error_code_from_int(12).has_value());
+  CHECK_FALSE(cemkit::core::error_code_from_int(13).has_value());  // first unused code
   CHECK(cemkit::core::to_string(static_cast<ErrorCode>(0)).empty());
 }
 

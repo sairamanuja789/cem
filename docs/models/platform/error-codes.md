@@ -20,6 +20,7 @@ data and the JSON interface use the name; the integer is used only across the C 
 | 9 | `unknown_unit` | A unit in the input is not one the spec compiler recognises. |
 | 10 | `unit_mismatch` | A value's unit has the wrong dimension for the field it was given for. |
 | 11 | `internal_error` | A defect in cemkit itself; it should be reported and fixed. |
+| 12 | `not_implemented` | The operation exists in the interface but this family or module does not provide it yet; no value is returned. |
 
 ## Simulation statuses (TRUST-004)
 

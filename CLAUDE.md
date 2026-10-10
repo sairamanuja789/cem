@@ -58,6 +58,9 @@ If code and the spec disagree, the spec wins. If the spec is ambiguous, stop and
 - `uv run pytest`
 - `uv run ruff check . && uv run mypy --strict python/`
 - `ctest --preset gcc-debug -R fans_l0_crosscheck` — kernel L0 vs the Python reference (PHY-005)
+- `cmake --build --preset release -j 6` also builds `cemkit._kernel` into `python/cemkit/` (needed by
+  `uv run pytest`); `uv build --wheel` builds the scikit-build-core wheel (ADR-012)
+- `PYTHONPATH=python uv run python scripts/bench_l0_batch.py` — batch API benchmark (docs/capi.md)
 
 Machine: 16 GB RAM. Never build C++ with more than `-j 6`; OpenCascade builds can run out of memory.
 

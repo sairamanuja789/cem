@@ -1,4 +1,4 @@
-// cemkit._kernel: the Python binding of the C ABI (T11; PERF-002; ADR-013). Batch-only and
+// cemkit._kernel: the Python binding of the C ABI (T11; PERF-002; ADR-012). Batch-only and
 // logic-free: every function takes one JSON request and returns (status, JSON response) from the
 // matching cemkit_* call; the GIL is released while the kernel runs. python/cemkit/kernel.py is the
 // typed Python API on top of it.

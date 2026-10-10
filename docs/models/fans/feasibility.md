@@ -35,6 +35,22 @@ with model `fans.feasibility@1.0.0`. It is nearest for **its own limit only**: i
 against the other limits (for example the duty at the pressure limit may still fall outside the
 family range, which is not computable while the pressure limit is violated).
 
+## Rotor tip diameter from the spec (owner decision D6, provisional)
+
+For `fans.axial_ducted`, `axial_ducted::rotor_tip_diameter(spec)` gives check 2 its D (ADR-003 D4):
+
+- `product.size_reference` = `duct_inner_diameter`: D = `product.nominal_size` − 2 ×
+  `product.tip_clearance_min`. With `examples/axial_120.yaml` (AX-001 120 mm, AX-009 0.5 mm) this is
+  0.119 m, the D of the verified hand calculation `l0_001`. Provenance `default`, provisional.
+- `product.size_reference` = `rotor_tip_diameter`: D = `product.nominal_size` as stated, with that
+  field's provenance; no clearance is involved.
+- A `frame` or unknown size reference, or an unknown nominal size or tip clearance:
+  no D, so check 2 stays `not_computable`. No clearance is ever assumed.
+- A non-positive nominal size is `spec_rejected` on `product.nominal_size`; a clearance below zero
+  or of half the duct diameter or more is `spec_rejected` on `product.tip_clearance_min`.
+
+Open item HI-023: the owner confirms frame vs rotor diameter (AX-001).
+
 ## Family ranges (SEL-002)
 
 `data/fans/family_ranges.yaml` lists ω_s ranges per family, with ω in rad/s and SI Q, Δp_t, ρ.

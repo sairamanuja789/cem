@@ -1048,3 +1048,15 @@ TEST_CASE("invalid UTF-8 in a text array does not throw", "[SPEC-001]") {
   REQUIRE(res.has_value());
   CHECK(res->field("product.scope").has_value());
 }
+
+TEST_CASE("compiler rejects temperature-specific unit basis with spec_rejected naming field",
+          "[SPEC-003]") {
+  SpecCompiler compiler(fixture_options());
+  json doc = base_valid_spec();
+  doc["product"]["duty"]["pressure"]["unit"] = "inH2O@60F";
+  const auto res = compiler.compile(doc);
+  REQUIRE(!res.has_value());
+  CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+  CHECK(res.error().subject() == "product.duty.pressure");
+  CHECK(res.error().details().at("unit") == "inH2O@60F");
+}

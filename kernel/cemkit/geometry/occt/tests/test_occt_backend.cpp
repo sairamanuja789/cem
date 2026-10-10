@@ -11,6 +11,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <numbers>
@@ -366,4 +367,20 @@ TEST_CASE("STEP and STL files are named by the sha256 of their content", "[GEO-0
       dir.path());
   REQUIRE(step_again.has_value());
   CHECK(step_again->path == step->path);
+}
+
+TEST_CASE("OCCT output does not reach stdout", "[GEO-004]") {
+  const OcctBackend backend;
+  const auto solid = backend.build_test_solid(test_params());
+  REQUIRE(solid.has_value());
+
+  std::ostringstream captured_cout;
+  auto* const original_cout = std::cout.rdbuf(captured_cout.rdbuf());
+  const auto step = backend.export_bytes(
+      **solid,
+      port::ExportRequest{.format = port::ExportFormat::step, .tessellation = std::nullopt});
+  std::cout.rdbuf(original_cout);
+
+  REQUIRE(step.has_value());
+  CHECK(captured_cout.str().empty());
 }

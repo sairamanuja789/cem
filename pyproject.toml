@@ -1,5 +1,5 @@
 [build-system]
-# T11 (ADR-013): scikit-build-core builds the nanobind module cemkit._kernel with CMake. Both are
+# T11 (ADR-012): scikit-build-core builds the nanobind module cemkit._kernel with CMake. Both are
 # pre-approved in docs/build-plan.md (T11) and pinned exactly; both releases predate the
 # exclude-newer date below (nanobind 3.1.0: 2026-09-18, scikit-build-core 1.0.3: 2026-07-12).
 requires = ["scikit-build-core==1.0.3", "nanobind==3.1.0"]
@@ -24,7 +24,7 @@ dev = [
   "gcovr",
   "hypothesis",
   "mypy",
-  "nanobind==3.1.0",  # T11: the release preset builds cemkit._kernel against it (ADR-013)
+  "nanobind==3.1.0",  # T11: the release preset builds cemkit._kernel against it (ADR-012)
   "pytest",
   "pytest-cov",
   "ruff",
@@ -49,7 +49,7 @@ editable.mode = "redirect"
 default-groups = ["dev"]
 # REPRO-002 / 14-day rule: resolve only versions published before this date (see docs/toolchain.md).
 exclude-newer = "2026-09-25T00:00:00Z"
-# The dev venv does not build or install cemkit (ADR-013): `uv run` must never compile the kernel
+# The dev venv does not build or install cemkit (ADR-012): `uv run` must never compile the kernel
 # (it runs on the host too, e.g. the edit hook). The tests import python/ (pytest pythonpath), and
 # the release preset builds cemkit._kernel into python/cemkit/. Wheels still build with
 # scikit-build-core (`uv build`, check.sh stage "wheel").

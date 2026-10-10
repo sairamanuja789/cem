@@ -51,7 +51,14 @@ The overlay differs from the pinned port only in:
   `USE_TBB`, `USE_VTK`, `USE_TK` all OFF;
 - dependencies: no `opengl` port, no default features, so **OCCT pulls in no other library**
   (only the host build helpers `vcpkg-cmake` and `vcpkg-cmake-config`);
-- release build only (`VCPKG_BUILD_TYPE release`); debug presets link the release libraries.
+- release build only (`VCPKG_BUILD_TYPE release`); debug presets link the release libraries;
+- patches: the five upstream vcpkg patches plus `0006-incallocator-align-allocations.patch`,
+  which aligns `NCollection_IncAllocator` allocations to `alignof(std::max_align_t)` to fix UBSan
+  alignment violations in `NCollection_TListNode` (HI-011, owner decision D1). Per owner decision D1,
+  the configuration route was investigated first: OCCT 8.0.0 `CMakeLists.txt:93` provides
+  `USE_MMGR_TYPE`, which already defaults to `NATIVE`. However, `NCollection_IncAllocator` is an
+  independent pool allocator invoked regardless of the chosen memory manager, so no configuration
+  option removes the misaligned allocation path, making patch 0006 necessary.
 
 The pin is exact: the overlay fixes the tag and SHA512, so a baseline bump does not change OCCT.
 Changing OCCT means editing the overlay (and this ADR).
@@ -93,6 +100,9 @@ overlay, after checking that the five patches still apply.
 - **Tessellation tolerances** for STL have no default: the caller chooses them. The values in the
   tests are arbitrary test values, as are all test-solid dimensions.
 - Mass properties are geometry, not a physics prediction, and carry no fidelity label.
+- **Output routing (D5, HI-013):** OCCT's `Message::DefaultMessenger()` is initialized by
+  `OcctBackend` to clear default printers (which write to stdout) and route messages to a
+  debug-level printer (`std::clog`). Nothing reaches stdout so CLI JSON output remains clean.
 
 ## Build cost
 Measured on this machine (16 GB, shared), `VCPKG_MAX_CONCURRENCY=2`: about 28 minutes for the
@@ -113,7 +123,9 @@ take seconds.
 - The overlay must be re-checked when the vcpkg baseline moves (REPRO-002), even though it pins OCCT
   independently.
 - Human check still open: the exported STEP and STL open in FreeCAD (build plan T10).
-- Open (HI-011): under clang-asan, UBSan's alignment check fires in OCCT header code
+- Resolved (HI-011 / HI-009, D1): under clang-asan, UBSan's alignment check fired in OCCT header code
   (`NCollection_TListNode<int>::delNode`) on nodes from `NCollection_IncAllocator`, which
-  bump-allocates without alignment, during STL meshing. The sanitizer configuration is not changed
-  until the owner decides.
+  bump-allocated without alignment. Resolved via overlay patch `0006-incallocator-align-allocations.patch`
+  aligning allocations to `alignof(std::max_align_t)`. Upstream bug report drafted in
+  `docs/upstream/occt-incallocator-alignment.md`.
+- Resolved (HI-013, D5): OCCT output is routed away from stdout via `Message::DefaultMessenger()`.

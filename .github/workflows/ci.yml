@@ -16,7 +16,10 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-24.04
+    # Pushes and same-repo PRs run on the owner's self-hosted runner (label cem-laptop). PRs from
+    # forks never reach it: they run on GitHub-hosted runners, and the repo requires approval for
+    # outside contributors' workflows.
+    runs-on: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted", "linux", "x64", "cem-laptop"]') || 'ubuntu-24.04' }}
     timeout-minutes: 120  # a cold vcpkg cache builds OpenCascade (ADR-004)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,18 +27,41 @@ jobs:
           fetch-depth: 0   # gitleaks scans the history
           persist-credentials: false
 
+      # Read build arguments from docker/pins.env.
+      # For CI, mirror.gcr.io/library/ is prefixed onto UBUNTU_BASE to bypass Docker Hub rate limits (D2).
+      # The base image digest remains strictly pinned. docker/pins.env and local builds are left unchanged.
       - name: Read build arguments from docker/pins.env
         id: pins
         run: |
           {
             echo "args<<PINS_EOF"
-            grep -E '^[A-Z_0-9]+=' docker/pins.env
+            sed 's|^UBUNTU_BASE=ubuntu:|UBUNTU_BASE=mirror.gcr.io/library/ubuntu:|' docker/pins.env | grep -E '^[A-Z_0-9]+='
             echo "PINS_EOF"
+            echo "args_fallback<<FALLBACK_EOF"
+            grep -E '^[A-Z_0-9]+=' docker/pins.env
+            echo "FALLBACK_EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # Authenticated pulls: anonymous Docker Hub pulls from shared runner IPs hit 429 rate limits.
+      # Secrets are unavailable to pull requests from forks, so those fall back to anonymous pulls.
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true   # a Docker Hub auth outage falls back to anonymous pulls
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build the ci image
+      # BuildKit image is pulled from mirror.gcr.io and pinned by digest to avoid Docker Hub rate limits (D2).
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1@sha256:cec9f139f45e93c5c69c60f8b07cfad9f43f4ef6b6a6cd917527fea5ff2e3dea
+
+      # Primary build: pulls Ubuntu base from mirror.gcr.io by digest.
+      - name: Build the ci image (mirror.gcr.io)
+        id: build_mirror
+        continue-on-error: true
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -44,6 +70,20 @@ jobs:
           load: true
           tags: cemkit-ci:latest
           build-args: ${{ steps.pins.outputs.args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Fallback build: if mirror.gcr.io fails, retry directly from Docker Hub (D2).
+      - name: Build the ci image fallback (Docker Hub)
+        if: steps.build_mirror.outcome != 'success'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: ci
+          load: true
+          tags: cemkit-ci:latest
+          build-args: ${{ steps.pins.outputs.args_fallback }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

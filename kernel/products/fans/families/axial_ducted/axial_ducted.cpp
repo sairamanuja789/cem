@@ -1,5 +1,8 @@
 #include "products/fans/families/axial_ducted/axial_ducted.hpp"
 
+#include <mp-units/systems/isq.h>
+#include <mp-units/systems/si.h>
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -85,6 +88,51 @@ FamilyRange specific_speed_range() {
                      .specific_speed_min = std::nullopt,
                      .specific_speed_max = std::nullopt,
                      .source = std::string{k_unsourced}};
+}
+
+core::Result<std::optional<DerivedTipDiameter>> rotor_tip_diameter(const spec::Spec& spec) {
+  const auto reference = spec.field("product.size_reference");
+  const std::string kind = reference ? reference->text_value.value_or("") : "";
+  const bool from_duct = kind == "duct_inner_diameter";
+  if (!from_duct && kind != "rotor_tip_diameter") {
+    return std::nullopt;  // frame or unknown: not decided by the owner (AX-001 open item)
+  }
+  const auto size = spec.field("product.nominal_size");
+  if (!size || !size->si_value) {
+    return std::nullopt;
+  }
+  if (!(*size->si_value > 0.0)) {
+    return core::fail(core::ErrorCode::spec_rejected, "the nominal size must be positive",
+                      "product.nominal_size");
+  }
+  const core::Length nominal = *size->si_value * mp_units::isq::length[mp_units::si::metre];
+  if (!from_duct) {
+    // The user stated the rotor tip diameter itself: nothing is derived or assumed.
+    return DerivedTipDiameter{.value = nominal,
+                              .provenance = size->provenance,
+                              .provisional = size->provisional || reference->provisional,
+                              .rule = k_tip_stated_rule,
+                              .from = {"product.nominal_size", "product.size_reference"}};
+  }
+  const auto clearance = spec.field("product.tip_clearance_min");
+  if (!clearance || !clearance->si_value) {
+    return std::nullopt;  // never assume a clearance (D6)
+  }
+  const core::Length c_tip = *clearance->si_value * mp_units::isq::length[mp_units::si::metre];
+  const core::Length d_tip = nominal - 2.0 * c_tip;
+  if (!(c_tip.numerical_value_in(mp_units::si::metre) >= 0.0) ||
+      !(d_tip.numerical_value_in(mp_units::si::metre) > 0.0)) {
+    return core::fail(core::ErrorCode::spec_rejected,
+                      "the tip clearance must be non-negative and less than half the duct inner "
+                      "diameter (D_tip = D_duct - 2 c_tip > 0)",
+                      "product.tip_clearance_min");
+  }
+  return DerivedTipDiameter{
+      .value = d_tip,
+      .provenance = core::Provenance::default_value,
+      .provisional = true,
+      .rule = k_tip_from_duct_rule,
+      .from = {"product.nominal_size", "product.size_reference", "product.tip_clearance_min"}};
 }
 
 core::Result<FeasibilityReport> check_feasibility(const Duty& duty, const physics::Air& air,

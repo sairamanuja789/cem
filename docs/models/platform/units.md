@@ -105,9 +105,10 @@ original value and unit (architecture rule 4). Decisions: ADR-003 D8 (proposed, 
 | inH₂O (conventional) | 25.4 × 9.80665 = 249.08891 Pa | NIST SP 811 Sec. B.8: 2.490 889 E+02 Pa |
 | °C | T + 273.15 K (differences: × 1) | SI definition of the Celsius scale |
 
-**Open point (owner):** inH₂O at 60 °F is 248.84 Pa and at 39.2 °F is 249.082 Pa (NIST SP 811
-Sec. B.8). The conventional value is used unless the owner decides a reference temperature must be
-stated (`docs/open-items.md`).
+**Owner decision D3 (2026-10-10):** inH₂O is the conventional inch of water: 249.08891 Pa. mmH₂O is
+9.80665 Pa (both NIST SP 811 Sec. B.8). A temperature-specific basis must be stated explicitly in
+the input; because the schema/compiler does not currently support temperature-specific bases, any
+such unit (e.g. `inH2O@60F`) is rejected with `spec_rejected` naming the field rather than guessing.
 
 Document: B. N. Taylor and A. Thompson, *Guide for the Use of the International System of Units
 (SI)*, NIST Special Publication 811, 2008 edition; entries read from the NIST PDF on 2026-10-10.

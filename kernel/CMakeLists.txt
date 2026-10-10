@@ -5,15 +5,13 @@ include(cmake/cemkit.cmake)
 add_subdirectory(cemkit/core)
 add_subdirectory(cemkit/spec)
 add_subdirectory(cemkit/physics)
+add_subdirectory(cemkit/product)
 add_subdirectory(cemkit/geometry/port)
 add_subdirectory(cemkit/geometry/occt)
-add_subdirectory(cemkit/product)
+add_subdirectory(cemkit/capi)
 
 # Product domains.
 add_subdirectory(products/fans)
-
-# The C ABI depends on every module above (ADR-009).
-add_subdirectory(cemkit/capi)
 
 add_subdirectory(testing)
 

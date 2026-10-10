@@ -1,4 +1,4 @@
-"""Type stub for the nanobind module cemkit._kernel (bindings/python/module.cpp, ADR-013).
+"""Type stub for the nanobind module cemkit._kernel (bindings/python/module.cpp, ADR-012).
 
 Each call takes one JSON request (docs/capi.md) and returns (status, JSON response); status is a
 cemkit_status from kernel/cemkit/capi/cemkit.h. Use cemkit.kernel, not this module, directly.

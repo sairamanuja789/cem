@@ -90,6 +90,11 @@ the same Reynolds-number regime. L0 has no viscosity to check this.
 
 - φ, ψ and δ_s use the **rotor tip diameter** D, and U = ω D / 2.
 - The **duct diameter** enters only the static-to-total conversion of D1.
+- **Rotor tip diameter from the spec (owner decision D6, 2026-10-10; provisional default).** The
+  120 mm of AX-001 is the duct inner diameter, and D = 120 mm − 2 × tip clearance, with the
+  clearance taken from the spec (`product.tip_clearance_min`, AX-009). If no clearance is stated,
+  D stays unknown and the tip-speed check stays not computable. The derived D has provenance
+  `default` and is provisional until the owner confirms frame vs rotor diameter (HI-023).
 
 ### D5. Family boundaries
 
@@ -124,10 +129,11 @@ T08 then compares the C++ and Python results field for field.
 
 **Status of D8: proposed (needs owner review).** D1–D7 are the owner's accepted decisions; D8 was
 written during autonomous work on T07 and is not accepted until the owner reviews it
-(`docs/open-items.md`). Open point: inH₂O is taken as the **conventional** inch of water,
-249.08891 Pa. Datasheets that state inches of water at 60 °F (248.84 Pa) or 39.2 °F (249.082 Pa,
-both NIST SP 811 Sec. B.8) differ by up to 0.1 %; the owner decides whether a reference
-temperature must be stated with inH₂O.
+(`docs/open-items.md`). Decision on inH₂O basis (owner decision D3, 2026-10-10): inH₂O is taken as
+the **conventional** inch of water: 0.0254 m × 1000 kg/m³ × 9.80665 m/s² = 249.08891 Pa. mmH₂O is
+9.80665 Pa (both NIST SP 811 Sec. B.8). A temperature-specific basis must be stated explicitly in
+the input. If the spec schema or compiler has no way to state a temperature-specific basis, any such
+units (e.g. `inH2O@60F`) are rejected with `spec_rejected` naming the field, rather than guessing.
 
 - **Unit conversion factors** (non-SI factors: NIST SP 811 (2008), Sec. B.8):
   - Length: 1 mm = 0.001 m, 1 cm = 0.01 m, 1 in = 0.0254 m (exact).

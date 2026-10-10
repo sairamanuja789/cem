@@ -209,3 +209,27 @@ TEST_CASE("convert_tolerance_to_si error paths", "[SPEC-003]") {
   REQUIRE(!mismatch.has_value());
   CHECK(mismatch.error().code() == cemkit::core::ErrorCode::unit_mismatch);
 }
+
+TEST_CASE("temperature-specific unit basis is rejected with spec_rejected naming the field",
+          "[SPEC-003]") {
+  CHECK(is_temperature_specific_unit("inH2O@60F"));
+  CHECK(is_temperature_specific_unit("inH2O@39.2F"));
+  CHECK(is_temperature_specific_unit("mmH2O@4C"));
+  CHECK(is_temperature_specific_unit("inH2O(60F)"));
+  CHECK(!is_temperature_specific_unit("inH2O"));
+  CHECK(!is_temperature_specific_unit("mmH2O"));
+  CHECK(!is_temperature_specific_unit("Pa"));
+
+  const auto res = convert_to_si(QuantityKind::pressure, "inH2O@60F", 1.0, "product.duty.pressure");
+  REQUIRE(!res.has_value());
+  CHECK(res.error().code() == cemkit::core::ErrorCode::spec_rejected);
+  CHECK(res.error().subject() == "product.duty.pressure");
+  CHECK(res.error().details().at("unit") == "inH2O@60F");
+
+  const auto tol =
+      convert_tolerance_to_si(QuantityKind::pressure, "inH2O@60F", 0.1, "product.duty.pressure");
+  REQUIRE(!tol.has_value());
+  CHECK(tol.error().code() == cemkit::core::ErrorCode::spec_rejected);
+  CHECK(tol.error().subject() == "product.duty.pressure");
+  CHECK(tol.error().details().at("unit") == "inH2O@60F");
+}

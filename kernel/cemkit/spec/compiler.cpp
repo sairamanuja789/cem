@@ -1,71 +1,43 @@
 #include "cemkit/spec/compiler.hpp"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 #include "cemkit/core/error.hpp"
 #include "cemkit/core/provenance.hpp"
+#include "cemkit/spec/catalogue.hpp"
 #include "cemkit/spec/units.hpp"
 
 namespace cemkit::spec {
 
 namespace {
 
-std::optional<QuantityKind> expected_field_kind(std::string_view path) {
-  if (path == "envelope.width" || path == "envelope.height" || path == "envelope.depth_min" ||
-      path == "envelope.depth_max" || path == "product.nominal_size" ||
-      path == "product.wall_thickness_min" || path == "product.tip_clearance_min" ||
-      path == "product.motor.bore_diameter") {
-    return QuantityKind::length;
-  }
-  if (path == "product.duty.flow") {
-    return QuantityKind::volume_flow_rate;
-  }
-  if (path == "product.duty.pressure") {
-    return QuantityKind::pressure;
-  }
-  if (path == "product.rotational_speed" || path == "product.motor.speed_min" ||
-      path == "product.motor.speed_max") {
-    return QuantityKind::angular_velocity;
-  }
-  if (path == "air.density") {
-    return QuantityKind::density;
-  }
-  if (path == "air.temperature") {
-    return QuantityKind::temperature;
-  }
-  if (path == "air.dynamic_viscosity") {
-    return QuantityKind::dynamic_viscosity;
-  }
-  if (path == "product.pressure_margin" || path == "product.safety_factor.factor" ||
-      path == "product.safety_factor.at_speed_ratio") {
-    return QuantityKind::ratio;
-  }
-  if (path == "product.power_limit" || path == "product.motor.power_limit" ||
-      path == "power_limit") {
-    return QuantityKind::power;
-  }
-  return std::nullopt;
-}
+// The fields a spec of one family may carry: the platform's (outside "product") and the family's
+// (ADR-015). There is no built-in product field list.
+struct Catalogues {
+  const FieldCatalogue& platform;
+  const FieldCatalogue& family;
 
-bool is_known_field(std::string_view path) {
-  if (expected_field_kind(path).has_value()) {
-    return true;
+  [[nodiscard]] const FieldDecl* find(std::string_view path) const noexcept {
+    const FieldDecl* decl = platform.find(path);
+    return decl != nullptr ? decl : family.find(path);
   }
-  if (path == "manufacturing.process" || path == "manufacturing.material" ||
-      path == "product.size_reference" || path == "product.scope") {
-    return true;
+
+  // A proper prefix of a declared field path, or the product block itself.
+  [[nodiscard]] bool is_container(std::string_view path) const {
+    if (path == "product") {
+      return true;
+    }
+    const std::string prefix = std::string{path} + ".";
+    const auto under = [&prefix](const FieldDecl& f) { return f.path.starts_with(prefix); };
+    return std::ranges::any_of(platform.fields, under) || std::ranges::any_of(family.fields, under);
   }
-  return false;
-}
+};
 
-bool is_known_container(std::string_view path) {
-  return path == "air" || path == "manufacturing" || path == "envelope" || path == "product" ||
-         path == "product.duty" || path == "product.safety_factor" || path == "product.motor";
-}
-
-core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j) {
-  if (!is_known_field(path)) {
+core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j,
+                                const FieldDecl* decl) {
+  if (decl == nullptr) {
     return core::fail(core::ErrorCode::spec_rejected, "unknown or invalid field path: " + path,
                       path, {{"path", path}});
   }
@@ -133,7 +105,7 @@ core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j
     return core::fail(core::ErrorCode::spec_rejected, "known field value cannot be null", path);
   }
 
-  const auto kind_opt = expected_field_kind(path);
+  const auto kind_opt = decl->kind;
 
   // Handle text fields (e.g. process, material, size_reference, scope)
   if (!kind_opt.has_value()) {
@@ -192,36 +164,29 @@ core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j
   f.si_value = *si_res;
   f.si_unit = std::string(coherent_si_unit(kind));
 
-  // Pressure specific checks (SPEC-004)
-  if (kind == QuantityKind::pressure) {
-    if (!j.contains("kind") || !j["kind"].is_string()) {
+  // Qualifier declared by the family, e.g. the kind of a pressure (SPEC-004).
+  if (decl->qualifier) {
+    const QualifierRule& rule = *decl->qualifier;
+    if (!j.contains(rule.member) || !j[rule.member].is_string()) {
+      return core::fail(core::ErrorCode::spec_rejected, rule.missing_message, path);
+    }
+    const std::string value = j[rule.member].get<std::string>();
+    for (const auto& rejected : rule.rejected) {
+      if (std::ranges::find(rejected.values, value) != rejected.values.end()) {
+        return core::fail(core::ErrorCode::spec_rejected, rejected.message, path);
+      }
+    }
+    if (std::ranges::find(rule.accepted, value) == rule.accepted.end()) {
       return core::fail(core::ErrorCode::spec_rejected,
-                        "pressure must state its kind (fan_total or fan_static)", path);
+                        rule.unknown_prefix + value + rule.unknown_suffix, path);
     }
-    const std::string p_kind = j["kind"].get<std::string>();
-    if (p_kind == "static_to_static" || p_kind == "static-to-static") {
-      return core::fail(
-          core::ErrorCode::spec_rejected,
-          "static-to-static pressure is rejected (ISO 5801 requires fan_total or fan_static)",
-          path);
-    }
-    if (p_kind == "total_to_static" || p_kind == "total-to-static") {
-      return core::fail(core::ErrorCode::spec_rejected,
-                        "'total-to-static' is an efficiency type, not a pressure type (ISO 5801)",
-                        path);
-    }
-    if (p_kind != "fan_total" && p_kind != "fan_static") {
-      return core::fail(core::ErrorCode::spec_rejected,
-                        "unknown pressure kind: " + p_kind + " (must be fan_total or fan_static)",
-                        path);
-    }
-    f.pressure_kind = p_kind;
+    f.qualifier = Qualifier{.name = rule.report_as, .value = value};
   }
 
   // Tolerances (SPEC-011)
-  if (path == "product.duty.flow" || path == "product.duty.pressure") {
+  if (decl->tolerance_required) {
     if (!j.contains("tolerance") || !j["tolerance"].is_object()) {
-      return core::fail(core::ErrorCode::spec_rejected, "duty point must carry a tolerance", path);
+      return core::fail(core::ErrorCode::spec_rejected, *decl->tolerance_required, path);
     }
   }
 
@@ -272,7 +237,8 @@ core::Result<Field> parse_field(const std::string& path, const nlohmann::json& j
 }
 
 core::Result<void> traverse_fields(const std::string& prefix, const nlohmann::json& node,
-                                   std::map<std::string, Field>& fields) {
+                                   std::map<std::string, Field>& fields,
+                                   const Catalogues& catalogues) {
   if (!node.is_object()) {
     return {};
   }
@@ -297,25 +263,26 @@ core::Result<void> traverse_fields(const std::string& prefix, const nlohmann::js
 
     const auto& val = it.value();
     if (val.is_object()) {
+      const FieldDecl* decl = catalogues.find(path);
       const bool is_field = val.contains("provenance") || val.contains("value") ||
-                            val.contains("unit") || is_known_field(path);
+                            val.contains("unit") || decl != nullptr;
       if (is_field) {
-        if (!is_known_field(path)) {
+        if (decl == nullptr) {
           return core::fail(core::ErrorCode::spec_rejected,
                             "unknown or invalid field path: " + path, path, {{"path", path}});
         }
-        const auto f_res = parse_field(path, val);
+        const auto f_res = parse_field(path, val, decl);
         if (!f_res.has_value()) {
           return core::fail(f_res.error().code(), f_res.error().message(), f_res.error().subject(),
                             f_res.error().details());
         }
         fields[path] = *f_res;
       } else {
-        if (!is_known_container(path)) {
+        if (!catalogues.is_container(path)) {
           return core::fail(core::ErrorCode::spec_rejected, "unknown container path: " + path, path,
                             {{"path", path}});
         }
-        const auto res = traverse_fields(path, val, fields);
+        const auto res = traverse_fields(path, val, fields, catalogues);
         if (!res.has_value()) {
           return res;
         }
@@ -350,6 +317,10 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
   if (!options_.essential_resolver) {
     return core::fail(core::ErrorCode::invalid_input, "empty essential_resolver",
                       "essential_resolver");
+  }
+  if (!options_.catalogue_resolver) {
+    return core::fail(core::ErrorCode::invalid_input, "empty catalogue_resolver",
+                      "catalogue_resolver");
   }
 
   // Required top-level attributes
@@ -424,8 +395,13 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
                            .revision = static_cast<std::uint32_t>(p_rev)};
   }
 
-  // Parse fields
-  const auto trav_res = traverse_fields("", doc, spec.fields_);
+  // Parse fields against the platform's and the family's catalogues (ADR-015)
+  const auto family_catalogue = options_.catalogue_resolver(spec.family_);
+  if (!family_catalogue.has_value()) {
+    return std::unexpected(family_catalogue.error());
+  }
+  const Catalogues catalogues{.platform = platform_catalogue(), .family = *family_catalogue};
+  const auto trav_res = traverse_fields("", doc, spec.fields_, catalogues);
   if (!trav_res.has_value()) {
     return core::fail(trav_res.error().code(), trav_res.error().message(),
                       trav_res.error().subject(), trav_res.error().details());
@@ -450,13 +426,14 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
         // default is not applied, and the field stays an essential unknown with a question.
         Field f = def_opt.value_or(Field{});
         // A numeric default must also be in the field's coherent SI unit.
-        const auto def_kind = expected_field_kind(ess_path);
+        const FieldDecl* ess_decl = catalogues.find(ess_path);
+        const bool numeric = ess_decl != nullptr && ess_decl->kind.has_value();
+        const QuantityKind def_kind =
+            numeric ? ess_decl->kind.value_or(QuantityKind::ratio) : QuantityKind::ratio;
         const bool cited = !f.note.value_or("").empty();
-        const bool has_value = def_kind.has_value()
-                                   ? (f.si_value.has_value() &&
-                                      f.si_unit.value_or("") ==
-                                          coherent_si_unit(def_kind.value_or(QuantityKind::ratio)))
-                                   : f.text_value.has_value();
+        const bool has_value = numeric ? (f.si_value.has_value() &&
+                                          f.si_unit.value_or("") == coherent_si_unit(def_kind))
+                                       : f.text_value.has_value();
         if (def_opt.has_value() && cited && has_value) {
           f.path = ess_path;
           f.provenance = core::Provenance::default_value;
@@ -468,19 +445,13 @@ core::Result<Spec> SpecCompiler::compile(const nlohmann::json& doc) const {
 
       if (!resolved_by_default) {
         std::string unit;
-        const auto kind_opt = expected_field_kind(ess_path);
-        if (kind_opt.has_value()) {
-          unit = std::string(coherent_si_unit(*kind_opt));
+        const FieldDecl* decl = catalogues.find(ess_path);
+        if (decl != nullptr && decl->kind.has_value()) {
+          unit = std::string(coherent_si_unit(*decl->kind));
         }
         std::string reason;
-        if (ess_path == "product.duty.flow") {
-          reason = "Essential duty point flow rate (AX-003).";
-        } else if (ess_path == "product.duty.pressure") {
-          reason = "Essential duty point pressure rise and kind (AX-004).";
-        } else if (ess_path == "product.nominal_size") {
-          reason = "Essential outer geometry envelope / nominal size (AX-001).";
-        } else if (ess_path == "product.rotational_speed") {
-          reason = "Essential design operating rotational speed (AX-002).";
+        if (decl != nullptr && !decl->question.empty()) {
+          reason = decl->question;
         } else {
           reason = "Essential requirement for family " + spec.family_ + " (" + ess_path + ").";
         }

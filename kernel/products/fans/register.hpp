@@ -8,11 +8,17 @@
 #include "cemkit/core/quantity.hpp"
 #include "cemkit/core/result.hpp"
 #include "cemkit/physics/air.hpp"
+#include "cemkit/product/operations.hpp"
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/spec.hpp"
 #include "products/fans/common/feasibility.hpp"
 
 namespace cemkit::fans {
+
+// The fan product's entry point (ADR-015 rule 5), called by the generated
+// product::register_products(): every fan family, then the fan operations of the C ABI.
+[[nodiscard]] core::Status register_product(product::Registry& registry,
+                                            product::Operations& operations);
 
 // Registers every fan family, in a fixed order (ADR-009). Called once by whoever owns the registry
 // (the C ABI at start-up; tests).

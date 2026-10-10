@@ -197,8 +197,9 @@ def field_line(path: str, field: Json) -> str:
     elif field["si_value"] is not None:
         given = f"{num(field['original_value'])} {field['original_unit']}"
         value = f"{given} = {num(field['si_value'])} {field['si_unit']}"
-        if field["pressure_kind"]:
-            value += f" ({field['pressure_kind']})"
+        qualifier = field.get("qualifier")
+        if qualifier:
+            value += f" ({qualifier['value']})"
     else:
         value = "unknown"
     flags = field["provenance"] + (", provisional" if field["provisional"] else "")

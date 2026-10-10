@@ -103,7 +103,7 @@ family registry (`register_fan_families`); an unknown family is `spec_rejected` 
 `family`. Response `spec`: `schema_version`,
 `spec_id`, `revision`, `parent`, `family`, `title`, `fields` (by path: `provenance`, `provisional`,
 `original_value`, `original_unit`, `si_value`, `si_unit`, `text_value`, `confidence`, `note`,
-`pressure_kind`, `tolerance`), `questions`, `conflicts`, `has_unresolved_essential_unknowns`.
+`pressure_kind` — one member per qualifier name the family declares, null where absent, kept for ABI 0.2.0 — `qualifier` (`{"name", "value"}` or null; ADR-015), `tolerance`), `questions`, `conflicts`, `has_unresolved_essential_unknowns`.
 
 ### `cemkit_geometry_smoke` / `kernel.geometry_smoke(request)` (GEO-001, GEO-002, GEO-004)
 

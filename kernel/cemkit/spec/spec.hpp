@@ -54,7 +54,7 @@ class Spec {
     return !questions_.empty();
   }
 
-  // Contradiction checks (SPEC-010): e.g. required air power exceeds stated power limit.
+  // Contradiction checks (SPEC-010): the family's rules (CompilerOptions::spec_checks).
   [[nodiscard]] core::Result<void> check_contradictions() const;
 
   // Derives a new immutable revision linked to this one as parent (SPEC-009).

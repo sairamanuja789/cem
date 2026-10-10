@@ -29,6 +29,21 @@ class TestFamily final : public Family {
   const ParameterSpace& parameter_space() const noexcept override { return space_; }
   std::vector<std::string> essential_fields() const override { return essentials_; }
   FeasibleRange feasible_range() const override { return range_; }
+  cemkit::spec::FieldCatalogue field_catalogue() const override {
+    // Declares each well-formed essential field once (as a text field), so that the registry's
+    // own essential-field checks are what these tests exercise.
+    cemkit::spec::FieldCatalogue catalogue;
+    for (const auto& path : essentials_) {
+      if (path.starts_with("product.") && catalogue.find(path) == nullptr) {
+        catalogue.fields.push_back({.path = path});
+      }
+    }
+    return catalogue;
+  }
+  cemkit::core::Status spec_checks(const cemkit::spec::Spec& /*spec*/) const override { return {}; }
+  Result<FeasibilityOutcome> feasibility(const cemkit::spec::Spec& /*spec*/) const override {
+    return FeasibilityOutcome{};
+  }
   Result<Design> initial_design(const cemkit::spec::Spec& /*spec*/) const override {
     return Design{};
   }

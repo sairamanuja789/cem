@@ -3,6 +3,7 @@
 #include <string>
 
 #include "products/fans/families/axial_ducted/axial_ducted.hpp"
+#include "products/fans/operations.hpp"
 
 namespace cemkit::fans {
 
@@ -10,6 +11,13 @@ namespace cemkit::fans {
 // kernel/testing/family_registry fails if a folder under families/ is not registered.
 core::Status register_fan_families(product::Registry& registry) {
   return axial_ducted::register_family(registry);
+}
+
+core::Status register_product(product::Registry& registry, product::Operations& operations) {
+  if (auto ok = register_fan_families(registry); !ok) {
+    return ok;
+  }
+  return register_operations(operations);
 }
 
 core::Result<FeasibilityReport> check_family_feasibility(std::string_view family, const Duty& duty,

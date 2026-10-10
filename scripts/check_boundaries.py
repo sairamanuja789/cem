@@ -57,6 +57,8 @@ def _kind(module: str) -> str:
     if parts[0] == "testing":
         return "testing"
     if parts[0] == "products":
+        if len(parts) == 1:
+            return "products_all"  # the generated register_products() entry point (ADR-015)
         if len(parts) == 2:
             return "product_register"
         return "product_common" if parts[2] == "common" else "family"
@@ -89,7 +91,11 @@ def allowed(src: str, dst: str) -> bool:
     if s == "product":
         return d in platform_basics
     if s == "capi":
-        return True
+        # ADR-015 rule 5: the C ABI names no product; it reaches them only through the generated
+        # entry point (products_all) and the Registry.
+        return d in platform_basics | {"product", "adapter", "products_all"}
+    if s == "products_all":
+        return d in {"product", "product_register"}
     same_product = _product(src) == _product(dst) if d in {"product_common", "family"} else False
     if s == "product_common":
         return d in platform_basics | {"product"}

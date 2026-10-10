@@ -1,7 +1,7 @@
 cemkit_add_module(
   PATH products/fans/common
-  SOURCES l0.cpp feasibility.cpp
-  DEPS cemkit_core cemkit_physics
+  SOURCES l0.cpp feasibility.cpp feasibility_json.cpp
+  DEPS cemkit_core cemkit_physics cemkit_product
   TESTS
     tests/test_pressure.cpp
     tests/test_l0.cpp

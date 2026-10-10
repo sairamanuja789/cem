@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:cemkit:schema:v1:spec",
   "title": "cemkit spec",
-  "description": "A requirement set (spec) for one product family, schema version 1.x (MAINT-005). Every value is a field object (SPEC-001). The 'product' block is validated separately against the family's own schema (for fans.axial_ducted: urn:cemkit:schema:products:fans:v1:spec); this platform schema never references product schemas (ADR-009). Specs are immutable: an edit is a new revision linked to its parent (SPEC-009). See schemas/README.md.",
+  "description": "A requirement set (spec) for one product family, schema version 1.x (MAINT-005). Every value is a field object (SPEC-001). The 'product' block is validated separately against the family's own schema (generated from its field catalogue, ADR-015; for fans.axial_ducted: urn:cemkit:schema:products:fans:v1:families:axial_ducted); this platform schema never references product schemas (ADR-009). Specs are immutable: an edit is a new revision linked to its parent (SPEC-009). See schemas/README.md.",
   "type": "object",
   "required": ["schema_version", "spec_id", "revision", "parent", "family", "product"],
   "additionalProperties": false,
@@ -169,6 +169,7 @@
     "temperature_unit": { "enum": ["K", "degC"] },
     "dynamic_viscosity_unit": { "enum": ["Pa*s"] },
     "ratio_unit": { "enum": ["1", "%"] },
+    "power_unit": { "enum": ["W", "kW"] },
     "si_unit": {
       "description": "Coherent SI unit strings used by candidates and results (values in the kernel are SI; '1' is dimensionless).",
       "enum": ["1", "m", "m2", "m3", "s", "kg", "K", "rad", "m/s", "rad/s", "m3/s", "kg/s", "kg/m3", "Pa", "Pa*s", "N", "N*m", "W", "J"]
@@ -213,6 +214,13 @@
       "$ref": "#/$defs/quantity_core",
       "allOf": [{ "$ref": "#/$defs/positive" }],
       "properties": { "unit": { "$ref": "#/$defs/dynamic_viscosity_unit" } },
+      "unevaluatedProperties": false
+    },
+    "power": {
+      "description": "A power (for example a stated power limit, SPEC-010); positive by definition.",
+      "$ref": "#/$defs/quantity_core",
+      "allOf": [{ "$ref": "#/$defs/positive" }],
+      "properties": { "unit": { "$ref": "#/$defs/power_unit" } },
       "unevaluatedProperties": false
     },
     "ratio": {

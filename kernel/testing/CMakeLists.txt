@@ -44,14 +44,35 @@ endif()
 # --- Family plugins (FAM-002, UC-09) ------------------------------------------------------------
 # The stub product and its stub family: a product laid out like kernel/products/<product>/.
 add_subdirectory(stub_product)
+# Two deliberately unlike stub families for the family contract suite (ADR-015 M1).
+add_subdirectory(contract_stubs)
 
 # Every folder under products/*/families/ (and testing/*/families/) must be in the registry built by
 # the products' registration functions. KERNEL_ROOT tells the test where to look.
 add_executable(cemkit_testing_family_registry_tests family_registry/test_family_folders.cpp)
 target_link_libraries(cemkit_testing_family_registry_tests PRIVATE
-  cemkit_fans cemkit_testing_stub_product Catch2::Catch2WithMain
+  cemkit_fans cemkit_testing_stub_product cemkit_testing_contract_stubs Catch2::Catch2WithMain
   cemkit_warnings cemkit_instrumentation)
 target_compile_definitions(cemkit_testing_family_registry_tests PRIVATE
   CEMKIT_KERNEL_ROOT="${CEMKIT_KERNEL_ROOT}")
 catch_discover_tests(cemkit_testing_family_registry_tests
   PROPERTIES LABELS "testing/family_registry;FAM-002")
+
+# ADR-015 M1: the family contract suite. Every registered family (the products' and the test
+# fixtures') goes through the same platform path; no product-specific branch exists to take.
+add_executable(cemkit_testing_family_contract_tests family_contract/test_family_contract.cpp)
+target_link_libraries(cemkit_testing_family_contract_tests PRIVATE
+  cemkit_products cemkit_spec cemkit_testing_stub_product cemkit_testing_contract_stubs
+  Catch2::Catch2WithMain cemkit_warnings cemkit_instrumentation)
+catch_discover_tests(cemkit_testing_family_contract_tests
+  PROPERTIES LABELS "testing/family_contract;FAM-001;FAM-002")
+
+# ADR-015 rule 3: each product family's JSON schema is generated from its field catalogue; the
+# committed files must match (scripts/gen_family_schemas.sh regenerates them).
+add_executable(cemkit_gen_family_schemas family_schemas/gen_family_schemas.cpp)
+target_link_libraries(cemkit_gen_family_schemas PRIVATE cemkit_products cemkit_spec
+  cemkit_warnings cemkit_instrumentation)
+add_test(NAME family_schemas_up_to_date
+  COMMAND cemkit_gen_family_schemas ${PROJECT_SOURCE_DIR})
+set_tests_properties(family_schemas_up_to_date PROPERTIES
+  LABELS "testing/family_schemas;SPEC-001;FAM-002")

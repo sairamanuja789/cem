@@ -40,12 +40,24 @@ core::Status Registry::add(std::unique_ptr<const Family> family) {
     return core::fail(core::ErrorCode::invalid_input, "family is already registered", "family",
                       {{"family", id}});
   }
+  const spec::FieldCatalogue catalogue = family->field_catalogue();
+  if (auto valid = spec::validate_family_catalogue(catalogue); !valid) {
+    auto details = valid.error().details();
+    details.emplace("family", id);
+    return core::fail(core::ErrorCode::invalid_input, valid.error().message(), "family",
+                      std::move(details));
+  }
   std::set<std::string, std::less<>> seen;
   for (const auto& path : family->essential_fields()) {
     if (path.empty() || !seen.insert(path).second) {
       return core::fail(core::ErrorCode::invalid_input,
                         "essential field paths must be non-empty and listed once", "family",
                         {{"family", id}, {"field", path}});
+    }
+    if (catalogue.find(path) == nullptr && spec::platform_catalogue().find(path) == nullptr) {
+      return core::fail(core::ErrorCode::invalid_input,
+                        "an essential field must be declared in the family's field catalogue",
+                        "family", {{"family", id}, {"field", path}});
     }
   }
   for (const auto& limit : family->feasible_range().limits) {
@@ -98,6 +110,47 @@ spec::EssentialFieldResolver essential_field_resolver(std::shared_ptr<const Regi
     }
     return registry->essential_fields(family);
   };
+}
+
+namespace {
+
+// A resolver needs its registry; one built without it is a defect.
+core::Error no_registry() {
+  return core::Error{core::ErrorCode::internal_error, "resolver has no family registry", "family"};
+}
+
+}  // namespace
+
+spec::FieldCatalogueResolver field_catalogue_resolver(std::shared_ptr<const Registry> registry) {
+  return [registry =
+              std::move(registry)](std::string_view family) -> core::Result<spec::FieldCatalogue> {
+    if (!registry) {
+      return std::unexpected(no_registry());
+    }
+    return registry->get(family).transform([](const Family& f) { return f.field_catalogue(); });
+  };
+}
+
+spec::SpecCheckResolver spec_check_resolver(std::shared_ptr<const Registry> registry) {
+  return [registry = std::move(registry)](const spec::Spec& spec) -> core::Status {
+    if (!registry) {
+      return std::unexpected(no_registry());
+    }
+    auto family = registry->get(spec.family());
+    if (!family) {
+      return std::unexpected(std::move(family.error()));
+    }
+    return family->get().spec_checks(spec);
+  };
+}
+
+spec::CompilerOptions compiler_options(const std::shared_ptr<const Registry>& registry,
+                                       bool autonomous_mode) {
+  return spec::CompilerOptions{.autonomous_mode = autonomous_mode,
+                               .essential_resolver = essential_field_resolver(registry),
+                               .default_resolver = {},
+                               .catalogue_resolver = field_catalogue_resolver(registry),
+                               .spec_checks = spec_check_resolver(registry)};
 }
 
 }  // namespace cemkit::product

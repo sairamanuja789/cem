@@ -58,8 +58,12 @@ ALLOWED = [
     ("products/fans/common", "cemkit/product"),
     ("products/fans/families/axial_ducted", "products/fans/common"),
     ("products/fans", "products/fans/families/axial_ducted"),
-    ("cemkit/capi", "products/fans"),
     ("cemkit/capi", "cemkit/geometry/occt"),
+    ("cemkit/capi", "cemkit/product"),
+    # ADR-015 rule 5: the C ABI reaches products only through the generated entry point.
+    ("cemkit/capi", "products"),
+    ("products", "products/fans"),
+    ("products", "cemkit/product"),
 ]
 FORBIDDEN = [
     ("cemkit/core", "cemkit/spec"),
@@ -75,6 +79,13 @@ FORBIDDEN = [
     ("products/fans/families/axial_ducted", "products/pumps/common"),
     ("products/fans/common", "cemkit/geometry/occt"),
     ("cemkit/core", "testing/toolchain"),
+    # ADR-015 rule 5: the C ABI exemption is gone.
+    ("cemkit/capi", "products/fans"),
+    ("cemkit/capi", "products/fans/common"),
+    ("cemkit/capi", "products/fans/families/axial_ducted"),
+    ("cemkit/capi", "testing/stub_product"),
+    ("products", "products/fans/common"),
+    ("cemkit/product", "products"),
 ]
 
 
@@ -118,6 +129,41 @@ def test_include_scan_rejects_a_platform_module_including_a_product(tmp_path: Pa
     violations = cb.scan_includes(kernel)
     assert len(violations) == 1
     assert "cemkit/spec" in violations[0] and "products/fans/common" in violations[0]
+
+
+@pytest.mark.req("FAM-002")
+@pytest.mark.req("FAM-001")
+def test_include_scan_rejects_the_c_abi_including_a_product(tmp_path: Path) -> None:
+    """ADR-015 rule 5: a planted product include in the C ABI is a violation."""
+    kernel = _tree(
+        tmp_path,
+        {
+            "cemkit/capi/detail/handlers.cpp": (
+                '#include "cemkit/product/products.hpp"\n#include "products/fans/register.hpp"\n'
+            ),
+            "cemkit/product/products.hpp": "#pragma once\n",
+            "products/fans/register.hpp": "#pragma once\n",
+        },
+    )
+    violations = cb.scan_includes(kernel)
+    assert len(violations) == 1
+    assert "cemkit/capi" in violations[0] and "products/fans" in violations[0]
+
+
+@pytest.mark.req("FAM-002")
+@pytest.mark.req("FAM-001")
+def test_link_graph_rejects_the_c_abi_linking_a_product() -> None:
+    """ADR-015 rule 5: the C ABI may link the generated entry point, never a product directly."""
+    manifest = "cemkit/capi=cemkit_capi\nproducts=cemkit_products\nproducts/fans=cemkit_fans\n"
+    dot = (
+        '"node0" [ label = "cemkit_capi" ];\n"node1" [ label = "cemkit_products" ];\n'
+        '"node2" [ label = "cemkit_fans" ];\n"node0" -> "node1";\n"node1" -> "node2";\n'
+    )
+    assert cb.check_link_graph(dot, manifest) == []
+    planted = dot + '"node0" -> "node2";\n'
+    assert cb.check_link_graph(planted, manifest) == [
+        "cemkit_capi links cemkit_fans (cemkit/capi may not depend on products/fans)"
+    ]
 
 
 @pytest.mark.req("FAM-002")

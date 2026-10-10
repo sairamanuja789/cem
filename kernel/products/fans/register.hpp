@@ -19,7 +19,8 @@ namespace cemkit::fans {
 [[nodiscard]] core::Status register_fan_families(product::Registry& registry);
 
 // SEL-004: the L0 feasibility hook of the fan family `family`, so that callers (the C ABI) never
-// name a family (FAM-002). not_implemented with subject "family" if the family has no hook.
+// name a family (FAM-002). not_implemented with subject "family"
+// and the detail capability = "<family>.feasibility" if the family has no hook (D4).
 [[nodiscard]] core::Result<FeasibilityReport> check_family_feasibility(
     std::string_view family, const Duty& duty, const physics::Air& air,
     std::optional<core::AngularVelocity> omega, std::optional<core::Length> d_tip);

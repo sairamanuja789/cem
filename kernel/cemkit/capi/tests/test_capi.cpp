@@ -300,14 +300,31 @@ TEST_CASE("feasibility from a spec computes the tip-speed check from the D6 tip 
   CHECK(d_tip["unit"] == "m");
   CHECK(d_tip["provenance"] == "default");
   CHECK(d_tip["provisional"] == true);
-  CHECK(d_tip["from"].size() == 3);
-  CHECK(r.body["report"]["checks"][1]["limit"] == "incompressible_tip_speed");
-  CHECK(r.body["report"]["checks"][1]["status"] == "pass");
+  CHECK(d_tip["from"] ==
+        json::array({"product.nominal_size", "product.size_reference", "product.tip_clearance_min"}));
+  const auto tip_check = [](const json& report) {
+    for (const auto& check : report["checks"]) {
+      if (check["limit"] == "incompressible_tip_speed") {
+        return check;
+      }
+    }
+    FAIL("no incompressible_tip_speed check");
+    return json{};
+  };
+  CHECK(tip_check(r.body["report"])["status"] == "pass");
 
   json no_clearance = spec;
   no_clearance["product"].erase("tip_clearance_min");
   const auto n = call(&cemkit_feasibility, json{{"spec", no_clearance}});
   REQUIRE(n.status == CEMKIT_OK);
   CHECK(!n.body["inputs"].contains("d_tip"));
-  CHECK(n.body["report"]["checks"][1]["status"] == "not_computable");
+  CHECK(tip_check(n.body["report"])["status"] == "not_computable");
+
+  // A clearance of half the duct diameter leaves no rotor: rejected on its field, never a number.
+  json too_wide = spec;
+  too_wide["product"]["tip_clearance_min"]["value"] = 60.0;
+  const auto w = call(&cemkit_feasibility, json{{"spec", too_wide}});
+  CHECK(w.status == CEMKIT_FAILED);
+  CHECK(w.body["error"]["code"] == "spec_rejected");
+  CHECK(w.body["error"]["subject"] == "product.tip_clearance_min");
 }

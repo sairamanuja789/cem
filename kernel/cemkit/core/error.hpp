@@ -64,9 +64,14 @@ inline constexpr std::array k_error_codes{
                   "A value's unit has the wrong dimension for the field it was given for."},
     ErrorCodeInfo{ErrorCode::internal_error, "internal_error",
                   "A defect in cemkit itself; it should be reported and fixed."},
+    // not_implemented (owner decision D4): only for a capability the spec declares (a requested
+    // family, or a hook of that family) that this release does not provide. Its details always
+    // name the missing capability under the key "capability". It is never a placeholder inside
+    // half-written code: unfinished code is not merged.
     ErrorCodeInfo{ErrorCode::not_implemented, "not_implemented",
-                  "The operation exists in the interface but this family or module does not "
-                  "provide it yet; no value is returned."},
+                  "A capability the spec declares (a requested family or a hook of that family) "
+                  "is not provided by this release; the details name it under capability. Never "
+                  "a placeholder for unfinished code; no value is returned."},
 };
 
 namespace detail {

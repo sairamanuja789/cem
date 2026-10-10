@@ -13,12 +13,15 @@ namespace {
 
 constexpr core::SemVer k_version{.major = 0, .minor = 1, .patch = 0};
 
+// D4: the spec declares fans.axial_ducted; this release lacks the named hook of that family
+// (axial L1 milestone, HI-014). The capability detail names it.
 core::Error not_implemented(std::string_view operation) {
   return core::Error{core::ErrorCode::not_implemented,
                      std::string{operation} +
                          " is not implemented for fans.axial_ducted yet "
                          "(axial L1 milestone)",
-                     std::string{k_family_id}};
+                     std::string{k_family_id},
+                     {{"capability", std::string{k_family_id} + "." + std::string{operation}}}};
 }
 
 class AxialDucted final : public product::Family {

@@ -20,7 +20,7 @@ data and the JSON interface use the name; the integer is used only across the C 
 | 9 | `unknown_unit` | A unit in the input is not one the spec compiler recognises. |
 | 10 | `unit_mismatch` | A value's unit has the wrong dimension for the field it was given for. |
 | 11 | `internal_error` | A defect in cemkit itself; it should be reported and fixed. |
-| 12 | `not_implemented` | The operation exists in the interface but this family or module does not provide it yet; no value is returned. |
+| 12 | `not_implemented` | A capability the spec declares (a requested family or a hook of that family) is not provided by this release; the details name it under capability. Never a placeholder for unfinished code; no value is returned. |
 
 ## Simulation statuses (TRUST-004)
 
@@ -41,6 +41,11 @@ ends a candidate is classified as follows; VERIFIED and CONVERGED are not failur
 - a subject: the spec field path or model parameter concerned (may be empty);
 - details: key/value pairs sorted by key, conventionally `value`, `unit`, `bounds` and
   `model`.
+
+`not_implemented` (owner decision D4) is used only for a capability the spec declares
+(a requested family, or a hook of that family) that this release does not provide. Its
+details always include `capability`, naming the missing capability (for example
+`fans.axial_ducted.initial_design`). It is never a placeholder inside half-written code.
 
 Messages are deterministic: no memory addresses and no locale-dependent formatting.
 Numbers are written in the shortest form that reads back to the same value.

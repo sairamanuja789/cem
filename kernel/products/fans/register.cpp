@@ -19,8 +19,11 @@ core::Result<FeasibilityReport> check_family_feasibility(std::string_view family
   if (family == axial_ducted::k_family_id) {
     return axial_ducted::check_feasibility(duty, air, omega, d_tip);
   }
+  // D4: the spec declares a registered family that has no feasibility hook in this release.
   return core::fail(core::ErrorCode::not_implemented, "no feasibility hook for this family",
-                    "family", {{"family", std::string{family}}});
+                    "family",
+                    {{"capability", std::string{family} + ".feasibility"},
+                     {"family", std::string{family}}});
 }
 
 }  // namespace cemkit::fans

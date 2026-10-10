@@ -75,6 +75,7 @@ void init_occt_messenger() {
     const occ::handle<Message_Messenger>& messenger = Message::DefaultMessenger();
     if (!messenger.IsNull()) {
       messenger->ChangePrinters().Clear();
+      // NOLINTNEXTLINE(cppcoreguidelines-owning-memory): the OCCT handle takes ownership
       messenger->AddPrinter(new OcctLogPrinter());
     }
     return true;

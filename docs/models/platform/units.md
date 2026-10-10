@@ -87,3 +87,27 @@ These points are from the physics review of T04, probed with GCC 13 and mp-units
 - Comparing a `std::optional<Q>` with anything through libstdc++ 13's mixed `optional == U` overloads
   makes mp-units' representation concept recurse; GCC 13 reports "satisfaction of atomic constraint
   depends on itself". Unwrap the optional before comparing (see `Labelled::operator==`).
+
+## Spec compiler unit table (T07)
+
+The spec compiler (`kernel/cemkit/spec/units.cpp`) converts user units to SI and records the
+original value and unit (architecture rule 4). Decisions: ADR-003 D8 (proposed, needs owner review).
+
+| Unit | SI factor | Source |
+| --- | --- | --- |
+| mm, cm, kPa, kW, mPa·s, L/s, % | SI prefixes / definitions | SI |
+| in | 0.0254 m (exact) | NIST SP 811 (2008), Sec. B.8 |
+| ft³/min (CFM) | 0.3048³ / 60 m³/s = 4.719474 × 10⁻⁴ m³/s | NIST SP 811 Sec. B.8: ft = 0.3048 m exact; ft³/min = 4.719 474 E−04 m³/s |
+| m³/min, m³/h | 1/60, 1/3600 m³/s | time units |
+| rpm | 2π/60 rad/s | NIST SP 811 Sec. B.8: 1.047 198 E−01 rad/s |
+| mmH₂O (conventional) | 9.80665 Pa | NIST SP 811 Sec. B.8; g_n = 9.806 65 m/s² exactly (same document) |
+| inH₂O (conventional) | 25.4 × 9.80665 = 249.08891 Pa | NIST SP 811 Sec. B.8: 2.490 889 E+02 Pa |
+| °C | T + 273.15 K (differences: × 1) | SI definition of the Celsius scale |
+
+**Owner decision D3 (2026-10-10):** inH₂O is the conventional inch of water: 249.08891 Pa. mmH₂O is
+9.80665 Pa (both NIST SP 811 Sec. B.8). A temperature-specific basis must be stated explicitly in
+the input; because the schema/compiler does not currently support temperature-specific bases, any
+such unit (e.g. `inH2O@60F`) is rejected with `spec_rejected` naming the field rather than guessing.
+
+Document: B. N. Taylor and A. Thompson, *Guide for the Use of the International System of Units
+(SI)*, NIST Special Publication 811, 2008 edition; entries read from the NIST PDF on 2026-10-10.

@@ -120,6 +120,48 @@ T08 then compares the C++ and Python results field for field.
   - one case beyond each incompressibility limit;
   - the ideal-gas consistency check.
 
+### D8. Spec compiler semantics and unit conversions (T07: SPEC-001 to SPEC-011, IN-001)
+
+**Status of D8: proposed (needs owner review).** D1–D7 are the owner's accepted decisions; D8 was
+written during autonomous work on T07 and is not accepted until the owner reviews it
+(`docs/open-items.md`). Decision on inH₂O basis (owner decision D3, 2026-10-10): inH₂O is taken as
+the **conventional** inch of water: 0.0254 m × 1000 kg/m³ × 9.80665 m/s² = 249.08891 Pa. mmH₂O is
+9.80665 Pa (both NIST SP 811 Sec. B.8). A temperature-specific basis must be stated explicitly in
+the input. If the spec schema or compiler has no way to state a temperature-specific basis, any such
+units (e.g. `inH2O@60F`) are rejected with `spec_rejected` naming the field, rather than guessing.
+
+- **Unit conversion factors** (non-SI factors: NIST SP 811 (2008), Sec. B.8):
+  - Length: 1 mm = 0.001 m, 1 cm = 0.01 m, 1 in = 0.0254 m (exact).
+  - Angular velocity: 1 rpm = π/30 rad/s.
+  - Volume flow rate: 1 m³/min = 1/60 m³/s, 1 m³/h = 1/3600 m³/s, 1 L/s = 0.001 m³/s,
+    1 CFM = (0.3048)³ / 60 m³/s = 0.0004719474432 m³/s.
+  - Pressure: 1 kPa = 1000 Pa, 1 mmH₂O = 9.80665 Pa (conventional; standard gravity g_n = 9.80665 m/s² exactly),
+    1 inH₂O = 25.4 × 9.80665 Pa = 249.08891 Pa. Both ASCII ("mmH2O", "inH2O") and Unicode
+    ("mmH₂O", "inH₂O") spellings are accepted.
+  - Power: 1 kW = 1000 W.
+  - Temperature: K is absolute; °C converts as T + 273.15 K, but tolerance bands in °C convert
+    with scale 1.0 (difference of points).
+  - Dimensionless / ratio: 1 % = 0.01, 1 = 1.0.
+  - Viscosity: 1 Pa·s = 1.0 Pa·s, 1 mPa·s = 0.001 Pa·s.
+- **Provenance precedence:** user (rank 4) > image (rank 3) > derived (rank 2) > default (rank 1) > unknown (rank 0).
+  Deterministic; conflicts and overridden provenance are recorded on the compiled spec.
+- **Pressure semantics:** accept only `fan_total` and `fan_static`. Reject missing kind, reject
+  `static_to_static` (and `static-to-static`), and reject `total_to_static` explaining that it is
+  an efficiency type only, not a pressure type. All rejections name the field.
+- **Contradiction check:** Required air power P_air = Q · Δp > P_limit (or motor/shaft limit) is
+  rejected as a physical contradiction (`infeasible_requirement`), naming the field.
+- **Essential unknown fields:** Stubbed until T09; for `fans.axial_ducted`, essential fields are
+  `product.duty.flow` and `product.duty.pressure`. Every essential unknown produces a question
+  naming the field, unit and why it matters. A campaign cannot start with unresolved essential
+  unknowns unless autonomous mode is set and a default exists (marked provisional).
+- **Defaults** come only from the injected family default resolver. The compiler has no built-in
+  default values. A resolver default is applied only when it carries a value in the field's
+  coherent SI unit and a non-empty source note (citation); otherwise the field stays an essential
+  unknown with a question. Applied defaults get provenance `default` and are provisional.
+- **Not covered by the kernel compiler yet:** SPEC-011's operating range / system curve (only a
+  single duty point with tolerances is compiled; HI-006) and IN-001's YAML input (the kernel reads
+  JSON; YAML is parsed in Python orchestration; HI-007).
+
 ## Consequences
 
 - **Type split in Python.** The Python reference gets distinct fan total and fan static pressure

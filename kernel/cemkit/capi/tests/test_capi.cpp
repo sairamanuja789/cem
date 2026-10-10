@@ -112,7 +112,7 @@ TEST_CASE("a batch evaluates every case in one call, errors per case", "[PERF-00
         "out_of_validity at flow: input must be finite and strictly positive (bounds=(0, inf), "
         "model=fans.l0@1.0.0, value=0)");
   CHECK(results[2]["id"] == 2);  // no id: the position
-  CHECK(r.body["abi_version"] == "0.1.0");
+  CHECK(r.body["abi_version"] == "0.2.0");
 }
 
 TEST_CASE("feasibility through the ABI reports range unsourced", "[SEL-004][SEL-002]") {
@@ -183,4 +183,47 @@ TEST_CASE("geometry smoke builds a valid solid deterministically", "[GEO-001][GE
   json bad_format = smoke_request();
   bad_format["exports"] = {{{"format", "obj"}}};
   CHECK(call(&cemkit_geometry_smoke, bad_format).body["error"]["subject"] == "format");
+}
+
+TEST_CASE("responses carry the versions STORE-002 records", "[MAINT-005][PHY-004]") {
+  const auto r = call(&cemkit_l0_batch, json{{"cases", json::array()}});
+  REQUIRE(r.status == CEMKIT_OK);
+  CHECK(r.body["models"]["fans.l0"] == "1.0.0");
+  CHECK(r.body["models"]["fans.feasibility"] == "1.0.0");
+  CHECK(r.body["models"]["platform.air"] == "1.0.0");
+  CHECK(r.body["plugins"]["fans.axial_ducted"] == "0.1.0");
+}
+
+TEST_CASE("air may be partial; the rest comes from the kernel's default air", "[PHY-002]") {
+  const json request{{"cases",
+                      {{{"function", "max_fan_total_pressure"}, {"args", json::object()}},
+                       {{"function", "max_fan_total_pressure"},
+                        {"args", json::object()},
+                        {"air", {{"pressure", 100000.0}}}}}}};
+  const auto r = call(&cemkit_l0_batch, request);
+  REQUIRE(r.status == CEMKIT_OK);
+  CHECK(r.body["results"][0]["value"] == 1418.55);
+  CHECK_THAT(r.body["results"][1]["value"].get<double>(), WithinRel(1400.0, 1e-12));
+  CHECK(r.body["results"][0]["fidelity_label"] == "L0 predicted");
+}
+
+TEST_CASE("spec compile asks the family registry; an unknown family is rejected", "[SPEC-006]") {
+  json unknown = minimal_spec();
+  unknown["family"] = "fans.no_such_family";
+  const auto e = call(&cemkit_spec_compile, json{{"spec", unknown}});
+  CHECK(e.status == CEMKIT_FAILED);
+  CHECK(e.body["error"]["code"] == "spec_rejected");
+  CHECK(e.body["error"]["subject"] == "family");
+}
+
+TEST_CASE("geometry smoke can return the export bytes", "[GEO-004]") {
+  json request = smoke_request();
+  request["include_data"] = true;
+  const auto r = call(&cemkit_geometry_smoke, request);
+  REQUIRE(r.status == CEMKIT_OK);
+  const auto& file = r.body["exports"][0];
+  const auto size = file["size_bytes"].get<std::size_t>();
+  const auto encoded = file["data_base64"].get<std::string>();
+  CHECK(encoded.size() == (size + 2) / 3 * 4);
+  CHECK(encoded.starts_with("SVNPLTEwMzAz"));  // "ISO-10303" (a STEP file)
 }

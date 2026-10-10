@@ -4,6 +4,7 @@
 #include <mp-units/systems/si.h>
 
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -19,9 +20,11 @@
 #include "cemkit/geometry/occt/occt_backend.hpp"
 #include "cemkit/geometry/port/backend.hpp"
 #include "cemkit/physics/air.hpp"
+#include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"
 #include "products/fans/common/feasibility.hpp"
 #include "products/fans/common/l0.hpp"
+#include "products/fans/register.hpp"
 
 namespace cemkit::capi::detail {
 
@@ -74,23 +77,42 @@ core::VolumeFlowRate flow_of(double v) {
 }
 fans::FanTotalPressure total_of(double v) { return v * fans::fan_total_pressure[si::pascal]; }
 
-// The request's air, or the AX-005 default air when the key is absent.
+// The request's air: each property given in the request, the rest from the AX-005 default air
+// with the 1976 constants (physics::default_air), so no constant is repeated outside the kernel.
 physics::Air air_of(const Json& object, const char* key) {
+  physics::Air air = physics::default_air();
   if (!object.contains(key)) {
-    return physics::default_air();
+    return air;
   }
   const Json& a = object[key];
-  return physics::Air{
-      .density =
-          number(a, "density") * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)],
-      .temperature =
-          mp_units::point<isq::thermodynamic_temperature[si::kelvin]>(number(a, "temperature")),
-      .pressure =
-          core::units::absolute_zero_pressure + number(a, "pressure") * isq::pressure[si::pascal],
-      .gamma = number(a, "gamma") * isq::ratio_of_specific_heat_capacities[mp_units::one],
-      .gas_constant = number(a, "gas_constant") *
-                      isq::specific_gas_constant[si::joule / (si::kilogram * si::kelvin)],
-  };
+  if (!a.is_object()) {
+    throw BadRequest{key, std::string{"must be an object: "} + key};
+  }
+  if (auto v = optional_number(a, "density")) {
+    air.density = *v * isq::mass_density[si::kilogram / mp_units::cubic(si::metre)];
+  }
+  if (auto v = optional_number(a, "temperature")) {
+    air.temperature = mp_units::point<isq::thermodynamic_temperature[si::kelvin]>(*v);
+  }
+  if (auto v = optional_number(a, "pressure")) {
+    air.pressure = core::units::absolute_zero_pressure + *v * isq::pressure[si::pascal];
+  }
+  if (auto v = optional_number(a, "gamma")) {
+    air.gamma = *v * isq::ratio_of_specific_heat_capacities[mp_units::one];
+  }
+  if (auto v = optional_number(a, "gas_constant")) {
+    air.gas_constant = *v * isq::specific_gas_constant[si::joule / (si::kilogram * si::kelvin)];
+  }
+  return air;
+}
+
+// The registry of every compiled-in family (ADR-009): built per call, so the ABI keeps no state.
+std::shared_ptr<const product::Registry> family_registry() {
+  auto registry = std::make_shared<product::Registry>();
+  if (auto ok = fans::register_fan_families(*registry); !ok) {
+    throw std::runtime_error{"family registration failed: " + core::describe(ok.error())};
+  }
+  return registry;
 }
 
 fans::FamilyRange range_of(const Json& r) {
@@ -103,16 +125,30 @@ fans::FamilyRange range_of(const Json& r) {
 // --- response encoding ------------------------------------------------------------------------
 
 Json versions() {
+  Json models = Json::object();
+  for (const auto& model : {fans::l0_model(), fans::feasibility_model(), physics::air_model()}) {
+    models[model.name] = core::to_string(model.version);
+  }
+  Json plugins = Json::object();
+  const auto registry = family_registry();
+  for (const auto& id : registry->ids()) {
+    if (auto family = registry->get(id)) {
+      plugins[id] = core::to_string(family->get().plugin().version);
+    }
+  }
   return Json{{"abi_version", std::to_string(CEMKIT_ABI_VERSION_MAJOR) + "." +
                                   std::to_string(CEMKIT_ABI_VERSION_MINOR) + "." +
                                   std::to_string(CEMKIT_ABI_VERSION_PATCH)},
-              {"kernel_version", std::string{core::kernel_version()}}};
+              {"kernel_version", std::string{core::kernel_version()}},
+              {"models", models},
+              {"plugins", plugins}};
 }
 
 template <class Q, class U>
 Json labelled_json(const core::Labelled<Q>& l, U unit) {
   return Json{{"value", l.value().numerical_value_in(unit)},
               {"fidelity", std::string{core::to_string(l.fidelity())}},
+              {"fidelity_label", std::string{core::report_label(l.fidelity())}},
               {"model", core::to_string(l.model())}};
 }
 
@@ -241,6 +277,7 @@ Json evaluate_case(const Json& c) {
           {"fan_total_pressure", r->pressure.value().numerical_value_in(pa)},
           {"power", r->power.value().numerical_value_in(si::watt)}}},
         {"fidelity", std::string{core::to_string(r->flow.fidelity())}},
+        {"fidelity_label", std::string{core::report_label(r->flow.fidelity())}},
         {"model", core::to_string(r->flow.model())}};
   }
   if (fn == "ideal_gas_density") {
@@ -344,6 +381,36 @@ port::TestSolidParams solid_params_of(const Json& request) {
   return params;
 }
 
+// RFC 4648 base64 (standard alphabet, with padding), for export bytes in a JSON response.
+std::string base64(std::string_view bytes) {
+  static constexpr std::string_view k_alphabet =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  std::string out;
+  out.reserve((bytes.size() + 2) / 3 * 4);
+  std::size_t i = 0;
+  for (; i + 2 < bytes.size(); i += 3) {
+    const auto n = (static_cast<unsigned>(static_cast<unsigned char>(bytes[i])) << 16U) |
+                   (static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 1])) << 8U) |
+                   static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 2]));
+    out += k_alphabet[(n >> 18U) & 63U];
+    out += k_alphabet[(n >> 12U) & 63U];
+    out += k_alphabet[(n >> 6U) & 63U];
+    out += k_alphabet[n & 63U];
+  }
+  if (i < bytes.size()) {
+    auto n = static_cast<unsigned>(static_cast<unsigned char>(bytes[i])) << 16U;
+    const bool two = i + 1 < bytes.size();
+    if (two) {
+      n |= static_cast<unsigned>(static_cast<unsigned char>(bytes[i + 1])) << 8U;
+    }
+    out += k_alphabet[(n >> 18U) & 63U];
+    out += k_alphabet[(n >> 12U) & 63U];
+    out += two ? k_alphabet[(n >> 6U) & 63U] : '=';
+    out += '=';
+  }
+  return out;
+}
+
 port::ExportRequest export_request_of(const Json& e) {
   const std::string format = text(e, "format");
   if (format == "step") {
@@ -385,7 +452,7 @@ core::Result<Json> spec_compile(const Json& request) {
   const nlohmann::json document = member(request, "spec");
   const spec::SpecCompiler compiler{
       spec::CompilerOptions{.autonomous_mode = autonomous,
-                            .essential_resolver = spec::default_essential_fields,
+                            .essential_resolver = product::essential_field_resolver(family_registry()),
                             .default_resolver = {}}};
   auto compiled = compiler.compile(document);
   if (!compiled) {
@@ -456,15 +523,26 @@ core::Result<Json> geometry_smoke(const Json& request) {
   if (!mass) {
     return std::unexpected(mass.error());
   }
+  bool include_data = false;
+  if (request.contains("include_data")) {
+    if (!request["include_data"].is_boolean()) {
+      throw BadRequest{"include_data", "must be a boolean: include_data"};
+    }
+    include_data = request["include_data"].get<bool>();
+  }
   Json files = Json::array();
   for (const auto& e : exports) {
     auto bytes = backend.export_bytes(**solid, e);
     if (!bytes) {
       return std::unexpected(bytes.error());
     }
-    files.push_back(Json{{"format", std::string{port::extension(e.format)}},
-                         {"sha256", core::sha256_hex(*bytes)},
-                         {"size_bytes", bytes->size()}});
+    Json file{{"format", std::string{port::extension(e.format)}},
+              {"sha256", core::sha256_hex(*bytes)},
+              {"size_bytes", bytes->size()}};
+    if (include_data) {
+      file["data_base64"] = base64(*bytes);
+    }
+    files.push_back(std::move(file));
   }
   const auto& v = *validity;
   const auto& t = *topology;

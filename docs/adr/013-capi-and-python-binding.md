@@ -1,4 +1,4 @@
-# ADR-012: C ABI shape and the Python binding build
+# ADR-013: C ABI shape and the Python binding build
 
 - Status: proposed (needs owner review)
 - Date: 2026-10-10
@@ -34,7 +34,7 @@ also in the locked dev group for the preset build); the wheel build limits Ninja
 ## Consequences
 - `uv run pytest` needs the `release` preset to have run (check.sh does; a missing module fails
   the binding tests loudly, nothing is skipped).
-- check.sh gains a "wheel (ADR-012)" stage that builds the scikit-build-core wheel and checks it
+- check.sh gains a "wheel (ADR-013)" stage that builds the scikit-build-core wheel and checks it
   contains `cemkit/_kernel*.so`; it recompiles the kernel in `build/python/`.
 - The JSON batch costs about 4 µs per case for encoding and decoding in Python on top of about
   9 µs in the C ABI (docs/capi.md). If L1 populations need less, add a columnar call (MINOR bump).

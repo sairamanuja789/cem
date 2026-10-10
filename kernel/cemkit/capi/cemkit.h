@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #define CEMKIT_ABI_VERSION_MAJOR 0
-#define CEMKIT_ABI_VERSION_MINOR 1
+#define CEMKIT_ABI_VERSION_MINOR 2
 #define CEMKIT_ABI_VERSION_PATCH 0
 
 typedef enum cemkit_status {

@@ -1,9 +1,10 @@
-# C ABI (T11; MAINT-005, PERF-002; ADR-012): JSON in and out, status codes, cemkit_free. The only
+# C ABI (T11; MAINT-005, PERF-002; ADR-013): JSON in and out, status codes, cemkit_free. The only
 # module that may depend on every other module (ADR-009).
 cemkit_add_module(
   PATH cemkit/capi
   SOURCES cemkit.cpp detail/handlers.cpp
-  DEPS cemkit_core cemkit_spec cemkit_physics cemkit_fans_common cemkit_geometry_occt
+  DEPS cemkit_core cemkit_spec cemkit_physics cemkit_product cemkit_fans_common cemkit_fans
+       cemkit_geometry_occt
        nlohmann_json::nlohmann_json
   TESTS tests/test_capi.cpp)
 

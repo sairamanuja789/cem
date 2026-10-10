@@ -1,28 +1,8 @@
-diff --git a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
-index 548c775..5df784b 100644
---- a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
-+++ b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
-@@ -21,6 +21,7 @@
- #include <NCollection_Allocator.hxx>
- #include <Standard_MemoryUtils.hxx>
- 
-+#include <cstddef>
- #include <utility>
- #include <atomic>
- #include <memory>
-@@ -101,7 +102,7 @@ public:
-   //! Forward list to keep multi-time allocated pointers.
-   //! On Reset operation objects will be reused.
--  struct IBlock
-+  struct alignas(std::max_align_t) IBlock
-   {
-     IBlock(void* thePointer, const size_t theSize);
- 
 diff --git a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.cxx b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.cxx
-index acf517d..3d115aa 100644
+index 5f1e524..7c1ad4c 100644
 --- a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.cxx
 +++ b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.cxx
-@@ -17,6 +17,7 @@
+@@ -16,6 +16,7 @@
  #include <Standard_OutOfMemory.hxx>
  
  #include <cmath>
@@ -30,7 +10,8 @@ index acf517d..3d115aa 100644
  
  IMPLEMENT_STANDARD_RTTIEXT(NCollection_IncAllocator, NCollection_BaseAllocator)
  
-@@ -29,6 +30,12 @@ namespace
+@@ -27,6 +28,12 @@ namespace
+   static constexpr unsigned THE_MEDIUM_BOUND_BLOCK_SIZE = NCollection_IncAllocator::THE_DEFAULT_BLOCK_SIZE * 64;  // 786 KB
    static constexpr unsigned THE_LARGE_BOUND_BLOCK_SIZE = NCollection_IncAllocator::THE_DEFAULT_BLOCK_SIZE * 1024; // 12 MB
  // clang-format on
 +  static constexpr size_t THE_ALIGNMENT = alignof(std::max_align_t);
@@ -42,7 +23,7 @@ index acf517d..3d115aa 100644
  
  //=================================================================================================
  
-@@ -93,6 +100,7 @@ NCollection_IncAllocator::~NCollection_IncAllocator()
+@@ -91,6 +98,7 @@ NCollection_IncAllocator::~NCollection_IncAllocator()
  
  void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
  {
@@ -50,7 +31,7 @@ index acf517d..3d115aa 100644
    if (myMutex)
    {
      // Fast path: shared lock allows multiple threads to bump-allocate
-@@ -102,10 +110,10 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
+@@ -101,15 +109,15 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
        if (aBlock)
        {
          size_t anAvail = aBlock->AvailableSize.load(std::memory_order_relaxed);
@@ -63,13 +44,13 @@ index acf517d..3d115aa 100644
                                                            std::memory_order_acquire,
                                                            std::memory_order_relaxed))
            {
-@@ -112,4 +120,4 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
+             // Won the CAS - claim our disjoint portion of the block.
 -            char* aRes = aBlock->CurPointer.fetch_add(theSize, std::memory_order_relaxed);
 +            char* aRes = aBlock->CurPointer.fetch_add(anAlignedSize, std::memory_order_relaxed);
              return aRes;
            }
            // CAS failed (another thread allocated), anAvail updated - retry.
-@@ -121,11 +129,11 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
+@@ -119,21 +127,22 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
  
      // Slow path: exclusive lock for new block allocation and list reordering.
      std::lock_guard<std::shared_mutex> aExclLock(*myMutex);
@@ -83,7 +64,6 @@ index acf517d..3d115aa 100644
  }
  
  //=================================================================================================
-@@ -132,9 +140,10 @@ void* NCollection_IncAllocator::AllocateOptimal(const size_t theSize)
  
  void* NCollection_IncAllocator::allocateSlow(const size_t theSize)
  {
@@ -101,15 +81,14 @@ index acf517d..3d115aa 100644
        increaseBlockSize();
      }
 -    if (myBlockSize < theSize)
--    {
--      myBlockSize = static_cast<unsigned>(theSize);
 +    if (myBlockSize < anAlignedSize)
-+    {
+     {
+-      myBlockSize = static_cast<unsigned>(theSize);
 +      myBlockSize = static_cast<unsigned>(anAlignedSize);
      }
      void* aBufferBlock       = Standard::AllocateOptimal(myBlockSize + sizeof(IBlock));
      aBlock                   = new (aBufferBlock) IBlock(aBufferBlock, myBlockSize);
-@@ -156,9 +165,9 @@ void* NCollection_IncAllocator::allocateSlow(const size_t theSize)
+@@ -157,9 +166,9 @@ void* NCollection_IncAllocator::allocateSlow(const size_t theSize)
    // Bump allocate within the selected block.
    const size_t anAvail = aBlock->AvailableSize.load(std::memory_order_relaxed);
    void*        aRes    = aBlock->CurPointer.load(std::memory_order_relaxed);
@@ -122,3 +101,24 @@ index acf517d..3d115aa 100644
    {
      myAllocationHeap  = aBlock->NextBlock;
      aBlock->NextBlock = myUsedHeap;
+diff --git a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
+index 8912b47..8d3ac9f 100644
+--- a/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
++++ b/src/FoundationClasses/TKernel/NCollection/NCollection_IncAllocator.hxx
+@@ -19,6 +19,7 @@
+ #include <NCollection_Allocator.hxx>
+ #include <Standard_MemoryUtils.hxx>
+ 
++#include <cstddef>
+ #include <utility>
+ #include <atomic>
+ #include <memory>
+@@ -100,7 +101,7 @@ private:
+ public:
+   //! Forward list to keep multi-time allocated pointers.
+   //! On Reset operation objects will be reused.
+-  struct IBlock
++  struct alignas(std::max_align_t) IBlock
+   {
+     IBlock(void* thePointer, const size_t theSize);
+ 

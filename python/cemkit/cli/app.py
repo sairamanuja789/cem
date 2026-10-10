@@ -35,6 +35,7 @@ import typer
 from cemkit import kernel
 from cemkit import schemas as cs
 from cemkit.errors import describe, format_number
+from cemkit.products import FeasibilityText, feasibility_text
 from cemkit.reporting.claims import BannedClaim, check_claims
 from cemkit.store import (
     DocumentRejected,
@@ -355,8 +356,6 @@ def spec_questions(
 
 # --- feasibility ---------------------------------------------------------------------------------
 
-INPUT_UNITS = {"flow": "m3/s", "fan_total_pressure": "Pa", "omega": "rad/s"}
-
 
 def input_line(name: str, value: Json) -> str:
     if "fidelity" in value:  # computed by the kernel (for example a converted pressure)
@@ -371,17 +370,16 @@ def input_line(name: str, value: Json) -> str:
     return f"  {name}: {num(value['value'])} {value['unit']}  (from {value['from']})"
 
 
-def check_lines(check: Json) -> list[str]:
+def check_lines(check: Json, text: FeasibilityText) -> list[str]:
     lines = [f"  {check['limit']}: {check['status']}: {check['message']}"]
     if check["violation"] is not None:
         lines.append(f"    limit violated: {check['violation']['describe']}")
     nearest = check["nearest_feasible"]
     if nearest is not None:
-        lines.append(
-            "    nearest feasible duty for this limit: flow "
-            f"{labelled(nearest['flow'], 'm3/s')}, fan total pressure "
-            f"{labelled(nearest['fan_total_pressure'], 'Pa')}"
+        duty = ", ".join(
+            f"{label} {labelled(nearest[key], unit)}" for key, label, unit in text.nearest_duty
         )
+        lines.append(f"    nearest feasible duty for this limit: {duty}")
     elif check["status"] == "violated":
         lines.append("    nearest feasible duty: not computable for this limit")
     return lines
@@ -414,11 +412,19 @@ def feasibility(
         report = response["report"]
         lines = [f"feasibility of {spec_id} revision {record.revision}: run {run_id}", "inputs:"]
         lines += [input_line(name, value) for name, value in response["inputs"].items()]
-        if report["specific_speed"] is not None:
-            lines.append(f"specific speed: {labelled(report['specific_speed'], '(1)')}")
+        text = feasibility_text(record.document()["family"])
+        for key, label, unit in text.report_quantities:
+            if report.get(key) is not None:
+                lines.append(f"{label}: {labelled(report[key], unit)}")
         lines.append("checks:")
         for check in report["checks"]:
-            lines += check_lines(check)
+            lines += check_lines(check, text)
+        evaluated = ("pass", "violated")
+        skipped = sum(check["status"] not in evaluated for check in report["checks"])
+        lines.append(
+            f"checks not evaluated: {skipped} of {len(report['checks'])} "
+            "(a check that was not evaluated never counts as a pass)"
+        )
         lines.append(f"verdict: {VERDICT_TEXT[report['verdict']]}")
         emit(lines)
         if report["verdict"] == "infeasible":

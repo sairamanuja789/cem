@@ -66,6 +66,13 @@ struct FanGeometry {
 // duct of a request, each with validity, topology, mass properties and exports.
 [[nodiscard]] core::Status register_geometry_operation(product::Operations& operations);
 
+// Registers "rotor_cfd_case" (cfd_case.cpp, M5): solver cases for a designed rotor.
+[[nodiscard]] core::Status register_cfd_operation(product::Operations& operations);
+
+// The integrated quantities of one solved case (rotor_cfd_metrics; cfd_case.cpp documents the
+// definitions): sim_untrusted unless args.status is CONVERGED or VERIFIED (TRUST-001, TRUST-004).
+[[nodiscard]] core::Result<product::Json> rotor_cfd_metrics(const product::Json& args);
+
 // Every operation of this family: ducted_fan_geometry and mean_line (operations.cpp).
 [[nodiscard]] core::Status register_operations(product::Operations& operations);
 

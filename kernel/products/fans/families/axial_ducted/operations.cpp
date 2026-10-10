@@ -4,6 +4,8 @@
 #include <string>
 
 #include "cemkit/product/json_io.hpp"
+#include <cmath>
+
 #include "products/fans/families/axial_ducted/free_vortex.hpp"
 #include "products/fans/families/axial_ducted/geometry.hpp"
 #include "products/fans/families/axial_ducted/mean_line.hpp"
@@ -83,6 +85,14 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
   const auto metres = [](core::Length l) { return l.numerical_value_in(si::metre); };
   const auto rad = [](core::Angle x) { return x.numerical_value_in(si::radian); };
   const auto one = [](core::Ratio x) { return x.numerical_value_in(mp_units::one); };
+  // "camber_scale" (optional, default 1): a DESIGN VARIABLE that multiplies the built sections'
+  // camber height (an optimiser may search it, M6). It is not a deviation model: the reported
+  // stations keep the zero-deviation camber.
+  const double camber_scale =
+      product::optional_number(a, "camber_scale").value_or(1.0);
+  if (!(std::isfinite(camber_scale) && camber_scale > 0.0)) {
+    throw product::BadRequest{"camber_scale", "must be finite and positive: camber_scale"};
+  }
   Json stations = Json::array();
   Json sections = Json::array();
   for (const auto& s : d->stations) {
@@ -103,7 +113,7 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
     sections.push_back(Json{{"radius", metres(s.radius)},
                             {"chord", metres(s.chord)},
                             {"stagger", rad(s.recipe_stagger)},
-                            {"camber", metres(s.camber)},
+                            {"camber", camber_scale * metres(s.camber)},
                             {"thickness", metres(s.thickness)}});
   }
   const MeanLine& ml = d->mean_line;
@@ -142,6 +152,9 @@ core::Status register_operations(product::Operations& operations) {
     return ok;
   }
   if (auto ok = operations.add("free_vortex_design", free_vortex_case); !ok) {
+    return ok;
+  }
+  if (auto ok = register_cfd_operation(operations); !ok) {
     return ok;
   }
   if (auto ok = operations.add_model(mean_line_model()); !ok) {

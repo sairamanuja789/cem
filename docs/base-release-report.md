@@ -8,7 +8,29 @@
   `cemkit` script itself is installed only by the wheel.
 - Scope: the T15 checklist in `docs/build-plan.md` (requirements section 8 acceptance criteria).
 
-## Summary
+## Re-run on 2026-10-11 (after PRs #24 to #28)
+
+- Commit under test: `e776431` (main after PR #28: ADR-015 multi-domain core, M2 geometry
+  operations and the fan recipe, the L1 mean line, ADR-016 and the follow-ups).
+- Where: a fresh `git clone` of main, checks inside the same pinned dev container image
+  (`sha256:06de9d23b335...`). The vcpkg binary cache (61 MB, `.cache/vcpkg/binary`) was hard-linked
+  from another checkout to save the download; no build tree or other cache was carried over.
+- Result: `scripts/check.sh` passed **every stage in one invocation** (the 2026-10-10 run needed
+  three parts because the disk filled): toolchain pins, REPRO-002, gcc-debug, clang-debug,
+  clang-asan, gcc-coverage, release, wheel, boundaries, clang-tidy, clang-format, ruff check, ruff
+  format, mypy --strict, pytest + coverage, gcovr, gitleaks and negative tests.
+- Checks 2 to 10 are covered by tests that ran in that invocation (the evidence sections below
+  name them); their commands were not re-run by hand.
+
+| # | Check | 2026-10-11 |
+|---|-------|-----------|
+| 1 | Clean clone builds and passes all tests with one command | PASS (one invocation; vcpkg binary cache reused, see above) |
+| 2–10 | As in the summary below | PASS (their tests passed in the same invocation) |
+| 11 | ADR-001 to ADR-003 merged | ADR-001 and ADR-002 now exist on main, both **proposed**; ADR-003 accepted (D8 proposed). The files are merged; the owner's acceptance of ADR-001 and ADR-002 is still open, and ADR-002 waits for the reference fan (ADR-016, HI-025) |
+
+T15 remains for the owner to sign (section "Owner sign-off").
+
+## Summary (2026-10-10 run)
 
 | # | Check | Result |
 |---|-------|--------|

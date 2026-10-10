@@ -24,7 +24,6 @@
 #include "cemkit/spec/compiler.hpp"
 #include "products/fans/common/feasibility.hpp"
 #include "products/fans/common/l0.hpp"
-#include "products/fans/families/axial_ducted/axial_ducted.hpp"
 #include "products/fans/register.hpp"
 
 namespace cemkit::capi::detail {
@@ -520,11 +519,7 @@ core::Result<Json> feasibility_from_spec(const Json& request) {
   }
 
   const fans::Duty duty{.flow = flow_of(*flow), .pressure = total_of(total)};
-  core::Result<fans::FeasibilityReport> report =
-      core::fail(core::ErrorCode::not_implemented, "no feasibility hook for this family", "family");
-  if (s.family() == fans::axial_ducted::k_family_id) {
-    report = fans::axial_ducted::check_feasibility(duty, air, omega, std::nullopt);
-  }
+  const auto report = fans::check_family_feasibility(s.family(), duty, air, omega, std::nullopt);
   if (!report) {
     return std::unexpected(report.error());
   }

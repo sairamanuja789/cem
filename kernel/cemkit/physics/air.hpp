@@ -33,6 +33,11 @@ inline constexpr double k_molar_mass_air = 28.9644;
 inline constexpr double k_sea_level_pressure = 101325.0;
 // gamma, dimensionless: Table 2 B, p. 2, and p. 4.
 inline constexpr double k_gamma_air = 1.40;
+// Sutherland's law for the dynamic viscosity of air, mu = beta T^(3/2) / (T + S): section 1.3.10,
+// eq. (51), with beta = 1.458e-6 kg/(s m K^(1/2)) and S = 110.4 K (U.S. Standard Atmosphere 1976;
+// page to be confirmed by the owner, docs/models/platform/air-properties.md).
+inline constexpr double k_sutherland_beta = 1.458e-6;
+inline constexpr double k_sutherland_s = 110.4;
 // Requirements AX-005 (the spec's own defaults, provenance "default").
 inline constexpr double k_default_density = 1.18;        // kg/m3
 inline constexpr double k_default_temperature = 298.15;  // K
@@ -65,6 +70,14 @@ struct Air {
 // a = sqrt(gamma R T). Valid for finite, strictly positive gamma, R and T (subjects "gamma",
 // "gas_constant", "temperature").
 [[nodiscard]] core::Result<core::Labelled<core::Speed>> speed_of_sound(const Air& air);
+
+// "platform.air.viscosity@1.0.0" (a separate model so platform.air@1.0.0 is unchanged).
+[[nodiscard]] core::ModelId viscosity_model();
+
+// mu = beta T^(3/2) / (T + S) (Sutherland, U.S. Standard Atmosphere 1976 eq. (51)). Valid for a
+// finite, strictly positive temperature (subject "temperature").
+[[nodiscard]] core::Result<core::Labelled<core::DynamicViscosity>> dynamic_viscosity(
+    core::AbsoluteTemperature temperature);
 
 // SI numerical values of an Air, for the physics functions that unwrap it (raw doubles only after
 // this explicit conversion to the coherent SI unit of each field).

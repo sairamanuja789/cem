@@ -25,6 +25,10 @@ GAMMA = 1.40  # ratio of specific heats of air; Table 2 B, p. 2, and p. 4
 GAS_CONSTANT_AIR = UNIVERSAL_GAS_CONSTANT / MOLAR_MASS_AIR  # R = R*/M0, J/(kg K); never rounded
 
 # Requirements AX-005 (the spec's own defaults, provenance "default").
+# Sutherland's law, mu = beta T^(3/2) / (T + S): section 1.3.10, eq. (51) (page to be confirmed).
+SUTHERLAND_BETA = 1.458e-6  # kg/(s m K^(1/2))
+SUTHERLAND_S = 110.4  # K
+VISCOSITY_MODEL = "platform.air.viscosity@1.0.0"
 DEFAULT_DENSITY = 1.18  # kg/m3
 DEFAULT_TEMPERATURE = 298.15  # K
 
@@ -78,3 +82,11 @@ def speed_of_sound(air: Air) -> float | Error:
         if failure is not None:
             return failure
     return math.sqrt(air.gamma * air.gas_constant * air.temperature)
+
+
+def dynamic_viscosity(temperature: float) -> float | Error:
+    """mu = beta T^(3/2) / (T + S) (Sutherland; U.S. Standard Atmosphere 1976 eq. (51)), Pa s."""
+    failure = require_positive("temperature", temperature, VISCOSITY_MODEL)
+    if failure is not None:
+        return failure
+    return SUTHERLAND_BETA * (temperature * math.sqrt(temperature)) / (temperature + SUTHERLAND_S)

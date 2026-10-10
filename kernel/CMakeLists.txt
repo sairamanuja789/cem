@@ -8,6 +8,8 @@ add_subdirectory(cemkit/physics)
 add_subdirectory(cemkit/product)
 add_subdirectory(cemkit/geometry/port)
 add_subdirectory(cemkit/geometry/occt)
+add_subdirectory(cemkit/simulation/port)
+add_subdirectory(cemkit/simulation/openfoam)
 add_subdirectory(cemkit/capi)
 
 # Product domains: every kernel/products/<product>/, and the generated register_products() entry

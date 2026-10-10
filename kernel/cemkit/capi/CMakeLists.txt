@@ -5,7 +5,7 @@ cemkit_add_module(
   PATH cemkit/capi
   SOURCES cemkit.cpp detail/handlers.cpp
   DEPS cemkit_core cemkit_spec cemkit_physics cemkit_product cemkit_products
-       cemkit_geometry_occt
+       cemkit_geometry_occt cemkit_simulation_openfoam
        nlohmann_json::nlohmann_json
   TESTS tests/test_capi.cpp)
 

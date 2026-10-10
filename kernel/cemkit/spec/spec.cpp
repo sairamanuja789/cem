@@ -2,16 +2,8 @@
 
 #include "cemkit/core/error.hpp"
 #include "cemkit/spec/compiler.hpp"
-#include "cemkit/spec/essential.hpp"
 
 namespace cemkit::spec {
-
-std::vector<std::string> default_essential_fields(std::string_view family) {
-  if (family == "fans.axial_ducted") {
-    return {"product.duty.flow", "product.duty.pressure"};
-  }
-  return {};
-}
 
 std::optional<Field> Spec::field(std::string_view path) const {
   auto it = fields_.find(std::string(path));

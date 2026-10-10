@@ -1,5 +1,3 @@
-#include "products/fans/families/axial_ducted/axial_ducted.hpp"
-
 #include <mp-units/systems/isq.h>
 #include <mp-units/systems/si.h>
 
@@ -9,6 +7,7 @@
 
 #include "cemkit/product/registry.hpp"
 #include "cemkit/spec/compiler.hpp"
+#include "products/fans/families/axial_ducted/axial_ducted.hpp"
 
 namespace axial = cemkit::fans::axial_ducted;
 namespace fans = cemkit::fans;
@@ -29,7 +28,7 @@ TEST_CASE("fans.axial_ducted registers and declares the ADR-003 D8 essential fie
   REQUIRE(family.has_value());
   const auto& f = family->get();
   CHECK(core::to_string(f.plugin()) == "fans.axial_ducted@0.1.0");
-  CHECK(f.parameter_space().size() == 0);   // nothing invented
+  CHECK(f.parameter_space().size() == 0);    // nothing invented
   CHECK(f.feasible_range().limits.empty());  // no cited range (HI-003)
 }
 
@@ -56,10 +55,10 @@ TEST_CASE("the family's feasibility hook reports range unsourced", "[SEL-002][SE
   const fans::Duty duty{
       .flow = 0.05 * core::units::volume_flow_rate[mp_units::cubic(si::metre) / si::second],
       .pressure = 150.0 * fans::fan_total_pressure[si::pascal]};
-  const auto report = axial::check_feasibility(
-      duty, cemkit::physics::default_air(),
-      209.43951023931953 * isq::angular_velocity[si::radian / si::second],
-      0.119 * isq::length[si::metre]);
+  const auto report =
+      axial::check_feasibility(duty, cemkit::physics::default_air(),
+                               209.43951023931953 * isq::angular_velocity[si::radian / si::second],
+                               0.119 * isq::length[si::metre]);
   REQUIRE(report.has_value());
   CHECK(report->verdict() == fans::Verdict::unconfirmed);
   REQUIRE(report->checks.size() == 3);

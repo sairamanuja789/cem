@@ -450,11 +450,10 @@ core::Result<Json> spec_compile(const Json& request) {
   }
   // The spec compiler takes nlohmann::json (unordered keys); the conversion keeps every value.
   const nlohmann::json document = member(request, "spec");
-  const spec::SpecCompiler compiler{
-      spec::CompilerOptions{.autonomous_mode = autonomous,
-                            .essential_resolver =
-                                product::essential_field_resolver(family_registry()),
-                            .default_resolver = {}}};
+  const spec::SpecCompiler compiler{spec::CompilerOptions{
+      .autonomous_mode = autonomous,
+      .essential_resolver = product::essential_field_resolver(family_registry()),
+      .default_resolver = {}}};
   auto compiled = compiler.compile(document);
   if (!compiled) {
     return std::unexpected(compiled.error());

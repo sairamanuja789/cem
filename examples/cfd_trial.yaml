@@ -1,0 +1,18 @@
+# CFD SETTINGS FOR THE TRIAL DESIGN - PROVISIONAL (M5). `cemkit simulate fan <design-run> THIS`.
+# One blade passage, OpenFOAM v2512 template cemkit.openfoam.rotor_sector_mrf@0.1.0
+# (docs/models/fans/axial-cfd.md). Every value is a numerical setting of this study, not an
+# engineering constant; the inflow turbulence is UNSOURCED (no measured inflow). SI units.
+flow_factors: [0.8, 1.0, 1.2]   # SIM-003: at least 3 operating points, fractions of the spec flow
+domain: {upstream: 0.0475, downstream: 0.1075}   # m from the rotor-zone ends (about 0.4 D and 0.9 D)
+inlet: {turbulence_intensity: 0.05, mixing_length: 0.004}   # UNSOURCED inflow turbulence
+blade_stl: {linear_deflection: 2.0e-5, angular_deflection: 0.1}   # blade surface tessellation
+mesh_levels:   # background cell size; ratio 1.3 between levels (Celik et al. 2008: r > 1.3)
+  coarse: 0.0030
+  medium: 0.0023
+  fine: 0.00177
+blade_refinement: 3   # 2^3 finer at the blade surface
+rotor_refinement: 1   # 2x finer in the rotating zone (resolves the 0.5 mm tip gap with 2-3 cells)
+iterations: 1500
+cores: 6              # MPI ranks per case (CLAUDE.md: at most 6 on the 16 GB machine)
+wall_time_s: 7200     # per solver step
+gci_limit: 0.05       # TRUST-002: start at 5% (proposed)

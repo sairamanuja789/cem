@@ -17,7 +17,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 120  # a cold vcpkg cache builds OpenCascade (ADR-004)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -85,11 +85,12 @@ jobs:
           cache-to: type=gha,mode=max
 
       # vcpkg binary cache keyed on vcpkg.json, the baseline (in vcpkg.json and pins.env), the triplet
-      # (x64-linux, fixed in CMakePresets.json) and the compilers (pins.env and the chainload files).
+      # (x64-linux, fixed in CMakePresets.json), the compilers (pins.env and the chainload files) and
+      # the overlay ports (cmake/vcpkg-ports, ADR-004).
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/vcpkg/binary
-          key: vcpkg-x64-linux-${{ hashFiles('vcpkg.json', 'docker/pins.env', 'cmake/toolchains/*.cmake', 'CMakePresets.json') }}
+          key: vcpkg-x64-linux-${{ hashFiles('vcpkg.json', 'docker/pins.env', 'cmake/toolchains/*.cmake', 'CMakePresets.json', 'cmake/vcpkg-ports/**') }}
 
       - name: scripts/check.sh in the ci image
         env:

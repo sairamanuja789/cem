@@ -6,6 +6,8 @@ add_subdirectory(cemkit/core)
 add_subdirectory(cemkit/spec)
 add_subdirectory(cemkit/physics)
 add_subdirectory(cemkit/product)
+add_subdirectory(cemkit/geometry/port)
+add_subdirectory(cemkit/geometry/occt)
 
 # Product domains.
 add_subdirectory(products/fans)

@@ -28,17 +28,42 @@ core::Speed speed(double v) { return v * isq::speed[si::metre / si::second]; }
 core::Angle angle(double v) { return v * isq::angular_measure[si::radian]; }
 core::Ratio ratio(double v) { return v * mp_units::one; }
 
-std::unexpected<core::Error> out_of_validity(const std::string& message, const std::string& subject,
-                                             const std::string& value, const std::string& bounds) {
-  return core::fail(
-      core::ErrorCode::out_of_validity, message, subject,
-      {{"value", value}, {"bounds", bounds}, {"model", core::to_string(free_vortex_model())}});
-}
-
 }  // namespace
 
 core::ModelId free_vortex_model() {
   return {.name = "fans.axial.free_vortex", .version = k_version};
+}
+
+core::Status check_sections(const FreeVortexInputs& in, const core::ModelId& model) {
+  const double ch = m(in.chord_hub);
+  const double ct = m(in.chord_tip);
+  const double t = m(in.thickness);
+  const double embed = m(in.embed_depth);
+  const double rh = m(in.r_hub);
+  const auto invalid = [&](const std::string& message, const std::string& subject,
+                           const std::string& value, const std::string& bounds) {
+    return core::fail(core::ErrorCode::out_of_validity, message, subject,
+                      {{"value", value}, {"bounds", bounds}, {"model", core::to_string(model)}});
+  };
+  for (const auto& [subject, value] : std::initializer_list<std::pair<std::string_view, double>>{
+           {"chord_hub", ch}, {"chord_tip", ct}, {"thickness", t}, {"embed_depth", embed}}) {
+    if (auto ok = physics::require_positive(subject, value, model); !ok) {
+      return ok;
+    }
+  }
+  if (in.stations < 3) {
+    return invalid("at least 3 blade stations are needed", "stations", std::to_string(in.stations),
+                   "[3, inf)");
+  }
+  if (!(embed < rh)) {
+    return invalid("the embed depth must be less than the hub radius", "embed_depth",
+                   core::format_number(embed), "(0, " + core::format_number(rh) + ")");
+  }
+  if (t >= ch || t >= ct) {  // all three are finite and positive here
+    return invalid("the blade thickness must be less than every chord", "thickness",
+                   core::format_number(t), "(0, " + core::format_number(std::min(ch, ct)) + ")");
+  }
+  return {};
 }
 
 core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
@@ -48,33 +73,15 @@ core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
     return std::unexpected{std::move(line).error()};
   }
   const auto model = free_vortex_model();
+  if (auto ok = check_sections(in, model); !ok) {
+    return std::unexpected{std::move(ok).error()};
+  }
+  const double rh = m(in.r_hub);
+  const double rt = m(in.r_tip);
   const double ch = m(in.chord_hub);
   const double ct = m(in.chord_tip);
   const double t = m(in.thickness);
   const double embed = m(in.embed_depth);
-  const double rh = m(in.r_hub);
-  const double rt = m(in.r_tip);
-  // The same check order as the reference (PHY-005).
-  for (const auto& [subject, value] : std::initializer_list<std::pair<std::string_view, double>>{
-           {"chord_hub", ch}, {"chord_tip", ct}, {"thickness", t}, {"embed_depth", embed}}) {
-    if (auto ok = physics::require_positive(subject, value, model); !ok) {
-      return std::unexpected{std::move(ok).error()};
-    }
-  }
-  if (in.stations < 3) {
-    return out_of_validity("at least 3 blade stations are needed", "stations",
-                           std::to_string(in.stations), "[3, inf)");
-  }
-  if (!(embed < rh)) {
-    return out_of_validity("the embed depth must be less than the hub radius", "embed_depth",
-                           core::format_number(embed), "(0, " + core::format_number(rh) + ")");
-  }
-  if (t >= ch || t >= ct) {  // all three are finite and positive here
-    return out_of_validity("the blade thickness must be less than every chord", "thickness",
-                           core::format_number(t),
-                           "(0, " + core::format_number(std::min(ch, ct)) + ")");
-  }
-
   const double w = in.omega.numerical_value_in(si::radian / si::second);
   const double dp = in.pressure.numerical_value_in(si::pascal);
   const double rho = physics::to_si(air).density;
@@ -107,7 +114,8 @@ core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
                                          .thickness = len(t),
                                          .de_haller_ratio = ratio(w2 / w1),
                                          .reaction = ratio(1.0 - (c_theta2 / (2.0 * u))),
-                                         .embedded = false});
+                                         .embedded = false,
+                                         .outlet_axial_velocity = speed(c_x)});
   }
   FreeVortexStation root = stations.front();
   root.radius = len(rh - embed);
@@ -115,6 +123,9 @@ core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
   stations.insert(stations.begin(), root);
   return FreeVortexDesign{.mean_line = *line,
                           .axial_velocity = line->axial_velocity,
+                          .vortex_exponent = -1.0,
+                          .swirl_constant = dp / (rho * w),
+                          .hub_axial_velocity_squared = c_x * c_x,
                           .stations = std::move(stations),
                           .fidelity = core::Fidelity::l1_predicted,
                           .model = model};

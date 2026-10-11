@@ -6,7 +6,7 @@ Every line in `data/`, `kernel/`, `python/` and `schemas/` (tests excluded) with
 the UNSOURCED marker (CLAUDE.md rule 7). Some lines define or explain the marker;
 the rest are values or models still waiting for a cited source.
 
-25 line(s) in 15 file(s).
+26 line(s) in 16 file(s).
 
 ## `data/fans/family_ranges.yaml`
 
@@ -71,6 +71,10 @@ the rest are values or models still waiting for a cited source.
 
 - `(a hydraulic efficiency below 1); no efficiency or loss value is sourced (UNSOURCED), so none is`
 - `de_haller_ratio: float  # W2 / W1 (reported only: any limit on it is empirical, UNSOURCED)`
+
+## `python/cemkit/reference/fans/axial/vortex.py`
+
+- `incidence and zero deviation (UNSOURCED, HI-027) as in free_vortex.py; reaction`
 
 ## `python/cemkit/reference/fans/common/feasibility.py`
 

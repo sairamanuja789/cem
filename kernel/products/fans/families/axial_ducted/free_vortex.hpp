@@ -39,8 +39,9 @@ struct FreeVortexStation {
   core::Length camber;  // h
   core::Length thickness;
   core::Ratio de_haller_ratio;  // W2 / W1, reported only (no sourced limit)
-  core::Ratio reaction;         // 1 - c_theta2 / (2 U)
+  core::Ratio reaction;         // 1 - c_theta2 / (2 U); general vortex: vortex.hpp
   bool embedded = false;
+  core::Speed outlet_axial_velocity;  // c_x2 (= the uniform c_x for the free vortex)
 };
 
 struct FreeVortexInputs {
@@ -59,11 +60,19 @@ struct FreeVortexInputs {
 // Every quantity is L1 predicted by free_vortex_model().
 struct FreeVortexDesign {
   MeanLine mean_line;
-  core::Speed axial_velocity;
+  core::Speed axial_velocity;  // c_x1, uniform at the inlet
+  // c_theta2 = K r^n. K's unit depends on n (m^(1-n)/s), so it is a double in SI; n = -1 is the
+  // free vortex. A = c_x2^2 at the hub (m2/s2).
+  double vortex_exponent = -1.0;
+  double swirl_constant = 0.0;
+  double hub_axial_velocity_squared = 0.0;
   std::vector<FreeVortexStation> stations;  // embedded root first, tip last
   core::Fidelity fidelity;
   core::ModelId model;
 };
+
+// The section validity checks shared with the general vortex (fixed order, PHY-005).
+[[nodiscard]] core::Status check_sections(const FreeVortexInputs& in, const core::ModelId& model);
 
 [[nodiscard]] core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
                                                                 const physics::Air& air);

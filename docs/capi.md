@@ -147,3 +147,10 @@ example `stations[2].radius` when the tip is not inside the duct.
 `fans.axial.free_vortex@0.1.0`, docs/models/fans/axial-free-vortex.md) with `axial_velocity`,
 `mean_line` and `stations` (embedded root first); with `geometry`, also `geometry_args`, the
 `ducted_fan_geometry` args that build those sections.
+
+`vortex_design` (fans, also a `cemkit_l0_batch` function): the `free_vortex_design` args plus
+`"vortex_exponent"` n in [−1, 1] (c_θ2 = K rⁿ, simple radial equilibrium; ADR-018). `result`:
+labelled `value` (L1 predicted, `fans.axial.vortex@0.1.0`, docs/models/fans/axial-vortex.md) with
+the same members plus `vortex_exponent`, `swirl_constant` (K, SI) and
+`hub_axial_velocity_squared`; every station carries `outlet_axial_velocity` (c_x2). Both
+operations report these members (n = −1 for the free vortex).

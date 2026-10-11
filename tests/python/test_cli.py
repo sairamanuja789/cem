@@ -409,6 +409,37 @@ def test_design_fan_builds_l1_sections_into_valid_parts(tmp_path: Path) -> None:
     assert reproduced.exit_code == 0, reproduced.output
 
 
+def _vortex_design(tmp_path: Path, n: float) -> Any:
+    store = tmp_path / "store"
+    assert invoke(store, "spec", "compile", str(TRIAL_SPEC)).exit_code == 0
+    params = cs.load_yaml(TRIAL_DESIGN.read_text(encoding="utf-8"))
+    assert isinstance(params, dict)
+    params.update(r_hub=0.028, vortex_exponent=n)
+    path = tmp_path / "vortex.json"
+    path.write_text(json.dumps(params), encoding="utf-8")
+    return invoke(store, "design", "fan", "axial-120-trial", str(path))
+
+
+@pytest.mark.req("PHY-001")
+@pytest.mark.req("GEO-001")
+def test_design_fan_with_a_vortex_exponent_uses_radial_equilibrium(tmp_path: Path) -> None:
+    """HI-031 (ADR-018): a stated vortex exponent selects fans.axial.vortex; the sections build."""
+    result = _vortex_design(tmp_path, -0.5)
+    assert result.exit_code == 0, result.output
+    assert "[L1 predicted, fans.axial.vortex@0.1.0]" in result.output
+    assert "n = -0.5" in result.output and "c_x2" in result.output
+    assert "rotor: validity ok" in result.output
+
+
+@pytest.mark.req("GEO-001")
+def test_a_section_needing_negative_camber_is_refused_by_the_geometry(tmp_path: Path) -> None:
+    """Constant swirl (n = 0) at the TRIAL duty needs negative hub camber (l1_003 case B); the
+    recipe builds only cambers in [0, c/2), so the design is refused, never silently flattened."""
+    result = _vortex_design(tmp_path, 0.0)
+    assert result.exit_code != 0
+    assert "geometry_failed" in result.output and "camber" in result.output
+
+
 @pytest.mark.req("PHY-003")
 def test_design_fan_names_a_missing_design_parameter(tmp_path: Path) -> None:
     store = tmp_path / "store"

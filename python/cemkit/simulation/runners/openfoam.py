@@ -142,7 +142,8 @@ def mesh_ok(case: Path) -> bool:
     return (
         bool(failed)
         and all(f.startswith("Max skewness") for f in failed)
-        and bool(counts)
+        and counts is not None
+        and len(counts) > 0
         and all(n == 0 for n in counts.values())
     )
 

@@ -154,6 +154,10 @@ def test_search_bounds_follow_the_architecture_design_variable_table() -> None:
     assert any(
         "hub-to-tip" in f for f in cli.search_bound_failures({**base, "r_hub": 0.040}, 0.0595)
     )
+    good = {**base, "chord_tip": 0.0267}
+    assert cli.search_bound_failures({**good, "vortex_exponent": 0.5}, 0.0595) == []
+    bad = cli.search_bound_failures({**good, "vortex_exponent": 1.5}, 0.0595)
+    assert bad == ["vortex exponent 1.5 outside [-1.0, 1.0]"]
 
 
 @pytest.mark.req("OPT-003")

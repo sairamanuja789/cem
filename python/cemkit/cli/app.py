@@ -591,6 +591,7 @@ def design_request(spec: Json, params: Json) -> tuple[Json, Json]:
         "r_tip": r_tip,
         **{k: params[k] for k in DESIGN_PARAMS[:6]},
         **({"camber_scale": params["camber_scale"]} if "camber_scale" in params else {}),
+        **({"vortex_exponent": params["vortex_exponent"]} if "vortex_exponent" in params else {}),
         "geometry": {
             "blade_count": params["blade_count"],
             "hub_length": params["hub_length"],
@@ -599,7 +600,9 @@ def design_request(spec: Json, params: Json) -> tuple[Json, Json]:
             "duct_length": params["duct_length"],
         },
     }
-    return feasibility, {"operation": "free_vortex_design", "args": args, "air": air}
+    # A stated vortex exponent selects the general vortex with radial equilibrium (ADR-018).
+    operation = "vortex_design" if "vortex_exponent" in params else "free_vortex_design"
+    return feasibility, {"operation": operation, "args": args, "air": air}
 
 
 def design_fan_output(
@@ -630,14 +633,17 @@ def design_lines(output: Json) -> list[str]:
     value = design["value"]
     label = f"[{design['fidelity_label']}, {design['model']}]"
     ml = value["mean_line"]
+    n = value.get("vortex_exponent", -1.0)
+    kind = "free-vortex" if n == -1.0 else f"general-vortex (c_theta2 = K r^n, n = {num(n)})"
     lines = [
-        f"design: free-vortex blade sections {label}",
+        f"design: {kind} blade sections {label}",
         "  loss-free, zero incidence and zero deviation (no loss or deviation data is sourced:",
         "  UNSOURCED); every angle in degrees from the axial direction",
-        f"  axial velocity: {num(value['axial_velocity'])} m/s; mean line: flow coefficient "
+        f"  inlet axial velocity: {num(value['axial_velocity'])} m/s; mean line: flow coefficient "
         f"{num(ml['flow_coefficient'])}, work coefficient {num(ml['work_coefficient'])}, "
         f"de Haller {num(ml['de_haller_ratio'])}",
-        "  radius_mm  beta1  beta2  camber  stagger  chord_mm  camber_mm  de_Haller  reaction",
+        "  radius_mm  beta1  beta2  camber  stagger  chord_mm  camber_mm  de_Haller  reaction"
+        "  c_x2",
     ]
     for s in value["stations"]:
         if s["embedded"]:
@@ -647,7 +653,8 @@ def design_lines(output: Json) -> list[str]:
             f"{math.degrees(s['relative_outlet_angle']):6.2f} "
             f"{math.degrees(s['camber_angle']):7.2f} "
             f"{math.degrees(s['stagger_from_axis']):8.2f} {s['chord'] * 1e3:9.2f} "
-            f"{s['camber'] * 1e3:10.3f} {s['de_haller_ratio']:10.3f} {s['reaction']:9.3f}"
+            f"{s['camber'] * 1e3:10.3f} {s['de_haller_ratio']:10.3f} {s['reaction']:9.3f} "
+            f"{s.get('outlet_axial_velocity', value['axial_velocity']):5.2f}"
         )
     camber_scale = output["design"].get("camber_scale", 1.0)
     if camber_scale != 1.0:
@@ -1009,6 +1016,7 @@ SEARCH_VARIABLES = (
     "camber_scale",
     "solidity_hub",
     "solidity_tip",
+    "vortex_exponent",
 )
 
 # Initial search ranges of the ducted axial design variables: docs/architecture.md section 5 (a
@@ -1016,6 +1024,7 @@ SEARCH_VARIABLES = (
 SOLIDITY_RANGE = (0.4, 1.5)
 HUB_TIP_RATIO_RANGE = (0.30, 0.60)
 BLADE_COUNT_RANGE = (3, 11)
+VORTEX_EXPONENT_RANGE = (-1.0, 1.0)  # c_theta2 = K r^n: -1 free, 0 constant swirl, 1 forced
 
 
 def solidity(chord: float, blade_count: int, radius: float) -> float:
@@ -1034,6 +1043,11 @@ def search_bound_failures(params: Json, r_tip: float) -> list[str]:
     nu_lo, nu_hi = HUB_TIP_RATIO_RANGE
     if not nu_lo <= r_hub / r_tip <= nu_hi:
         out.append(f"hub-to-tip ratio {r_hub / r_tip:.3f} outside [{nu_lo}, {nu_hi}]")
+    if "vortex_exponent" in params:
+        n = float(params["vortex_exponent"])
+        n_lo, n_hi = VORTEX_EXPONENT_RANGE
+        if not n_lo <= n <= n_hi:
+            out.append(f"vortex exponent {n} outside [{n_lo}, {n_hi}]")
     c_hub, c_tip = float(params["chord_hub"]), float(params["chord_tip"])
     lo, hi = SOLIDITY_RANGE
     for where, chord, radius in (
@@ -1067,7 +1081,7 @@ def candidates_of(base: Json, variables: Json, limit: int, r_tip: float) -> list
         scale = float(combo.get("chord_scale", 1.0))
         params["chord_hub"] = base["chord_hub"] * scale
         params["chord_tip"] = base["chord_tip"] * scale
-        for key in ("r_hub", "blade_count", "camber_scale", "chord_tip"):
+        for key in ("r_hub", "blade_count", "camber_scale", "chord_tip", "vortex_exponent"):
             if key in combo:
                 params[key] = combo[key]
         z = int(params["blade_count"])

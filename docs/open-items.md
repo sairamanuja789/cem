@@ -2,17 +2,22 @@
 
 This document tracks items that require human owner action, verification, or review.
 
-## Priority order (agreed 2026-10-11)
+## Priority order (updated 2026-10-12)
 
-1. Owner measures the reference fan (HI-025, HI-030): geometry, motor, and a rough duty test.
-2. Set the real target duty in the spec from that measurement; the 18 Pa TRIAL duty may be out of
-   reach for a 120 mm rotor at 2000 rpm.
-3. CFD credibility check (Gate 1): model the reference fan's measured blades, simulate them with the
-   existing CFD, and compare with its datasheet or rig curve before trusting CFD for design.
+1. **Reference data** (done in this change): `data/reference_fans/` (ebm-papst 4412 F, Noctua NF-F12
+   envelope and ratings, FAN-01); `docs/reference/`.
+2. **Duty definition:** resolve HI-032 (the ebm-papst Δp_f definition), then review ADR-019 (the
+   provisional duty, PROPOSED). The TRIAL duty stays until then.
+3. **CFD workflow credibility:** review ADR-020 and its acceptance criteria. After acceptance, repair
+   the FAN-01 geometry and implement the external-reference case. A benchmark comparison is not
+   validation and does not close Gate 1.
 4. HI-027 (Carter deviation, Lieblein loss) once the owner gives the pages; HI-026 de Haller limit.
-5. Design search against the real duty; regenerate the design package.
-6. Print the best trusted rotor; rig test (first L3 point, AX-017).
-7. Owner sign-off at any time: hand calculations to `verified/`, ADR-001/016/017/018, HI-031 pages.
+5. Rotor/stator trade study (`docs/studies/rotor-stator-trade-study.md`) after steps 2 and 3;
+   rotor-only stays the v1 baseline.
+6. Design search against the accepted duty; regenerate the design package.
+7. Physical reference fan and rig (HI-025): the only route to Gate 1 at our Reynolds number.
+8. Owner sign-off at any time: hand calculations to `verified/`; ADR-001/016/017/018/019/020;
+   HI-031 pages.
 
 | ID | Item | Origin | Notes / Action Required |
 |---|---|---|---|
@@ -43,3 +48,6 @@ This document tracks items that require human owner action, verification, or rev
 | HI-029 | First CFD findings on the TRIAL designs (M5/M6, exploratory) | M5, M6 | Free-vortex blades with zero deviation (fans.axial.free_vortex@0.1.0) under-turn: one-passage CFD gives a total rise near 0 to 4 Pa at 0.028 m³/s against the 21.6 Pa designed, and about 15 Pa at 0.010 m³/s (diagnostic monitors; no run with these numbers passed the trust gate). Two exploratory searches (20 candidates: hub 24 to 28 mm, 7 to 11 blades, chord and camber multipliers) found no candidate that is both CONVERGED and meets the 18 Pa fan static duty; finer meshes show unsteady flow (stalled hub, blunt plate edges) that steady RANS does not settle. Owner decisions that unblock it: a sourced deviation and loss model (HI-027), the measured duty (HI-025), and the gate's mesh criterion: checkMesh's default skewness 4 also on boundary faces fails 1 to 7 faces per mesh, while snappyHexMesh's own quality limit for boundary faces is 20 (HI-028). |
 | HI-030 | Physical test hardware and the rotor's hub interface | Trial review | The first rig test mounts a printed rotor in the commercial reference fan's frame, so the duct inner diameter comes from measuring that frame (replacing the 120 mm `duct_inner_diameter` default, HI-023). In most PC fans the motor's magnet ring and shaft are built into the rotor hub, so there may be no bore to slide onto. Two options, chosen after opening the reference fan: **(a) transplant**: the printed hub embeds the original magnet ring and shaft (measure the ring's outer diameter and height, the shaft diameter and how the shaft is held); **(b) separate motor**: a small brushless motor with a defined mount, the hub designed around it. Also measure the frame inner diameter where the rotor runs, the original blade tip diameter (real tip clearance) and the frame depth, three caliper readings each with the spread. The rotor's hub interface waits for these measurements; the trial hub is a solid disc. Measure both fans on the same rig: the reference fan gives the duty (ADR-002), the trial rotor checks the CFD (first L3 point, AX-017). |
 | HI-031 | Vortex exponent n: confirm the source pages and review ADR-018 | Trial review | Implemented as `fans.axial.vortex@0.1.0` (c_θ2 = K rⁿ, n = −1 free, 0 constant swirl, 1 forced; simple radial equilibrium; search variable `vortex_exponent` in [−1, 1]); docs/architecture.md section 5 wording corrected. Owner: give the Dixon & Hall 7th ed. chapter and pages for general vortex design and simple radial equilibrium, check hand calculation `l1_003`, and accept ADR-018. Finding: on the TRIAL duty n > −1 does not unload the hub (hub de Haller 0.633 → 0.614 → 0.622 for n = −1, −0.5, 0 at a 28 mm hub; n = 0 needs negative hub camber). |
+| HI-032 | Definition of ebm-papst "Δp_f" (4412 F curve) | ADR-019 | The datasheet's curve axis is "Δp_f" with no definition (fan static or fan total). Owner: find ebm-papst's definition (catalogue legend or technical documentation). Until then the curve's pressure type is UNKNOWN in `data/reference_fans/ebmpapst_4412f.yaml`, and ADR-019 cannot be applied to the spec (SPEC-004). |
+| HI-033 | Read the Noctua NF-F12 iPPC-2000 primary specification page | Reference data | noctua.at returned HTTP 429 to automated access; ratings are recorded from retailer listings quoting the specification. Owner: save the primary page (or its PDF) so the values can be confirmed or replaced. |
+| HI-034 | FAN-01 open points before the benchmark run | ADR-020 | (a) Rotational speed: 1500 rpm inferred from the 225 Hz blade-passing frequency; confirm from SAE 2016-01-1805. (b) Tip gap: undetermined from the IGES (duct samples inside the tip radius). (c) Test uncertainty: extract the round-robin figures (TU Darmstadt). (d) Geometry repair (blade roots, hub closure, fuse) only after ADR-020 is accepted; the Parasolid file is not inspected (no reader). |

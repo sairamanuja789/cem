@@ -983,7 +983,7 @@ def simulate_fan(
 # --- optimize ------------------------------------------------------------------------------------
 
 SEARCH_SETTINGS = ("variables", "objective", "max_candidates")
-SEARCH_VARIABLES = ("r_hub", "blade_count", "chord_scale", "camber_scale")
+SEARCH_VARIABLES = ("r_hub", "blade_count", "chord_scale", "chord_tip", "camber_scale")
 
 
 def candidates_of(base: Json, variables: Json, limit: int) -> list[Json]:
@@ -1004,7 +1004,7 @@ def candidates_of(base: Json, variables: Json, limit: int) -> list[Json]:
         scale = float(combo.get("chord_scale", 1.0))
         params["chord_hub"] = base["chord_hub"] * scale
         params["chord_tip"] = base["chord_tip"] * scale
-        for key in ("r_hub", "blade_count", "camber_scale"):
+        for key in ("r_hub", "blade_count", "camber_scale", "chord_tip"):
             if key in combo:
                 params[key] = combo[key]
         out.append({"variables": combo, "params": params})

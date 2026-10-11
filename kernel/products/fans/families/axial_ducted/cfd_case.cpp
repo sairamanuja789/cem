@@ -5,8 +5,10 @@
 #include <mp-units/systems/isq.h>
 #include <mp-units/systems/si.h>
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -44,6 +46,9 @@ core::Result<Json> rotor_cfd_case(const Json& c, const product::OperationContext
   auto g = build_fan_geometry(context.geometry, params);
   if (!g) {
     return std::unexpected(g.error());
+  }
+  if (auto ok = blade_fits_passage(params); !ok) {
+    return std::unexpected{std::move(ok).error()};
   }
   const Json& tess = product::member(a, "blade_stl");
   auto stl = context.geometry.export_bytes(
@@ -235,6 +240,30 @@ core::Result<Json> rotor_cfd_metrics(const Json& a) {
     out["notes"] = std::move(notes);
   }
   return out;
+}
+
+core::Status blade_fits_passage(const FanGeometryParams& params) {
+  // The passage holds exactly one blade: every section point must lie strictly inside +-pi/N about
+  // +x, or the periodic sides would cut the blade and the case would model a different rotor.
+  if (params.blade_count == 0) {
+    return core::fail(core::ErrorCode::geometry_failed, "no blades", "blade_count");
+  }
+  const double half_passage = std::numbers::pi / static_cast<double>(params.blade_count);
+  for (std::size_t i = 0; i < params.stations.size(); ++i) {
+    const auto section = blade_section(params.stations[i], 64);
+    for (const auto* curve : {&section.upper, &section.lower}) {
+      for (const auto& pt : *curve) {
+        const double angle =
+            std::atan2(pt.y.numerical_value_in(si::metre), pt.x.numerical_value_in(si::metre));
+        if (!(std::abs(angle) < half_passage)) {
+          return core::fail(core::ErrorCode::geometry_failed,
+                            "the blade is wider than its passage (pi/N about the blade axis)",
+                            "stations[" + std::to_string(i) + "]");
+        }
+      }
+    }
+  }
+  return {};
 }
 
 core::Status register_cfd_operation(product::Operations& operations) {

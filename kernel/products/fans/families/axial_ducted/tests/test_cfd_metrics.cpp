@@ -1,5 +1,8 @@
 // rotor_cfd_metrics (SIM-004, TRUST-001, TRUST-004): numbers only for a trusted result, with the
 // stated definitions. Synthetic monitor values, worked by hand below.
+#include <mp-units/systems/isq.h>
+#include <mp-units/systems/si.h>
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -69,4 +72,26 @@ TEST_CASE("no efficiency is reported for a pressure rise that is not positive", 
   CHECK_FALSE(r->contains("total_efficiency"));
   CHECK_FALSE(r->contains("total_to_static_efficiency"));
   CHECK(r->at("notes").size() == 2);
+}
+
+TEST_CASE("a blade wider than its passage is rejected naming the station", "[SIM-001]") {
+  namespace si = mp_units::si;
+  namespace isq = mp_units::isq;
+  const auto len = [](double v) { return v * isq::length[si::metre]; };
+  const auto station = [&](double r, double chord, double stagger) {
+    return cemkit::fans::axial_ducted::BladeStation{
+        .radius = len(r),
+        .chord = len(chord),
+        .stagger = stagger * isq::angular_measure[si::radian],
+        .camber = len(0.0005),
+        .thickness = len(0.001)};
+  };
+  cemkit::fans::axial_ducted::FanGeometryParams p;
+  p.blade_count = 7;
+  p.stations = {station(0.02, 0.018, -0.5), station(0.0595, 0.016, -1.3)};
+  CHECK(cemkit::fans::axial_ducted::blade_fits_passage(p).has_value());
+  p.stations.back() = station(0.0595, 0.060, -1.3);  // 60 mm tip chord spans about 54 degrees
+  const auto r = cemkit::fans::axial_ducted::blade_fits_passage(p);
+  REQUIRE_FALSE(r.has_value());
+  CHECK(r.error().subject() == "stations[1]");
 }

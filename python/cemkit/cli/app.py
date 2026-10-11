@@ -111,6 +111,26 @@ def num(value: float) -> str:
     return format_number(value)
 
 
+def failed_text(failed: Json) -> str:
+    """A failed trust-gate check: the measured value and limit, or the check's message when it
+    has no single value (mesh quality, solver failure, resource limit)."""
+    if failed["value"] is None:
+        return f"failed {failed['check']}: {failed['message']}"
+    return f"failed {failed['check']}: {num(failed['value'])} (limit {num(failed['threshold'])})"
+
+
+def field_value_text(value: object, unit: str | None) -> str:
+    """A spec field for display: "unknown" when absent; no unit for dimensionless values."""
+    if value is None:
+        return "unknown"
+    return f"{value} {unit}" if unit and unit != "1" else str(value)
+
+
+def peak_text(case: Json) -> str:
+    peak = case.get("peak_rss_bytes")
+    return "unknown" if peak is None else f"{peak / 2**20:.0f} MiB"
+
+
 def labelled(value: Json, unit: str) -> str:
     """A computed value: number, unit, fidelity label and model (REP-001)."""
     return f"{num(value['value'])} {unit} [{value['fidelity_label']}, {value['model']}]"
@@ -941,12 +961,10 @@ def simulate_fan(
         ]
         for case in out["cases"]:
             head = f"  {case['name']}: {case['status']} ({case['cells']} cells, "
-            head += f"{case['wall_seconds']:.0f} s)"
+            head += f"{case['wall_seconds']:.0f} s, peak {peak_text(case)})"
             lines.append(head)
             for failed in case["failed_checks"]:
-                lines.append(
-                    f"    failed {failed['check']}: {failed['value']} (limit {failed['threshold']})"
-                )
+                lines.append(f"    {failed_text(failed)}")
             metrics = case.get("metrics")
             if metrics:
                 for key in (
@@ -983,12 +1001,57 @@ def simulate_fan(
 # --- optimize ------------------------------------------------------------------------------------
 
 SEARCH_SETTINGS = ("variables", "objective", "max_candidates")
-SEARCH_VARIABLES = ("r_hub", "blade_count", "chord_scale", "chord_tip", "camber_scale")
+SEARCH_VARIABLES = (
+    "r_hub",
+    "blade_count",
+    "chord_scale",
+    "chord_tip",
+    "camber_scale",
+    "solidity_hub",
+    "solidity_tip",
+)
+
+# Initial search ranges of the ducted axial design variables: docs/architecture.md section 5 (a
+# project plan, not an empirical limit). Solidity sigma = c Z / (2 pi r) at hub, mid and tip.
+SOLIDITY_RANGE = (0.4, 1.5)
+HUB_TIP_RATIO_RANGE = (0.30, 0.60)
+BLADE_COUNT_RANGE = (3, 11)
 
 
-def candidates_of(base: Json, variables: Json, limit: int) -> list[Json]:
+def solidity(chord: float, blade_count: int, radius: float) -> float:
+    return chord * blade_count / (2.0 * math.pi * radius)
+
+
+def search_bound_failures(params: Json, r_tip: float) -> list[str]:
+    """The design-variable bounds of docs/architecture.md section 5 that `params` violates. The
+    chord is linear from hub to tip, so the mid solidity follows from the hub and tip chords."""
+    z = int(params["blade_count"])
+    r_hub = float(params["r_hub"])
+    out = []
+    z_lo, z_hi = BLADE_COUNT_RANGE
+    if not z_lo <= z <= z_hi:
+        out.append(f"blade count {z} outside [{z_lo}, {z_hi}]")
+    nu_lo, nu_hi = HUB_TIP_RATIO_RANGE
+    if not nu_lo <= r_hub / r_tip <= nu_hi:
+        out.append(f"hub-to-tip ratio {r_hub / r_tip:.3f} outside [{nu_lo}, {nu_hi}]")
+    c_hub, c_tip = float(params["chord_hub"]), float(params["chord_tip"])
+    lo, hi = SOLIDITY_RANGE
+    for where, chord, radius in (
+        ("hub", c_hub, r_hub),
+        ("mid", (c_hub + c_tip) / 2.0, (r_hub + r_tip) / 2.0),
+        ("tip", c_tip, r_tip),
+    ):
+        sigma = solidity(chord, z, radius)
+        if not lo <= sigma <= hi:
+            out.append(f"{where} solidity {sigma:.3f} outside [{lo}, {hi}]")
+    return out
+
+
+def candidates_of(base: Json, variables: Json, limit: int, r_tip: float) -> list[Json]:
     """The full factorial of the stated variable values (OPT-003: deterministic, no seed needed),
-    applied to the base design parameters; chord_scale multiplies both chords."""
+    applied to the base design parameters. chord_scale multiplies both chords; solidity_hub and
+    solidity_tip set the chord at that radius (c = sigma 2 pi r / Z) and override chord_scale and
+    chord_tip there."""
     unknown = [k for k in variables if k not in SEARCH_VARIABLES]
     if unknown:
         raise Failure(f"unknown search variables: {', '.join(unknown)}")
@@ -1007,6 +1070,11 @@ def candidates_of(base: Json, variables: Json, limit: int) -> list[Json]:
         for key in ("r_hub", "blade_count", "camber_scale", "chord_tip"):
             if key in combo:
                 params[key] = combo[key]
+        z = int(params["blade_count"])
+        if "solidity_hub" in combo:
+            params["chord_hub"] = float(combo["solidity_hub"]) * 2.0 * math.pi * params["r_hub"] / z
+        if "solidity_tip" in combo:
+            params["chord_tip"] = float(combo["solidity_tip"]) * 2.0 * math.pi * r_tip / z
         out.append({"variables": combo, "params": params})
     return out
 
@@ -1051,11 +1119,21 @@ def optimize_fan(
                     "p_s2 - p_t1, compared with the CFD total-to-static rise)"
                 )
             required = float(duty["si_value"])
+            d_tip = kernel.feasibility_for_spec(spec)["inputs"].get("d_tip")
+            if d_tip is None:
+                raise Failure("the spec gives no tip diameter; run cemkit feasibility")
+            r_tip = float(d_tip["value"]) / 2.0
             rows: list[Json] = []
             for i, cand in enumerate(
-                candidates_of(base, settings["variables"], int(settings["max_candidates"]))
+                candidates_of(base, settings["variables"], int(settings["max_candidates"]), r_tip)
             ):
                 row: Json = {"candidate": i, "variables": cand["variables"]}
+                bounds = search_bound_failures(cand["params"], r_tip)
+                if bounds:
+                    row["status"] = "out_of_bounds"
+                    row["reason"] = "; ".join(bounds) + " (docs/architecture.md section 5)"
+                    rows.append(row)
+                    continue
                 try:
                     output, _ = design_fan_output(spec, cand["params"], [])
                 except (Failure, kernel.KernelError) as e:
@@ -1206,10 +1284,10 @@ def report_lines(
     ]
     for path, f in provisional:
         value = f["text_value"] if f["text_value"] is not None else f["original_value"]
-        unit = f["original_unit"] or ""
+        shown = field_value_text(value, None if f["text_value"] is not None else f["original_unit"])
         flags = f["provenance"] + (", provisional" if f["provisional"] else "")
         note = (f["note"] or "").replace("|", "/")
-        lines.append(f"| `{path}` | {value} {unit} | {flags} | {note} |")
+        lines.append(f"| `{path}` | {shown} | {flags} | {note} |")
     lines += [
         "",
         "Design parameters (all placeholders unless stated otherwise):",
@@ -1254,10 +1332,14 @@ def report_lines(
         lines += [f"- {src}" for src in sim["thresholds"]["sources"]]
         lines.append("")
         for case in sim["cases"]:
-            lines.append(f"### {case['name']}: {case['status']} ({case['cells']} cells)")
+            cells = "unknown" if case["cells"] is None else case["cells"]
+            lines.append(
+                f"### {case['name']}: {case['status']} ({cells} cells, peak memory "
+                f"{peak_text(case)})"
+            )
             lines.append("")
             for f in case["failed_checks"]:
-                lines.append(f"- failed {f['check']}: {f['value']} (limit {f['threshold']})")
+                lines.append(f"- {failed_text(f)}")
             metrics = case.get("metrics")
             if metrics:
                 for key in (
@@ -1284,7 +1366,9 @@ def report_lines(
         lines.append(
             "- L2 verified (TRUST-002)" if ms["verified"] else "- not verified (TRUST-002)"
         )
-    if opt is not None:
+    if opt is None:
+        lines += ["", "## 6. Search", "", "No search was run."]
+    else:
         lines += ["", f"## 6. Search: {opt['label']}", ""]
         lines += [
             "| # | Variables | Status | Total-to-static rise (Pa) | Efficiency | Meets duty |",

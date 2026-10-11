@@ -5,6 +5,7 @@ OpenFOAM), so these tests check the wiring and labels, not any fan's performance
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -83,7 +84,8 @@ def test_optimize_fan_labels_the_campaign_exploratory_and_respects_the_budget(
     search.write_text(
         json.dumps(
             {
-                "variables": {"r_hub": [0.024, 0.028]},
+                # The trial tip solidity (0.30) is outside the section 5 bounds; set it to 0.5.
+                "variables": {"r_hub": [0.024, 0.028], "solidity_tip": [0.5]},
                 "objective": "total_to_static_efficiency",
                 "max_candidates": 2,
             }
@@ -127,6 +129,10 @@ def test_report_fan_writes_a_package_with_provisional_inputs_first(tmp_path: Pat
     assert "`product.duty.flow`" in report and "TRIAL" in report
     assert "[L2 simulated, fans.axial.cfd_metrics@0.2.0]" in report
     assert "Not L3" in report
+    assert "## 6. Search\n\nNo search was run." in report
+    assert "| unknown |" in report and "None" not in report
+    assert "| 0.1 |" in report  # dimensionless pressure margin: no "1" unit
+    assert "peak memory" in report
     assert len(list((out / "files").iterdir())) == 4  # rotor and duct, STEP and STL
     assert {p.name for p in (out / "previews").iterdir()} == {
         "fan_iso.png",
@@ -134,3 +140,27 @@ def test_report_fan_writes_a_package_with_provisional_inputs_first(tmp_path: Pat
         "fan_side.png",
     }
     assert (out / "previews" / "fan_iso.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+@pytest.mark.req("OPT-006")
+def test_search_bounds_follow_the_architecture_design_variable_table() -> None:
+    base = {"r_hub": 0.024, "blade_count": 7, "chord_hub": 0.018, "chord_tip": 0.016}
+    failures = cli.search_bound_failures(base, 0.0595)
+    assert failures == ["tip solidity 0.300 outside [0.4, 1.5]"]
+    assert cli.search_bound_failures({**base, "chord_tip": 0.0267}, 0.0595) == []
+    assert any(
+        "blade count" in f for f in cli.search_bound_failures({**base, "blade_count": 2}, 0.0595)
+    )
+    assert any(
+        "hub-to-tip" in f for f in cli.search_bound_failures({**base, "r_hub": 0.040}, 0.0595)
+    )
+
+
+@pytest.mark.req("OPT-003")
+def test_solidity_variables_set_the_chord_at_hub_and_tip() -> None:
+    base = {"r_hub": 0.024, "blade_count": 7, "chord_hub": 0.018, "chord_tip": 0.016}
+    (cand,) = cli.candidates_of(base, {"solidity_hub": [1.0], "solidity_tip": [0.5]}, 1, 0.0595)
+    p = cand["params"]
+    assert p["chord_hub"] == pytest.approx(2.0 * math.pi * 0.024 / 7)
+    assert p["chord_tip"] == pytest.approx(0.5 * 2.0 * math.pi * 0.0595 / 7)
+    assert cli.solidity(p["chord_tip"], 7, 0.0595) == pytest.approx(0.5)

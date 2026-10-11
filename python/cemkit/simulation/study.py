@@ -101,6 +101,7 @@ def run_case(
         solver_failed=failed,
         resource_limit=None,
         mesh_ok=mesh_ok,
+        mesh_failures=() if mesh_ok else openfoam.mesh_failures(directory),
         residuals=residuals,
         inflow=inflow,
         outflow=outflow,

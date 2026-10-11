@@ -94,3 +94,23 @@ def test_a_monitor_near_zero_is_judged_against_its_scale() -> None:
     )
     assert assess(**common, thresholds=scaled).status == "CONVERGED"  # type: ignore[arg-type]
     assert assess(**common, thresholds=unscaled).status == "UNCONVERGED"  # type: ignore[arg-type]
+
+
+@pytest.mark.req("TRUST-004")
+def test_mesh_invalid_names_the_failing_check_metric_and_count() -> None:
+    failure = "Max skewness = 7.73, 4 highly skew faces detected which may impair the quality"
+    a = assess(
+        solver_failed=False,
+        resource_limit=None,
+        mesh_ok=False,
+        mesh_failures=(failure,),
+        residuals=GOOD,
+        inflow=1.0,
+        outflow=1.0,
+        monitors={"torque": FLAT},
+        thresholds=T,
+    )
+    (check,) = a.failed
+    assert (
+        check.name == "mesh_quality" and "Max skewness = 7.73, 4 highly skew faces" in check.message
+    )

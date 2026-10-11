@@ -115,6 +115,18 @@ def mesh_ok(case: Path) -> bool:
     return log.exists() and "Mesh OK." in log.read_text(encoding="utf-8", errors="replace")
 
 
+def mesh_failures(case: Path) -> tuple[str, ...]:
+    """checkMesh's failed checks (the lines it marks with ***), each naming the metric, its value
+    and the number of faces or cells that fail it."""
+    log = case / "log.checkMesh"
+    if not log.exists():
+        return ("no checkMesh log",)
+    text = log.read_text(encoding="utf-8", errors="replace")
+    return tuple(
+        line.strip().lstrip("*") for line in text.splitlines() if line.strip().startswith("***")
+    )
+
+
 def cell_count(case: Path) -> int | None:
     log = case / "log.checkMesh"
     if not log.exists():

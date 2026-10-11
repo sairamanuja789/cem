@@ -55,3 +55,17 @@ def test_a_residual_above_its_threshold_is_unconverged_and_recorded(tmp_path: Pa
 def test_case_files_cannot_escape_the_case_directory(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         openfoam.write_case(tmp_path / "case", {"files": {"../evil": "x"}})
+
+
+@pytest.mark.req("TRUST-004")
+def test_mesh_failures_are_read_from_the_checkmesh_log(tmp_path: Path) -> None:
+    (tmp_path / "log.checkMesh").write_text(
+        "    Max skewness = 1.2 OK.\n"
+        " ***Max skewness = 7.7328652, 4 highly skew faces detected which may impair\n"
+        "Failed 1 mesh checks.\n",
+        encoding="utf-8",
+    )
+    assert openfoam.mesh_failures(tmp_path) == (
+        "Max skewness = 7.7328652, 4 highly skew faces detected which may impair",
+    )
+    assert openfoam.mesh_failures(tmp_path / "missing") == ("no checkMesh log",)

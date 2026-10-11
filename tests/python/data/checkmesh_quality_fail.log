@@ -1,0 +1,31 @@
+Checking geometry...
+    Overall domain bounding box (0.02254824 -0.020531244 -0.06) (0.059978858 0.020527126 0.12)
+    Mesh has 3 geometric (non-empty/wedge) directions (1 1 1)
+    Mesh has 3 solution (non-empty) directions (1 1 1)
+    Boundary openness (-2.0167246e-16 1.107427e-16 8.9741117e-18) OK.
+    Max cell openness = 3.2368817e-16 OK.
+    Max aspect ratio = 6.7250135 OK.
+    Minimum face area = 3.4150751e-09. Maximum face area = 7.3846859e-06.  Face area magnitudes OK.
+    Min volume = 1.4193266e-12. Max volume = 1.6300216e-08.  Total volume = 0.00018886782.  Cell volumes OK.
+    Mesh non-orthogonality Max: 64.834061 average: 11.380403
+    Non-orthogonality check OK.
+    Face pyramids OK.
+ ***Max skewness = 7.7328652, 4 highly skew faces detected which may impair the quality of the results
+  <<Writing 4 skew faces to set skewFaces
+    Coupled point location match (average 0) OK.
+Checking faces in error :
+    non-orthogonality >  30 degrees                        : 7673
+    faces with face pyramid volume < 1e-13                 : 0
+    faces with face-decomposition tet quality < 1e-15      : 0
+    faces with concavity >  80 degrees                     : 0
+    faces with skewness >   4 (internal) or  20 (boundary) : 0
+    faces with interpolation weights (0..1)  <  0.05       : 0
+    faces with volume ratio of neighbour cells <  0.01     : 0
+    faces with face twist <  0.02                          : 0
+    faces on cells with determinant < 0.001                : 0
+  <<Writing 7673 faces in error to set meshQualityFaces
+
+Failed 2 mesh checks.
+
+End
+

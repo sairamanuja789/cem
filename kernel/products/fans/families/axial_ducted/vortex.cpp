@@ -25,6 +25,7 @@ namespace isq = mp_units::isq;
 constexpr core::SemVer k_version{.major = 0, .minor = 1, .patch = 0};
 constexpr std::size_t k_intervals = 200;  // Simpson intervals (numerical choice, as the reference)
 constexpr int k_max_doublings = 200;
+constexpr double k_duty_tolerance = 1e-9;  // numerical guard on the final rise, as the reference
 
 double m(core::Length l) { return l.numerical_value_in(si::metre); }
 core::Length len(double v) { return v * isq::length[si::metre]; }
@@ -217,6 +218,12 @@ core::Result<FreeVortexDesign> vortex_design(const FreeVortexInputs& in, double 
   const auto a_hub = hub_for(k);
   if (!a_hub) {
     return reverse();
+  }
+  const double achieved = rho * eq.work_flow(*a_hub, k) / q;
+  if (!(std::abs((achieved / dp) - 1.0) <= k_duty_tolerance)) {
+    return invalid("the duty search did not converge (the rise is not monotonic in K here)", n,
+                   "rise within " + core::format_number(k_duty_tolerance) + " of the duty; got " +
+                       core::format_number(achieved) + " Pa");
   }
 
   std::vector<FreeVortexStation> stations;

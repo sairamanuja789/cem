@@ -16,7 +16,8 @@ form and for radial equilibrium once the axial velocity is no longer uniform.
    ed., three-dimensional flows in axial turbomachines (pages to be confirmed by the owner).
 2. **Axial velocity:** for n ≠ −1, c_x2(r) follows from simple radial equilibrium behind the rotor
    with loss-free Euler work and a uniform inlet, scaled to the duty flow by continuity. K is set so
-   the mass-averaged loss-free total-pressure rise equals the duty (docs/models/fans/axial-vortex.md).
+   the mass-averaged loss-free total-pressure rise equals the duty
+   (docs/models/fans/axial-vortex.md).
 3. **A separate model,** `fans.axial.vortex@0.1.0` (operation `vortex_design`). The free vortex
    (`fans.axial.free_vortex@0.1.0`, l1_002) stays unchanged; `cemkit design fan` uses the general
    model only when the design parameters state `vortex_exponent`.
@@ -30,5 +31,6 @@ form and for radial equilibrium once the axial velocity is no longer uniform.
 - docs/architecture.md section 5 now reads "−1 (free vortex) to 1 (forced vortex)".
 - Hand calculation l1_003 covers n = −1 (reproduces l1_002) and n = 0; the owner moves it to
   `verified/` after checking.
-- On the TRIAL duty, n > −1 does not unload the hub (finding in the model page): the next levers
-  are hub size, solidity and the measured duty (HI-025, HI-029).
+- On the TRIAL duty, at the hub sizes examined (28 mm for n from −1 to 1, 20 mm for n = 0), n > −1
+  does not unload the hub (model page, findings): the next levers are hub size, solidity and the
+  measured duty (HI-025, HI-029).

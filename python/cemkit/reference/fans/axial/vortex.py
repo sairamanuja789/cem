@@ -51,6 +51,9 @@ from cemkit.reference.platform.air import Air
 MODEL = "fans.axial.vortex@0.1.0"
 N_INTERVALS = 200  # Simpson intervals (even); a numerical choice, not an engineering constant
 MAX_DOUBLINGS = 200
+# Numerical tolerance on the final rise (the bisection assumes the rise grows with K; this guards
+# that assumption): a numerical choice, not an engineering constant.
+DUTY_TOLERANCE = 1e-9
 
 
 @dataclass(frozen=True)
@@ -208,6 +211,14 @@ def vortex_design(
     a_hub = hub_for(k)
     if a_hub is None:
         return reverse
+    achieved = air.density * eq.work_flow(a_hub, k) / flow
+    if not abs((achieved / pressure.pa) - 1.0) <= DUTY_TOLERANCE:
+        return _invalid(
+            "the duty search did not converge (the rise is not monotonic in K here)",
+            "vortex_exponent",
+            n,
+            f"rise within {DUTY_TOLERANCE} of the duty; got {format_number(achieved)} Pa",
+        )
 
     out: list[Station] = []
     for i in range(stations):

@@ -35,7 +35,10 @@ SST, 0.5–2 M cells, a few MPI ranks.
    measurements exist. Mesh quality uses OpenFOAM v2512's default
    `etc/caseDicts/mesh/generation/meshQualityDict.cfg` (internal skewness 4, boundary skewness
    20) through `checkMesh -meshQuality`: plain checkMesh applies 4 to every face, so a mesh whose
-   only generic failure is skewness passes when no face is in error under meshQualityDict. Every assessment prints these sources.
+   only generic failure is skewness passes when no face is in error under meshQualityDict (the
+   whole section must be parsed). Generic checkMesh and meshQualityDict compute boundary-face
+   skewness differently, so accepting a generic boundary skewness above 4 on the strength of the
+   meshQualityDict metric is itself a project decision. Every assessment prints these sources.
 6. **Air viscosity:** Sutherland's law from the U.S. Standard Atmosphere 1976 (eq. 51) as a new
    model `platform.air.viscosity@1.0.0`, used when the spec states none.
 

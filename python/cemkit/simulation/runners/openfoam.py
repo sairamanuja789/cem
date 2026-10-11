@@ -110,6 +110,11 @@ def final_initial_residuals(case: Path) -> dict[str, float]:
     }
 
 
+# The checks that checkMesh -meshQuality lists for OpenFOAM v2512's default meshQualityDict.cfg (a
+# count of output lines, not an engineering value): fewer means the section was not parsed whole.
+QUALITY_CHECKS = 9
+
+
 def faces_in_error(text: str) -> dict[str, int] | None:
     """The counts of checkMesh -meshQuality's "Checking faces in error" section (the limits of
     system/meshQualityDict: OpenFOAM's defaults, internal skewness 4, boundary skewness 20), or
@@ -143,7 +148,8 @@ def mesh_ok(case: Path) -> bool:
         bool(failed)
         and all(f.startswith("Max skewness") for f in failed)
         and counts is not None
-        and len(counts) > 0
+        and len(counts) == QUALITY_CHECKS
+        and any("skewness" in name for name in counts)
         and all(n == 0 for n in counts.values())
     )
 

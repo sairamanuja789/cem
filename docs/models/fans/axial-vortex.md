@@ -36,8 +36,11 @@ Two conditions fix A and K:
 
 Numerics (choices, not engineering constants): composite Simpson's rule on 200 intervals; A by
 bisection for each K, K by bisection, each run until the bracket cannot shrink. The kernel repeats
-the reference's algorithm and order of operations. For n = −1 the equilibrium terms vanish, so
-c_x2 = c_x1 and K = Δp_t/(ρω): the free vortex (l1_003 case A, agreement 1e-10).
+the reference's algorithm and order of operations. The bisection on K assumes the rise grows with K
+up to the onset of reverse flow (true across a sweep of n from −1 to 1 at the TRIAL duty); a final
+check refuses any result whose rise is not within 1e-9 of the duty. For n = −1 the equilibrium
+terms vanish, so c_x2 = c_x1 and K = Δp_t/(ρω): the free vortex (l1_003 case A, agreement
+1e-10).
 
 Sections at each station: β1 = atan2(U, c_x1), β2 = atan2(U − c_θ2, c_x2), θ = β1 − β2,
 ξ = (β1 + β2)/2, h = (c/2) tan(θ/4) (zero incidence and zero deviation, UNSOURCED, HI-027),
@@ -55,16 +58,33 @@ That of `fans.axial.free_vortex@0.1.0` (mean line and section checks), plus:
 When the duty can only be reached with reverse flow somewhere behind the rotor, the model returns
 `out_of_validity` (subject `vortex_exponent`), never a number.
 
-## Findings on the TRIAL duty (l1_003)
+## Findings on the TRIAL duty (l1_003 and the physics review's sweep)
 
-Moving work outward (n > −1) removes swirl at the hub, but radial equilibrium then lowers the hub
-axial velocity behind the rotor. With a 28 mm hub, the hub de Haller ratio is 0.633 (n = −1), 0.614
-(n = −0.5) and 0.622 (n = 0). At n = 0 the hub section needs **negative camber** (θ = −15.4°) and
-reaction 1.29, which the geometry recipe refuses (camber must be in [0, c/2)). With a 20 mm hub,
-n = 0 reaches only about 12 Pa before reverse flow. Raising n alone therefore does not unload the
-hub at this duty; a larger hub, more solidity, a lower duty or a different speed are the levers.
+Examined: n from −1 to 1 in steps of 0.25 with a 28 mm hub, and n = 0 with a 20 mm hub. Moving
+work outward (n > −1) removes swirl at the hub, but radial equilibrium then lowers the hub axial
+velocity behind the rotor:
+
+| n (28 mm hub) | Hub W2/W1 | Hub camber |
+| --- | --- | --- |
+| −1 | 0.633 | positive |
+| −0.75 | 0.621 | positive |
+| −0.5 | 0.614 | positive |
+| −0.25 | 0.615 | −4.75° (negative) |
+| 0 | 0.622 | −15.4° (negative, reaction 1.29) |
+| ≥ 0.25 | none: the duty needs reverse flow (largest rise 19.7 to 13.8 Pa) | — |
+
+The geometry recipe refuses negative camber (camber must be in [0, c/2)). With a 20 mm hub, n = 0
+reaches about 12.5 Pa before reverse flow. At the hub sizes examined, raising n therefore does not
+unload the hub at this duty; a larger hub, more solidity, a lower duty or a different speed are the
+remaining levers. Judged by the de Haller ratio and the hub camber only; losses are not modelled.
 
 ## Fidelity and limits
+
+- The duty sets the mass-averaged loss-free stagnation rise, which includes the swirl dynamic
+  pressure (as fans.axial.mean_line's defect D1: a rotor without a stator does not deliver it) and,
+  for n ≠ −1, the extra kinetic energy of the non-uniform c_x2 profile (at n = 0 c_x2 runs from
+  0.97 to 4.47 m/s). ISO 5801's fan total pressure uses a conventional dynamic pressure from Q/A,
+  so the two are not the same quantity; the difference grows with n.
 
 L1 predicted. Loss-free; zero deviation (HI-027); no blade blockage; simple radial equilibrium
 (no streamline curvature or radial velocity); uniform inlet. Not validated (no rig data, AX-017).

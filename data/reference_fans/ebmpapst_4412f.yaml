@@ -1,0 +1,81 @@
+# Public manufacturer data: ebm-papst 4412 F DC axial compact fan. Reference data only: it is not a
+# design target, not a validation case (no blade geometry), and not a project asset.
+# Every value is copied from the cited document; nothing is derived unless marked "inferred".
+# Unknown quantities are null with status UNKNOWN. Units are stated per value.
+schema_version: 1
+id: ebmpapst_4412f
+kind: manufacturer_datasheet
+document:
+  title: "4412 F DC axial compact fan (datasheet)"
+  url: https://img.ebmpapst.com/products/datasheets/DC-axial-fan-4412F-ENU.pdf
+  version: "ENU (Web), Approved 2016-06-22, 4 pages"
+  accessed: 2026-10-12
+  sha256: 49f3531f12727f33967c2387831b242f7739a7dade6c174f84841bc40edbd48f
+  stored_in_repository: false   # manufacturer document; only provenance and extracted values here
+ratings:                        # page 1, "Nominal data"
+  nominal_voltage: {value: 12, unit: V}
+  voltage_range: {min: 8, max: 12.6, unit: V}
+  speed: {value: 2900, unit: rpm}
+  power_input: {value: 5.3, unit: W}
+  airflow: {value: 170, unit: m3/h, note: "operating point not stated; the curve meets zero pressure at about 173 m3/h"}
+  sound_power_level: {value: 5.3, unit: B}
+  sound_pressure_level: {value: 43, unit: dB(A)}
+  ambient_temperature: {min: -20, max: 60, unit: degC}
+description:                    # page 2, "Technical description"
+  dimensions: {value: "119 x 119 x 25", unit: mm}
+  rotation: "counterclockwise, viewed toward rotor"
+  airflow_direction: "exhaust over struts"
+  bearing: ball
+  impeller_material: "glass-fiber reinforced PA"
+  housing_material: "glass-fiber reinforced PBT"
+  mass: {value: 0.175, unit: kg}
+drawing:                        # page 3, "Product drawing" (tolerances as printed)
+  frame_square: {value: 119, tolerance: 0.3, unit: mm}
+  frame_depth: {value: 25.4, tolerance: 0.3, unit: mm}
+  hole_spacing_square: {value: 104.8, tolerance: 0.2, unit: mm}
+  hole_diameter: {value: 4.3, tolerance: 0.15, unit: mm}
+  panel_cutout_diameter: {value: 125, unit: mm}
+geometry_unknown:               # not in any public ebm-papst document examined
+  blade_count: {value: null, status: UNKNOWN, note: "the page-1 photograph is not a dimensional source"}
+  rotor_tip_diameter: {value: null, status: UNKNOWN}
+  hub_diameter: {value: null, status: UNKNOWN}
+  tip_clearance: {value: null, status: UNKNOWN}
+  blade_chord: {value: null, status: UNKNOWN}
+  blade_pitch_angle: {value: null, status: UNKNOWN}
+  blade_thickness: {value: null, status: UNKNOWN}
+  airfoil: {value: null, status: UNKNOWN}
+curve:                          # page 4, "Curves: Air performance"
+  quantity: "Delta p_f (axis label)"
+  pressure_definition: {value: null, status: UNKNOWN, note: "the datasheet does not define Delta p_f (fan static or fan total); do not use it as either until the definition is found (HI-032)"}
+  speed: {value: 2900, unit: rpm, note: "the nominal speed; the curve's test conditions are not stated"}
+  test_standard: {value: null, status: UNKNOWN}
+  method: >
+    Vector extraction: page 4 converted with pdftocairo -svg (poppler); the curve is the single
+    0.8-point stroked path; calibrated with the drawn grid (x: 0 to 105 CFM over 8 gridlines;
+    y: 0 to 60 Pa over 7 gridlines); cubic Bezier segments sampled at 20 points each and linearly
+    interpolated at whole CFM steps. 1 CFM = 1.69901082 m3/h (0.028316846592 m3/min, exact).
+  extraction_uncertainty: "below 0.05 Pa and 0.05 CFM relative to the drawn curve; the drawn curve's own measurement uncertainty is UNKNOWN"
+  endpoints: {shutoff_pressure_pa: 54.58, at_cfm: 0.262, zero_pressure_cfm: 102.06, zero_pressure_m3_per_h: 173.4}
+  points_cfm_pa:
+    - [5, 51.92]
+    - [10, 48.88]
+    - [15, 45.70]
+    - [20, 42.46]
+    - [25, 39.25]
+    - [30, 36.15]
+    - [35, 33.27]
+    - [40, 30.72]
+    - [45, 28.64]
+    - [50, 27.20]
+    - [55, 26.46]
+    - [60, 25.67]
+    - [65, 24.58]
+    - [70, 23.15]
+    - [75, 21.31]
+    - [80, 18.94]
+    - [85, 15.94]
+    - [90, 12.23]
+    - [95, 7.73]
+  notes:
+    - "Inflection (stall region) between about 45 and 60 CFM."
+    - "An earlier reading from the raster image put the zero-pressure point near 96 CFM; the vector extraction (102 CFM) supersedes it."

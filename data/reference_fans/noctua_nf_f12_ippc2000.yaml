@@ -1,0 +1,43 @@
+# Public data: Noctua NF-F12 industrialPPC-2000 PWM. Reference only (envelope and ratings). The
+# public CAD is IP-modified and its licence forbids performance simulation and reproduction of
+# substantially similar products (owner decision 2026-10-12): no blade geometry is taken from it.
+schema_version: 1
+id: noctua_nf_f12_ippc2000
+kind: manufacturer_ratings
+document:
+  title: "NF-F12 industrialPPC-2000 PWM specifications"
+  url: https://www.noctua.at/en/products/nf-f12-industrialppc-2000-pwm/specifications
+  accessed: 2026-10-12
+  primary_page_read: false     # the manufacturer site returned HTTP 429 to automated access
+  values_from: "retailer listings quoting the manufacturer's specification (ldlc.com PB00173676, quietpc.com nf-f12-ippc-2000-pwm, pccasegear.com 27865); replace with the primary page (HI-033)"
+ratings:
+  size: {value: "120 x 120 x 25", unit: mm}
+  speed: {value: 2000, tolerance_percent: 10, unit: rpm}
+  airflow_max: {value: 121.8, unit: m3/h, note: "maximum rating; operating point (free delivery) and test standard not stated"}
+  static_pressure_max: {value: 3.94, unit: mmH2O, note: "maximum rating, at a different operating point from airflow_max; 3.94 mmH2O = 38.6 Pa at 9.80665 Pa/mmH2O"}
+  noise: {value: 29.7, unit: dB(A)}
+cad:
+  file: NF-F12_iPPC_Public-CAD.stp
+  sha256: 45e416bdb7d9f3d017b8ea0a902f0846d5181e03d2770d528b951258ea008f6a
+  stored_in_repository: false
+  licence_terms: >
+    Noctua README (in the download): models represent mounting dimensions and overall external
+    dimensions accurately; impeller and internal frame structures are modified; "please do not use
+    these models for performance simulations"; not for manufacture or reproduction of the product or
+    substantially similar products.
+  audit: docs/reference/noctua-nf-f12-cad-audit.md
+envelope_from_cad:             # external and mounting dimensions only (stated accurate by Noctua)
+  frame: {value: "119.00 x 119.00 x 25.00", unit: mm}
+  assembly_with_pads: {value: "120.0 x 120.0 x 27.0", unit: mm}
+  pads_proud_of_each_face: {value: 0.7, unit: mm}
+geometry_unknown:              # the real fan's; the public CAD is modified (owner decision 3)
+  blade_count: {value: null, status: UNKNOWN, note: "the public model shows 7; not a dimensional source"}
+  rotor_tip_diameter: {value: null, status: UNKNOWN}
+  hub_diameter: {value: null, status: UNKNOWN}
+  tip_clearance: {value: null, status: UNKNOWN}
+  blade_chord: {value: null, status: UNKNOWN}
+  blade_pitch_angle: {value: null, status: UNKNOWN}
+  blade_thickness: {value: null, status: UNKNOWN}
+  airfoil: {value: null, status: UNKNOWN}
+  stator: {value: null, status: UNKNOWN, note: "the public model shows outlet guide vanes; their geometry is modified"}
+performance_curve: {value: null, status: UNKNOWN, note: "no curve in the documents examined"}

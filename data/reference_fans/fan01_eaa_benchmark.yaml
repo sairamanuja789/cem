@@ -1,0 +1,66 @@
+# FAN-01 (EAA benchmark): low-pressure axial fan in a short duct. Open research dataset used to
+# check the credibility of the CFD *workflow* (ADR-020, proposed). It is not our fan: agreement here
+# does not validate our design or close Gate 1 (architecture: "first fan validated ... with rig
+# data"), and its chord Reynolds number is about 10x or more above our fan's.
+schema_version: 1
+id: fan01_eaa_benchmark
+kind: research_dataset
+document:
+  title: "FAN 01 Benchmark: Low pressure Axial Fan in a short Duct"
+  creators: [Florian Kromer, Clemens Junger, Stefan Becker, Manfred Kaltenbacher, Felix Czwielong, Stefan Schoder]
+  repository: Zenodo
+  doi: 10.5281/zenodo.20037409
+  version: v5 (published 2026-05-05)
+  url: https://zenodo.org/records/20037409
+  accessed: 2026-10-12
+  licence: CC-BY-4.0
+  attribution: >
+    Kromer, F., Junger, C., Becker, S., Kaltenbacher, M., Czwielong, F., Schoder, S. "FAN 01
+    Benchmark: Low pressure Axial Fan in a short Duct", Zenodo, v5, 2026,
+    doi:10.5281/zenodo.20037409, licensed CC BY 4.0. Original case: Zenger, F., Junger, C.,
+    Kaltenbacher, M., Becker, S., SAE Technical Paper 2016-01-1805, doi:10.4271/2016-01-1805.
+  files:                         # downloaded 2026-10-12; not stored in the repository (sizes)
+    - {name: LA_Case4_AxialFan_measurements.pdf, sha256: 273b71a49968654e2d3c4be574d0c0fc028e5c4f4d7fbd5c8ad3fccdd332545a}
+    - {name: characteristic.zip, sha256: 717433174a8c7c58974f5fb7a377fc116cc64422ee8a4df62fa7c065493cfbdf}
+    - {name: cad_model.zip, sha256: cc4663dc26e700c226881e34317789ce6d79eaec2928939cce7c2b0f7f39daa6, contents: [cad_model/cad_model.igs, cad_model/cad_model.x_t]}
+test_setup:                      # LA_Case4_AxialFan_measurements.pdf
+  standard: "ISO 5801:2007, standardized inlet test chamber; flow from a standardized bellmouth inlet"
+  installation: "short duct (390 mm) with inlet nozzle and outlet diffuser; duct diameter 500 mm"
+  drive: "motor outside the duct; torque and speed from a precision torque meter"
+  rotation: clockwise (as stated in the PDF; viewing direction not stated)
+configuration:
+  rotor_only: true
+  blade_count: {value: 9, source: "LDA and beamforming figures; 9-fold symmetric surface groups in cad_model.igs"}
+  speed: {value: 1500, unit: rpm, status: inferred, note: "from the stated blade-passing frequency 225 Hz with 9 blades; the speed is not given in the dataset files examined; confirm from the SAE paper (HI-034)"}
+  duct_diameter: {value: 500, unit: mm, source: "measurement PDF, figure 1"}
+  tip_radius_from_cad: {value: 247.50, unit: mm, source: "max vertex radius of the rotor surfaces in cad_model.igs (FreeCAD 1.1.1)"}
+  hub_radius_from_cad: {min: 118.0, max: 127.0, unit: mm, note: "hub-region vertex radii; the hub is an open surface"}
+  tip_gap: {value: null, status: UNKNOWN, note: "duct surfaces sampled in the rotor span reach r = 247.17 mm, inside the 247.50 mm tip: an extraction artefact or a geometry issue; to be resolved from the CAD or the SAE paper (HI-034)"}
+characteristic:                  # characteristic.zip / characteristic_n1ug.mat (MATLAB 5, 2015-12-04)
+  pressure_definition: "total-to-static pressure difference Delta p_ts (ISO 5801 inlet chamber); the file stores it as p_chamber_static_in_Pa, the chamber static pressure relative to ambient (annotations.txt), as a positive magnitude"
+  columns: [flow_m3_per_s, delta_p_ts_pa, shaft_power_w]
+  power_column_note: "the file names it P_shaft_in_Nm, but the values are watts: Q x Delta p_ts / P reproduces the PDF's eta_ts = 53 % at 1.4 m3/s (recorded discrepancy)"
+  uncertainty: {value: null, status: UNKNOWN, note: "not stated in the dataset; a round-robin study (TU Darmstadt, three printed copies) reports high repeatability and good reproducibility at the design point and deviations in stall; figures to be extracted (HI-034)"}
+  design_flow: {value: 1.4, unit: m3/s, eta_ts_percent: 53, source: "measurement PDF"}
+  stall_note: "a plateau and dip near 0.8-1.2 m3/s (stall onset; acoustic rise at 1.1 m3/s per the PDF)"
+  points:
+    - [0.199439942, 252.84180310077656, 346.86495076765993]
+    - [0.291810477, 245.85828462867926, 339.4217987654671]
+    - [0.389706973, 238.24698321845733, 336.19919763203035]
+    - [0.496269306, 225.41234623040296, 331.56533715825185]
+    - [0.606075409, 204.60848066412447, 324.6224827389456]
+    - [0.692718343, 181.770990955699, 311.85096696206506]
+    - [0.803460985, 139.15209796348313, 275.8315639704576]
+    - [0.897290191, 135.15147309918368, 278.4774612649587]
+    - [0.99400039, 134.6805009836549, 286.58601683306864]
+    - [1.089804, 137.09801184990124, 299.1642605732633]
+    - [1.18608, 137.9236892298861, 314.3249112770671]
+    - [1.305608, 133.67434350101777, 327.95152354476005]
+    - [1.40324, 126.45657916912445, 333.30089514952226]
+    - [1.494137, 115.80361785595466, 331.38342491116185]
+    - [1.592779, 103.23605080590154, 326.122753033381]
+    - [1.699824, 85.86704165712074, 313.4769730098356]
+    - [1.803924, 63.94880034546681, 292.9249350411205]
+    - [1.907229, 42.784470280110035, 272.91178681720663]
+    - [1.994607, 24.65984195988698, 254.9707887064245]
+    - [2.078657, 6.791155611620111, 235.2978117161624]

@@ -4,8 +4,10 @@
 #include <mp-units/systems/isq.h>
 #include <mp-units/systems/si.h>
 
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <string>
+#include <vector>
 
 #include "cemkit/simulation/openfoam/writer.hpp"
 
@@ -48,7 +50,7 @@ TEST_CASE("the rotor sector case is deterministic and states its template", "[SI
   REQUIRE(a.has_value());
   REQUIRE(b.has_value());
   CHECK(a->text == b->text);
-  CHECK(cemkit::core::to_string(a->case_template) == "cemkit.openfoam.rotor_sector_mrf@0.2.0");
+  CHECK(cemkit::core::to_string(a->case_template) == "cemkit.openfoam.rotor_sector_mrf@0.3.0");
   CHECK(a->binary.at("constant/triSurface/blade_mm.stl") == std::vector<std::uint8_t>{1, 2, 3});
   REQUIRE(a->steps.size() == 7);
   CHECK(a->steps.back().argv == std::vector<std::string>{"simpleFoam"});
@@ -83,8 +85,22 @@ TEST_CASE("the template's trust thresholds name their sources", "[TRUST-004]") {
   CHECK(t.mass_imbalance == 0.005);
   CHECK(t.flat_fraction == 0.2);
   CHECK(t.residuals.size() == 6);
-  CHECK(t.sources.size() == 4);
-  CHECK(has(t.sources[0], "UNSOURCED"));
+  CHECK(t.sources.size() == 5);
+  CHECK(has(t.sources[0], "project decision (ADR-017"));
+  CHECK(has(t.sources[4], "meshQualityDict"));
+}
+
+TEST_CASE("mesh quality uses OpenFOAM's default limits through checkMesh -meshQuality",
+          "[TRUST-004]") {
+  const auto files = cemkit::simulation::openfoam::OpenFoamWriter{}.rotor_sector(trial());
+  REQUIRE(files.has_value());
+  CHECK(has(files->text.at("system/meshQualityDict"),
+            "#includeEtc \"caseDicts/mesh/generation/meshQualityDict.cfg\""));
+  const auto check = std::ranges::find_if(files->steps, [](const auto& s) {
+    return s.name == "checkMesh";
+  });
+  REQUIRE(check != files->steps.end());
+  CHECK(check->argv == std::vector<std::string>{"checkMesh", "-meshQuality"});
 }
 
 TEST_CASE("more than one process decomposes the case and runs the solver under MPI", "[SIM-002]") {

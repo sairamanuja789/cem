@@ -110,21 +110,59 @@ def final_initial_residuals(case: Path) -> dict[str, float]:
     }
 
 
+def faces_in_error(text: str) -> dict[str, int] | None:
+    """The counts of checkMesh -meshQuality's "Checking faces in error" section (the limits of
+    system/meshQualityDict: OpenFOAM's defaults, internal skewness 4, boundary skewness 20), or
+    None when the section is absent."""
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines) if "Checking faces in error" in line), None)
+    if start is None:
+        return None
+    counts: dict[str, int] = {}
+    for line in lines[start + 1 :]:
+        name, sep, value = line.rpartition(":")
+        if not sep or not value.strip().isdigit():
+            break
+        counts[" ".join(name.split())] = int(value)
+    return counts
+
+
 def mesh_ok(case: Path) -> bool:
+    """checkMesh passed (HI-028, ADR-017): "Mesh OK.", or the only failed generic check is the
+    skewness one (checkMesh applies 4 to every face) and no face breaks the meshQualityDict limits,
+    which allow boundary skewness up to 20."""
     log = case / "log.checkMesh"
-    return log.exists() and "Mesh OK." in log.read_text(encoding="utf-8", errors="replace")
+    if not log.exists():
+        return False
+    text = log.read_text(encoding="utf-8", errors="replace")
+    if "Mesh OK." in text:
+        return True
+    failed = mesh_failures(case)
+    counts = faces_in_error(text)
+    return (
+        bool(failed)
+        and all(f.startswith("Max skewness") for f in failed)
+        and bool(counts)
+        and all(n == 0 for n in counts.values())
+    )
 
 
 def mesh_failures(case: Path) -> tuple[str, ...]:
-    """checkMesh's failed checks (the lines it marks with ***), each naming the metric, its value
-    and the number of faces or cells that fail it."""
+    """checkMesh's failed checks (the lines it marks with ***) and the meshQualityDict checks with
+    faces in error, each naming the metric, its value or limit and the number of faces."""
     log = case / "log.checkMesh"
     if not log.exists():
         return ("no checkMesh log",)
     text = log.read_text(encoding="utf-8", errors="replace")
-    return tuple(
+    generic = tuple(
         line.strip().lstrip("*") for line in text.splitlines() if line.strip().startswith("***")
     )
+    quality = tuple(
+        f"{name}: {n} (meshQualityDict)"
+        for name, n in (faces_in_error(text) or {}).items()
+        if n > 0
+    )
+    return generic + quality
 
 
 def cell_count(case: Path) -> int | None:

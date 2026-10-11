@@ -69,3 +69,32 @@ def test_mesh_failures_are_read_from_the_checkmesh_log(tmp_path: Path) -> None:
         "Max skewness = 7.7328652, 4 highly skew faces detected which may impair",
     )
     assert openfoam.mesh_failures(tmp_path / "missing") == ("no checkMesh log",)
+
+
+QUALITY = """Checking faces in error :
+    non-orthogonality >  65 degrees                        : 0
+    faces with skewness >   4 (internal) or  20 (boundary) : {skew}
+    faces on cells with determinant < 0.001                : 0
+Failed 1 mesh checks.
+"""
+
+
+@pytest.mark.req("TRUST-004")
+def test_boundary_skewness_up_to_the_meshqualitydict_limit_passes(tmp_path: Path) -> None:
+    """HI-028: checkMesh applies skewness 4 to every face; OpenFOAM's default meshQualityDict allows
+    20 on boundary faces, so a mesh whose only generic failure is skewness and that has no face in
+    error under meshQualityDict passes."""
+    skew = " ***Max skewness = 4.0335816, 1 highly skew faces detected which may impair\n"
+    log = tmp_path / "log.checkMesh"
+    log.write_text(skew + QUALITY.format(skew=0), encoding="utf-8")
+    assert openfoam.mesh_ok(tmp_path)
+    log.write_text(skew + QUALITY.format(skew=2), encoding="utf-8")
+    assert not openfoam.mesh_ok(tmp_path)
+    assert openfoam.mesh_failures(tmp_path)[-1] == (
+        "faces with skewness > 4 (internal) or 20 (boundary): 2 (meshQualityDict)"
+    )
+    # Another generic failure, or no meshQualityDict section, still fails.
+    log.write_text(skew + " ***Zero or negative cell volume detected.\n" + QUALITY.format(skew=0))
+    assert not openfoam.mesh_ok(tmp_path)
+    log.write_text(skew + "Failed 1 mesh checks.\n", encoding="utf-8")
+    assert not openfoam.mesh_ok(tmp_path)

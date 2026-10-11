@@ -15,7 +15,7 @@ SST, 0.5–2 M cells, a few MPI ranks.
 
 1. **Case placement follows the geometry pattern.** `kernel/cemkit/simulation/port` defines the
    solver-neutral `RotorSectorCase` and the `CaseWriter` interface; `simulation/openfoam` implements
-   it (template `cemkit.openfoam.rotor_sector_mrf@0.2.0`); the C ABI lends the writer to product
+   it (template `cemkit.openfoam.rotor_sector_mrf@0.3.0`); the C ABI lends the writer to product
    operations through `OperationContext::case_writer`, as it lends the geometry backend. The family
    only states what to simulate (`rotor_cfd_case`). The kernel writes files and command steps and
    never runs a solver.
@@ -29,9 +29,13 @@ SST, 0.5–2 M cells, a few MPI ranks.
    `mesh_study.py`), as docs/repository-structure.md (ADR-009) places them. The metrics that turn
    monitors into engineering quantities are a kernel family operation (`rotor_cfd_metrics`), which
    refuses any status other than CONVERGED or VERIFIED (`sim_untrusted`).
-5. **Thresholds (template 0.1.0, provisional):** residuals ≤ 1e-4 (UNSOURCED), mass imbalance
-   ≤ 0.5% and flatness over the last 20% (docs/architecture.md, proposed), flatness ≤ 1% relative
-   range (UNSOURCED). Every assessment prints these sources.
+5. **Thresholds (template 0.3.0; owner decision HI-028, 2026-10-11):** residuals ≤ 1e-4, mass
+   imbalance ≤ 0.5%, and monitor flatness ≤ 1% relative range over the last 20% of iterations are
+   **project decisions**: common practice, not published standards, to be revisited once rig
+   measurements exist. Mesh quality uses OpenFOAM v2512's default
+   `etc/caseDicts/mesh/generation/meshQualityDict.cfg` (internal skewness 4, boundary skewness
+   20) through `checkMesh -meshQuality`: plain checkMesh applies 4 to every face, so a mesh whose
+   only generic failure is skewness passes when no face is in error under meshQualityDict. Every assessment prints these sources.
 6. **Air viscosity:** Sutherland's law from the U.S. Standard Atmosphere 1976 (eq. 51) as a new
    model `platform.air.viscosity@1.0.0`, used when the spec states none.
 
@@ -40,5 +44,5 @@ SST, 0.5–2 M cells, a few MPI ranks.
 - A new solver adds a writer under `kernel/cemkit/simulation/<solver>/`; families do not change.
 - CI has no OpenFOAM (the CI image); runner tests use a stand-in wrapper
   (`CEMKIT_OPENFOAM_WRAPPER`) that writes synthetic monitors. Real runs happen in the dev image.
-- The owner must accept or replace the UNSOURCED thresholds before any L2 result supports a
-  decision (HI-028).
+- The thresholds are labelled project decisions in every assessment; they change only through
+  this ADR (HI-028).

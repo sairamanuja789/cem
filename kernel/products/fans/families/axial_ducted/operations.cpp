@@ -88,7 +88,7 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
   // camber height (an optimiser may search it, M6). It is not a deviation model: the reported
   // stations keep the zero-deviation camber.
   const double camber_scale = product::optional_number(a, "camber_scale").value_or(1.0);
-  if (!(std::isfinite(camber_scale) && camber_scale > 0.0)) {
+  if (!std::isfinite(camber_scale) || camber_scale <= 0.0) {
     throw product::BadRequest{"camber_scale", "must be finite and positive: camber_scale"};
   }
   Json stations = Json::array();

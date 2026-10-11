@@ -50,7 +50,10 @@ core::Status validate(const RotorSectorCase& c) {
   if (!(m(c.hub_radius) < m(c.duct_radius))) {
     return bad("hub_radius", "the hub must be inside the duct");
   }
-  if (!(m(c.z_inlet) < -m(c.rotor_half_length) && m(c.rotor_half_length) < m(c.z_outlet))) {
+  const double z_in = m(c.z_inlet);
+  const double z_out = m(c.z_outlet);
+  const double half = m(c.rotor_half_length);
+  if (!std::isfinite(z_in) || !std::isfinite(z_out) || z_in >= -half || half >= z_out) {
     return bad("z_inlet", "the inlet must be upstream and the outlet downstream of the rotor zone");
   }
   if (!(m(c.cell_size) < m(c.duct_radius) - m(c.hub_radius))) {

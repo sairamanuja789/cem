@@ -6,7 +6,7 @@ Every line in `data/`, `kernel/`, `python/` and `schemas/` (tests excluded) with
 the UNSOURCED marker (CLAUDE.md rule 7). Some lines define or explain the marker;
 the rest are values or models still waiting for a cited source.
 
-29 line(s) in 16 file(s).
+30 line(s) in 16 file(s).
 
 ## `data/fans/family_ranges.yaml`
 
@@ -64,6 +64,7 @@ the rest are values or models still waiting for a cited source.
 ## `python/cemkit/cli/app.py`
 
 - `"  UNSOURCED); every angle in degrees from the axial direction",`
+- `"- L1 numbers are loss-free with zero deviation (UNSOURCED losses and deviation).",`
 
 ## `python/cemkit/reference/crosscheck.py`
 

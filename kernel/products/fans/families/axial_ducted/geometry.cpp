@@ -237,7 +237,13 @@ core::Status register_geometry_operation(product::Operations& operations) {
           }
         }
         const auto solid_of = [&g](const std::string& n) {
-          return n == "rotor" ? g->rotor.get() : n == "duct" ? g->duct.get() : g->blade.get();
+          if (n == "rotor") {
+            return g->rotor.get();
+          }
+          if (n == "duct") {
+            return g->duct.get();
+          }
+          return g->blade.get();
         };
         Json parts = Json::array();
         for (const auto& name : names) {

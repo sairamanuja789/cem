@@ -93,20 +93,20 @@ TEST_CASE("the built section's end tangents follow beta1 and beta2", "[ADR-016][
       cemkit::fans::axial_ducted::free_vortex_design(trial(5), cemkit::physics::default_air());
   REQUIRE(d.has_value());
   for (const auto& s : d->stations) {
-    constexpr std::size_t n = 2001;
+    constexpr std::size_t k_points = 2001;
     const auto section = cemkit::fans::axial_ducted::blade_section({.radius = s.radius,
                                                                     .chord = s.chord,
                                                                     .stagger = s.recipe_stagger,
                                                                     .camber = s.camber,
                                                                     .thickness = s.thickness},
-                                                                   n);
+                                                                   k_points);
     const auto mid = [&](std::size_t i, auto member) {
       return (m(section.upper[i].*member) + m(section.lower[i].*member)) / 2.0;
     };
     using P = cemkit::geometry::port::Point3;
     const double le = std::atan2(mid(1, &P::y) - mid(0, &P::y), mid(1, &P::z) - mid(0, &P::z));
-    const double te =
-        std::atan2(mid(n - 1, &P::y) - mid(n - 2, &P::y), mid(n - 1, &P::z) - mid(n - 2, &P::z));
+    const double te = std::atan2(mid(k_points - 1, &P::y) - mid(k_points - 2, &P::y),
+                                 mid(k_points - 1, &P::z) - mid(k_points - 2, &P::z));
     CHECK_THAT(le, WithinAbs(rad(s.relative_inlet_angle), 2e-3));
     CHECK_THAT(te, WithinAbs(rad(s.relative_outlet_angle), 2e-3));
   }

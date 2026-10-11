@@ -69,7 +69,7 @@ core::Result<FreeVortexDesign> free_vortex_design(const FreeVortexInputs& in,
     return out_of_validity("the embed depth must be less than the hub radius", "embed_depth",
                            core::format_number(embed), "(0, " + core::format_number(rh) + ")");
   }
-  if (!(t < ch && t < ct)) {
+  if (t >= ch || t >= ct) {  // all three are finite and positive here
     return out_of_validity("the blade thickness must be less than every chord", "thickness",
                            core::format_number(t),
                            "(0, " + core::format_number(std::min(ch, ct)) + ")");

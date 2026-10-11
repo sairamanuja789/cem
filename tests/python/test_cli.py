@@ -466,3 +466,25 @@ def test_the_fan_geometry_can_export_one_unpatterned_blade() -> None:
     (part,) = response["result"]["parts"]
     assert part["name"] == "blade" and part["validity"]["ok"]
     assert part["topology"]["solids"] == 1
+
+
+PROVISIONAL_SPEC = ROOT / "examples" / "axial_120_provisional.yaml"
+
+
+@pytest.mark.req("SPEC-004")
+@pytest.mark.req("REP-002")
+def test_the_provisional_duty_compiles_as_derived_provisional_fan_static(tmp_path: Path) -> None:
+    """ADR-019: 0.020 m3/s at 12 Pa fan static, inferred from public data, labelled provisional."""
+    from cemkit import kernel
+
+    spec = cs.load_yaml(PROVISIONAL_SPEC.read_text(encoding="utf-8"))
+    fields = kernel.spec_compile(spec)["fields"]
+    flow, pressure = fields["product.duty.flow"], fields["product.duty.pressure"]
+    assert flow["si_value"] == pytest.approx(0.020)
+    assert pressure["si_value"] == pytest.approx(12.0)
+    assert pressure["qualifier"]["value"] == "fan_static"
+    for f in (flow, pressure):
+        assert f["provenance"] == "derived" and f["provisional"]
+        assert "PROVISIONAL" in f["note"]
+    store = tmp_path / "store"
+    assert invoke(store, "spec", "compile", str(PROVISIONAL_SPEC)).exit_code == 0

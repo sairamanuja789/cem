@@ -1,5 +1,5 @@
 """PHY-002, REP-002: public reference-fan data carries provenance, keeps unknowns explicit and is
-internally consistent (data/reference_fans/; ADR-019, ADR-020)."""
+internally consistent (data/fans/reference_fans/; ADR-019, ADR-020)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 import yaml
 
-DATA = Path(__file__).resolve().parents[2] / "data" / "reference_fans"
+DATA = Path(__file__).resolve().parents[2] / "data" / "fans" / "reference_fans"
 FILES = sorted(DATA.glob("*.yaml"))
 
 
@@ -62,9 +62,13 @@ def test_unknown_values_are_null_never_a_number(path: Path) -> None:
 
 
 @pytest.mark.req("REP-002")
-def test_the_ebmpapst_pressure_type_stays_unknown_until_defined() -> None:
+def test_the_ebmpapst_pressure_type_is_an_inferred_fan_static_with_evidence() -> None:
+    """HI-032: accepted as INFERRED (not manufacturer-confirmed); the evidence is pinned by hash."""
     curve = _load(DATA / "ebmpapst_4412f.yaml")["curve"]
-    assert curve["pressure_definition"]["status"] == "UNKNOWN"  # HI-032
+    definition = curve["pressure_definition"]
+    assert (definition["value"], definition["status"]) == ("fan_static", "INFERRED")
+    assert len(definition["evidence"]["sha256"]) == 64
+    assert definition["uncertainty"]
     flows = [q for q, _ in curve["points_cfm_pa"]]
     pressures = [p for _, p in curve["points_cfm_pa"]]
     assert flows == sorted(flows)

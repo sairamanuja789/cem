@@ -1,6 +1,6 @@
 # ADR-020: External-reference CFD case (FAN-01) for CFD workflow credibility
 
-- Status: proposed (needs owner review; no code until accepted)
+- Status: accepted (owner, 2026-10-12), with the provisional ±10 % pressure target
 - Date: 2026-10-12
 - Requirements affected: SIM-001, SIM-003, SIM-004, TRUST-001 to TRUST-004, REP-001, REP-004, AX-017
 
@@ -11,7 +11,7 @@ data for *our* fan; none exists yet (HI-025). Before relying on CFD for design, 
 a check of the CFD workflow against an openly licensed research fan with measured performance.
 
 - **The case:** FAN-01 (EAA benchmark; Zenodo doi:10.5281/zenodo.20037409, v5, CC BY 4.0;
-  `data/reference_fans/fan01_eaa_benchmark.yaml`).
+  `data/fans/reference_fans/fan01_eaa_benchmark.yaml`).
 - **Why it fits:**
   - a 9-blade rotor with no stator, in a 500 mm short duct;
   - ISO 5801 total-to-static characteristic plus shaft power;
@@ -38,7 +38,7 @@ sections. It can't take an external rotor.
 3. **Wait for a physical fan.** Pros: it addresses our Reynolds number. Cons: it blocks all CFD
    credibility work until hardware exists.
 
-## Decision (proposed)
+## Decision
 
 Option 1: an **external-reference rotor case**. It is a separate case type with its own template
 version, and it keeps the trust gate, metrics, labels and reports unchanged.
@@ -68,7 +68,7 @@ version, and it keeps the trust gate, metrics, labels and reports unchanged.
    - Comparison with the measured curve is reported as "benchmark comparison". It is **not**
      validation of our fan, does not close Gate 1, and earns no L3 label (REP-004).
 
-## Acceptance criteria (proposed, for owner review)
+## Acceptance criteria (accepted 2026-10-12)
 
 **A. The case is fit to compare:**
 - the trust gate gives CONVERGED or VERIFIED at the compared points;
@@ -84,13 +84,19 @@ version, and it keeps the trust gate, metrics, labels and reports unchanged.
 
 **C. Credibility statement:** the workflow is called *credible for this case* only if all three hold:
 1. criterion A passes;
-2. the simulated Δp_ts at 1.4 m³/s lies within **[owner to set, e.g. ±10 %]** of the measured value;
+2. the simulated Δp_ts at 1.4 m³/s lies within **±10 %** (provisional owner target) of the measured value;
 3. the curve trend over 1.2–1.6 m³/s has the same sign of slope.
 
 **D. Otherwise:** the discrepancy is reported with candidate causes and nothing is tuned to fit.
 Calibration needs separate, recorded data (PHY-006, holdout rules).
 
 ## Consequences
+
+- **Product-neutral platform (owner, 2026-10-12):**
+  - the generic simulation port carries only what any rotating-sector case needs;
+  - FAN-01 data (`data/fans/reference_fans/`), the external-rotor case writer's fan-specific inputs
+    and all fan design searches live in the fans application module (`kernel/products/fans/`,
+    `python/cemkit/products/fans/` where applicable), never in the platform.
 
 - **Easier:**
   - a first evidence-based statement about our CFD workflow;

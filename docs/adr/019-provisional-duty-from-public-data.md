@@ -1,6 +1,6 @@
 # ADR-019: Provisional design duty from public manufacturer data
 
-- Status: proposed (needs owner review; the TRIAL duty of ADR-016 stays in force until accepted)
+- Status: accepted (owner, 2026-10-12) as a **PROVISIONAL exploratory** duty: design searches may target it; no result against it may be called validated or guaranteed performance
 - Date: 2026-10-12
 - Requirements affected: SPEC-004, AX-003, AX-004, REP-002, REP-004
 
@@ -10,7 +10,7 @@
   static, 2000 rpm, 120 mm) has produced no trusted candidate (HI-029). Public data now suggests it is
   out of reach for this class of fan.
 - **No physical reference fan:** HI-025 stays open.
-- **Public data** (`data/reference_fans/`):
+- **Public data** (`data/fans/reference_fans/`):
   - **ebm-papst 4412 F** (2900 rpm): a vector-extracted curve of "Δp_f" against flow. The shutoff is
     54.6 Pa, zero pressure at 173 m³/h, and an inflection near 45–60 CFM. **The pressure type is
     undefined** in the datasheet (HI-032).
@@ -41,12 +41,18 @@ Option 2:
   labelled **PROVISIONAL (public data)** everywhere, as TRIAL is today.
 - **Derivation:** the ebm-papst points at 60 CFM (25.67 Pa) and 65 CFM (24.58 Pa), scaled to
   2000 rpm, give 0.0195–0.0212 m³/s at 12.2–11.7 Pa.
-- **Pressure type:** the target is entered as **fan static only if** HI-032 shows that the
-  ebm-papst Δp_f is the static pressure. If it is fan total pressure, the target is entered as fan
-  total.
-- **Spec:** until HI-032 is resolved, the spec carries the value with the pressure type marked
-  unconfirmed. The design commands refuse a duty whose pressure type is not stated (SPEC-004), so
-  **this ADR cannot be applied to the spec before HI-032.**
+- **Pressure type: fan static** (ISO 5801 total-to-static, `kind: fan_static`). HI-032 was resolved
+  on 2026-10-12 as an **INFERRED** interpretation, accepted by the owner and **not
+  manufacturer-confirmed**. The evidence is ebm-papst's catalogue "Definitions" page (2016-01; only
+  seen on a distributor mirror, SHA-256 recorded in `data/fans/reference_fans/ebmpapst_4412f.yaml`):
+  - free-air flow is "without static pressure increase", and the curve's zero matches the free-air
+    rating (173 against 170 m³/h);
+  - curves are measured to DIN ISO 5801 with intake-side chamber measurement, which gives outlet
+    static minus inlet total pressure.
+  Fan static and fan total pressure stay distinct in every calculation and CFD comparison.
+- **Spec:** `examples/axial_120_provisional.yaml`, with flow and pressure `provenance: derived`
+  and `provisional: true` (the spec schema has no "inferred" provenance; the note says inferred from
+  public data), labelled PROVISIONAL. The TRIAL spec stays for regression.
 
 ## Consequences
 

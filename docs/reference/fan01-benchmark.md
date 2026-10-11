@@ -1,6 +1,6 @@
 # FAN-01 benchmark: dataset permissions and geometry completeness
 
-Data: `data/reference_fans/fan01_eaa_benchmark.yaml`. Decision on use: ADR-020 (proposed). Status:
+Data: `data/fans/reference_fans/fan01_eaa_benchmark.yaml`. Decision on use: ADR-020 (proposed). Status:
 **preparation only**: no CFD case exists yet.
 
 ## Permissions

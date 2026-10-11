@@ -46,7 +46,23 @@ geometry_unknown:               # not in any public ebm-papst document examined
   airfoil: {value: null, status: UNKNOWN}
 curve:                          # page 4, "Curves: Air performance"
   quantity: "Delta p_f (axis label)"
-  pressure_definition: {value: null, status: UNKNOWN, note: "the datasheet does not define Delta p_f (fan static or fan total); do not use it as either until the definition is found (HI-032)"}
+  pressure_definition:
+    value: fan_static
+    status: INFERRED            # owner-accepted interpretation (HI-032, 2026-10-12); NOT manufacturer-confirmed
+    basis: >
+      The datasheet does not define Delta p_f. ebm-papst's catalogue "Definitions" page (2016-01)
+      states that air flow is quoted for free air "without static pressure increase", and that fan
+      curves are "determined in accordance with DIN ISO 5801 specifications on a dual-chamber test
+      stand with intake side measurement". (1) The curve meets zero at 173 m3/h, matching the free-air
+      rating of 170 m3/h, which is a static-pressure zero (a total-pressure curve would not reach zero
+      at free delivery). (2) Intake-side chamber measurement gives outlet static minus inlet total
+      pressure: the ISO 5801 fan static pressure.
+    evidence:
+      title: "ebm-papst catalogue page: Definitions (2016-01)"
+      url: https://static.chipdip.ru/lib/504/DOC014504598.pdf   # distributor mirror; the primary ebm-papst copy was not found
+      accessed: 2026-10-12
+      sha256: 930025188e4bc4ad3fc9af965ffec6a6879e6f77f6c7d1522a2caa10af3a1f09
+    uncertainty: "interpretation, not a stated definition; reopen if ebm-papst documents otherwise"
   speed: {value: 2900, unit: rpm, note: "the nominal speed; the curve's test conditions are not stated"}
   test_standard: {value: null, status: UNKNOWN}
   method: >

@@ -84,4 +84,21 @@ core::Result<core::Labelled<core::Speed>> speed_of_sound(const Air& air) {
                                                    model);
 }
 
+core::ModelId viscosity_model() {
+  return {.name = "platform.air.viscosity", .version = {.major = 1, .minor = 0, .patch = 0}};
+}
+
+core::Result<core::Labelled<core::DynamicViscosity>> dynamic_viscosity(
+    core::AbsoluteTemperature temperature) {
+  const double t = temperature.quantity_from_zero().numerical_value_in(si::kelvin);
+  const auto model = viscosity_model();
+  if (auto ok = require_positive("temperature", t, model); !ok) {
+    return std::unexpected(ok.error());
+  }
+  // Operation order of the reference: beta * (t * sqrt(t)) / (t + S).
+  const double mu = k_sutherland_beta * (t * std::sqrt(t)) / (t + k_sutherland_s);
+  return core::Labelled<core::DynamicViscosity>::l0_predicted(
+      mu * isq::dynamic_viscosity[si::pascal * si::second], model);
+}
+
 }  // namespace cemkit::physics

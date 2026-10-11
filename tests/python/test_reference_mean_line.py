@@ -26,7 +26,11 @@ def _checks() -> list[Any]:
     for folder in ("verified", "proposed"):
         for path in sorted((HAND_CALCS / folder).glob("l1_*.yaml")):
             doc = yaml.safe_load(path.read_text(encoding="utf-8"))
-            checks += [pytest.param(c, id=f"{doc['id']}:{i}") for i, c in enumerate(doc["checks"])]
+            checks += [
+                pytest.param(c, id=f"{doc['id']}:{i}")
+                for i, c in enumerate(doc["checks"])
+                if c["function"] == "mean_line"
+            ]
     return checks
 
 

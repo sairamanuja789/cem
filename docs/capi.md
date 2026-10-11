@@ -139,3 +139,11 @@ in rad. `result`: `basis` (geometry from stated parameters only; no performance)
 (m), and `parts` (`rotor`, `duct`), each with `validity`, `topology`, `mass_properties` and
 `exports` as in `cemkit_geometry_smoke`. A bad parameter is `geometry_failed` naming its path, for
 example `stations[2].radius` when the tip is not inside the duct.
+
+`free_vortex_design` (fans, also a `cemkit_l0_batch` function): `{"args": {"flow",
+"fan_total_pressure", "omega", "r_tip", "r_hub", "chord_hub", "chord_tip", "thickness",
+"embed_depth", "stations", ["geometry": {"blade_count", "hub_length", "duct_inner_radius",
+"duct_wall", "duct_length"}]}, ["air"]}` in SI. `result`: labelled `value` (L1 predicted,
+`fans.axial.free_vortex@0.1.0`, docs/models/fans/axial-free-vortex.md) with `axial_velocity`,
+`mean_line` and `stations` (embedded root first); with `geometry`, also `geometry_args`, the
+`ducted_fan_geometry` args that build those sections.

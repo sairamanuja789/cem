@@ -48,6 +48,9 @@ struct FanGeometryParams {
 struct FanGeometry {
   std::unique_ptr<geometry::port::Solid> rotor;
   std::unique_ptr<geometry::port::Solid> duct;
+  // One blade before patterning and fusing, root station included (it reaches into the hub): the
+  // blade surface a CFD mesher cuts the fluid domain with (M5).
+  std::unique_ptr<geometry::port::Solid> blade;
   core::Length tip_clearance;  // duct_inner_radius - tip radius
 };
 
@@ -62,6 +65,17 @@ struct FanGeometry {
 // Registers "ducted_fan_geometry" (C ABI cemkit_product_operation, docs/capi.md): the rotor and
 // duct of a request, each with validity, topology, mass properties and exports.
 [[nodiscard]] core::Status register_geometry_operation(product::Operations& operations);
+
+// Registers "rotor_cfd_case" (cfd_case.cpp, M5): solver cases for a designed rotor.
+[[nodiscard]] core::Status register_cfd_operation(product::Operations& operations);
+
+// geometry_failed naming the first station at or outside the hub radius any point of which lies
+// outside +-pi/N about the blade axis (+x): a one-passage CFD case would cut that blade.
+[[nodiscard]] core::Status blade_fits_passage(const FanGeometryParams& params);
+
+// The integrated quantities of one solved case (rotor_cfd_metrics; cfd_case.cpp documents the
+// definitions): sim_untrusted unless args.status is CONVERGED or VERIFIED (TRUST-001, TRUST-004).
+[[nodiscard]] core::Result<product::Json> rotor_cfd_metrics(const product::Json& args);
 
 // Every operation of this family: ducted_fan_geometry and mean_line (operations.cpp).
 [[nodiscard]] core::Status register_operations(product::Operations& operations);

@@ -9,6 +9,7 @@
 #include "cemkit/core/version.hpp"
 #include "cemkit/geometry/port/backend.hpp"
 #include "cemkit/product/json_io.hpp"
+#include "cemkit/simulation/port/case.hpp"
 
 namespace cemkit::product {
 
@@ -20,6 +21,8 @@ namespace cemkit::product {
 // products never depend on an engine (ADR-009).
 struct OperationContext {
   const geometry::port::GeometryBackend& geometry;
+  // The solver case writer the C ABI lends (M5); null where no writer is linked.
+  const simulation::port::CaseWriter* case_writer = nullptr;
 };
 
 using Operation =

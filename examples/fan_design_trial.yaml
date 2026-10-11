@@ -1,0 +1,17 @@
+# DESIGN PARAMETERS FOR THE TRIAL DUTY - PLACEHOLDERS, NOT REQUIREMENTS (ADR-016).
+# `cemkit spec compile examples/axial_120_trial.yaml`, then
+# `cemkit design fan axial-120-trial examples/fan_design_trial.yaml --out DIR` runs the L1
+# free-vortex design (fans.axial.free_vortex@0.1.0) and builds the rotor and duct. The duty, speed,
+# tip radius (D6) and duct come from the spec. Every value below is provisional: the hub radius
+# waits for the measured motor (HI-025), chords and thickness for a sourced loading rule (none is
+# sourced: UNSOURCED). Units: metres.
+r_hub: 0.020          # placeholder (40 mm hub); replace with the measured motor hub (HI-025)
+chord_hub: 0.018      # placeholder (a 20 mm root reaches past the 25 mm hub at this stagger)
+chord_tip: 0.016      # placeholder
+thickness: 0.0012     # placeholder; at least product.wall_thickness_min (0.8 mm)
+stations: 5
+embed_depth: 0.003    # root section 3 mm inside the hub so the blade fuses with it
+blade_count: 7        # ADR-016 initial design
+hub_length: 0.025     # ADR-016 depth 25 mm
+duct_wall: 0.002      # placeholder
+duct_length: 0.025    # ADR-016 depth 25 mm

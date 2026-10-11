@@ -14,6 +14,8 @@ calculation and 10 000 random states (ctest `fans_l0_crosscheck`, T08). Decision
 | R* | 8.31432 × 10³ | J/(kmol·K) | USSA 1976, p. 3, discussion of the Category I constants (see the erratum below) |
 | M₀ | 28.9644 | kg/kmol | USSA 1976, section 1.2.4 "Mean molecular weight", eq. (21) with table 3, p. 9 |
 | R | R*/M₀ = 287.0531 | J/(kg·K) | Computed in code from R* and M₀, never typed as a rounded value |
+| β (Sutherland) | 1.458 × 10⁻⁶ | kg/(s·m·K^½) | USSA 1976, section 1.3.10, eq. (51) (page to be confirmed by the owner) |
+| S (Sutherland) | 110.4 | K | USSA 1976, section 1.3.10, eq. (51) (page to be confirmed by the owner) |
 | γ | 1.40 | – | USSA 1976, Table 2 B (Category II constants), p. 2 ("1.40 (dimensionless)"); p. 4 ("an adopted value γ = 1.400") |
 
 **Document:** *U.S. Standard Atmosphere, 1976*. National Oceanic and Atmospheric Administration,
@@ -52,3 +54,12 @@ The ideal-gas density at the defaults is p₁ / (R T₁) = 101 325 / (287.0531 �
 
 a₁ = √(1.40 × 287.0531 × 298.15) = 346.149 m/s. It is used by the tip-Mach limit in
 `docs/models/fans/l0-similarity.md`.
+
+## Dynamic viscosity (model platform.air.viscosity@1.0.0)
+
+μ = β T^(3/2) / (T + S) (Sutherland's law as given by the U.S. Standard Atmosphere 1976, eq. (51)).
+At the AX-005 default temperature, 298.15 K: μ = 1.8372 × 10⁻⁵ Pa·s. A separate model id keeps
+platform.air@1.0.0 unchanged. Validity: the code checks only a finite, strictly positive temperature; the
+temperature range over which eq. (51) holds is to be cited by the owner (HI-028). Fans here use it
+near 250 to 330 K. Used for the Reynolds number of
+CFD cases (M5) when the spec states no `air.dynamic_viscosity`; a stated value wins.

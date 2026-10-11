@@ -428,3 +428,22 @@ def test_static_pressure_where_total_is_required_is_a_type_error(tmp_path: Path)
     out, status = _mypy(tmp_path, "FanStaticPressure(150.0)")
     assert status == 1
     assert 'incompatible type "FanStaticPressure"' in out
+
+
+@pytest.mark.req("PHY-005")
+@given(st.floats(150.0, 400.0))
+def test_kernel_dynamic_viscosity_agrees_with_the_reference(t: float) -> None:
+    from cemkit import kernel
+
+    expected = air_mod.dynamic_viscosity(t)
+    assert isinstance(expected, float)
+    (row,) = kernel.l0_batch([{"function": "dynamic_viscosity", "args": {"temperature": t}}])
+    assert row["model"] == "platform.air.viscosity@1.0.0"
+    assert row["value"] == pytest.approx(expected, rel=1e-15)
+
+
+@pytest.mark.req("PHY-003")
+def test_dynamic_viscosity_outside_validity_is_an_error() -> None:
+    result = air_mod.dynamic_viscosity(-1.0)
+    assert isinstance(result, Error) and result.subject == "temperature"
+    assert air_mod.dynamic_viscosity(298.15) == pytest.approx(1.8372e-5, rel=1e-4)

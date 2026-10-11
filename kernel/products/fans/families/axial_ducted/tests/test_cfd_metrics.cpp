@@ -88,10 +88,14 @@ TEST_CASE("a blade wider than its passage is rejected naming the station", "[SIM
   };
   cemkit::fans::axial_ducted::FanGeometryParams p;
   p.blade_count = 7;
+  p.hub_radius = len(0.02);
   p.stations = {station(0.02, 0.018, -0.5), station(0.0595, 0.016, -1.3)};
   CHECK(cemkit::fans::axial_ducted::blade_fits_passage(p).has_value());
   p.stations.back() = station(0.0595, 0.060, -1.3);  // 60 mm tip chord spans about 54 degrees
   const auto r = cemkit::fans::axial_ducted::blade_fits_passage(p);
   REQUIRE_FALSE(r.has_value());
   CHECK(r.error().subject() == "stations[1]");
+  // A wide root section inside the hub is outside the fluid domain and not checked.
+  p.stations = {station(0.017, 0.060, -0.2), station(0.0595, 0.016, -1.3)};
+  CHECK(cemkit::fans::axial_ducted::blade_fits_passage(p).has_value());
 }

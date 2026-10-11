@@ -69,8 +69,8 @@ struct FanGeometry {
 // Registers "rotor_cfd_case" (cfd_case.cpp, M5): solver cases for a designed rotor.
 [[nodiscard]] core::Status register_cfd_operation(product::Operations& operations);
 
-// geometry_failed naming the first station any point of which lies outside +-pi/N about the blade
-// axis (+x): a one-passage CFD case would cut that blade (cfd_case.cpp).
+// geometry_failed naming the first station at or outside the hub radius any point of which lies
+// outside +-pi/N about the blade axis (+x): a one-passage CFD case would cut that blade.
 [[nodiscard]] core::Status blade_fits_passage(const FanGeometryParams& params);
 
 // The integrated quantities of one solved case (rotor_cfd_metrics; cfd_case.cpp documents the

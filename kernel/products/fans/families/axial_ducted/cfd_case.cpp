@@ -244,12 +244,16 @@ core::Result<Json> rotor_cfd_metrics(const Json& a) {
 
 core::Status blade_fits_passage(const FanGeometryParams& params) {
   // The passage holds exactly one blade: every section point must lie strictly inside +-pi/N about
-  // +x, or the periodic sides would cut the blade and the case would model a different rotor.
+  // +x (sections at or outside the hub radius), or the periodic sides would cut the blade.
   if (params.blade_count == 0) {
     return core::fail(core::ErrorCode::geometry_failed, "no blades", "blade_count");
   }
   const double half_passage = std::numbers::pi / static_cast<double>(params.blade_count);
   for (std::size_t i = 0; i < params.stations.size(); ++i) {
+    // A section inside the hub (the embedded root) is not in the fluid domain.
+    if (params.stations[i].radius < params.hub_radius) {
+      continue;
+    }
     const auto section = blade_section(params.stations[i], 64);
     for (const auto* curve : {&section.upper, &section.lower}) {
       for (const auto& pt : *curve) {

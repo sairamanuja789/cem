@@ -1064,9 +1064,19 @@ def optimize_fan(
                     rows.append(row)
                     continue
                 command = {"command": "design fan", "inputs": {"spec": spec}}
-                out, _ = simulate_fan_run(
-                    command, output, cfd_settings, workdir / f"candidate_{i:02d}", [("medium", 1.0)]
-                )
+                try:
+                    out, _ = simulate_fan_run(
+                        command,
+                        output,
+                        cfd_settings,
+                        workdir / f"candidate_{i:02d}",
+                        [("medium", 1.0)],
+                    )
+                except (Failure, kernel.KernelError) as e:
+                    row["status"] = "infeasible"
+                    row["reason"] = str(e)
+                    rows.append(row)
+                    continue
                 case = out["cases"][0]
                 row["status"] = case["status"]
                 row["failed_checks"] = case["failed_checks"]

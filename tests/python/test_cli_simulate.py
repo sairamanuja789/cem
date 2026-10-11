@@ -52,7 +52,7 @@ def test_simulate_fan_runs_three_points_and_a_mesh_study(tmp_path: Path) -> None
     # Identical synthetic monitors on all meshes: a converged study, so the fine case is verified.
     assert "fine_q100: VERIFIED" in out
     assert "[L2 verified, fans.axial.cfd_metrics@0.2.0]" in out
-    assert "UNSOURCED" in out  # the thresholds' sources are printed
+    assert "project decision (ADR-017, HI-028)" in out  # the thresholds' sources are printed
     case = tmp_path / "w" / "design_2" / "medium_q100"
     assert "volumetricFlowRate 0.004;" in (case / "0" / "U").read_text(encoding="utf-8")
 

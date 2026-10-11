@@ -26,10 +26,10 @@ constexpr core::SemVer k_version{.major = 0, .minor = 3, .patch = 0};
 // measurements. Mesh quality uses OpenFOAM v2512's default limits
 // (etc/caseDicts/mesh/generation/meshQualityDict.cfg: maxInternalSkewness 4, maxBoundarySkewness
 // 20) through checkMesh -meshQuality.
-constexpr double k_residual = 1e-4;  // project decision (ADR-017): final initial residual
+constexpr double k_residual = 1e-4;         // project decision (ADR-017): final initial residual
 constexpr double k_mass_imbalance = 0.005;  // project decision (ADR-017)
 constexpr double k_flat_fraction = 0.2;     // project decision (ADR-017): final 20% of iterations
-constexpr double k_flatness = 0.01;  // project decision (ADR-017): relative range there
+constexpr double k_flatness = 0.01;         // project decision (ADR-017): relative range there
 
 double m(core::Length l) { return l.numerical_value_in(si::metre); }
 
@@ -265,7 +265,8 @@ core::Result<port::CaseFiles> OpenFoamWriter::rotor_sector(const port::RotorSect
   out.case_template = rotor_sector_template();
   out.text["system/blockMeshDict"] = block_mesh(c);
   out.text["system/snappyHexMeshDict"] = snappy(c);
-  // checkMesh -meshQuality reads this: OpenFOAM's default limits (internal skewness 4, boundary 20).
+  // checkMesh -meshQuality reads this: OpenFOAM's default limits (internal skewness 4, boundary
+  // 20).
   out.text["system/meshQualityDict"] =
       header("dictionary", "meshQualityDict") +
       "#includeEtc \"caseDicts/mesh/generation/meshQualityDict.cfg\"\n";
@@ -351,10 +352,10 @@ core::Result<port::CaseFiles> OpenFoamWriter::rotor_sector(const port::RotorSect
       .sources = {"residuals 1e-4: project decision (ADR-017, HI-028)",
                   "mass imbalance 0.5%: project decision (ADR-017, HI-028)",
                   "flat over the final 20%: project decision (ADR-017, HI-028)",
-                  "flatness 1% relative range: project decision (ADR-017, HI-028); pressure "
-                  "rise range relative to max(|mean|, 1/2 (omega r_duct)^2)",
-                  "mesh quality: OpenFOAM v2512 default meshQualityDict.cfg (internal skewness "
-                  "4, boundary skewness 20) via checkMesh -meshQuality"}};
+                  std::string{"flatness 1% relative range: project decision (ADR-017, HI-028); "} +
+                      "pressure rise range relative to max(|mean|, 1/2 (omega r_duct)^2)",
+                  std::string{"mesh quality: OpenFOAM v2512 default meshQualityDict.cfg "} +
+                      "(internal skewness 4, boundary skewness 20) via checkMesh -meshQuality"}};
   out.monitors = {{"inletFlow", "volumetric flow through the inlet (m3/s, negative inwards)"},
                   {"outletFlow", "volumetric flow through the outlet (m3/s)"},
                   {"pIn", "area-averaged kinematic static pressure at the inlet (m2/s2)"},

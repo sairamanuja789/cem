@@ -5,6 +5,7 @@ port against the reference."""
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -190,7 +191,7 @@ def test_the_solution_meets_continuity_the_duty_and_radial_equilibrium(n: float)
     h = (rt - rh) / m
     rs = [rh + j * h for j in range(m + 1)]
 
-    def trap(f: Any) -> float:
+    def trap(f: Callable[[float], float]) -> float:
         return h * (sum(f(r) for r in rs) - 0.5 * (f(rs[0]) + f(rs[-1])))
 
     flow = trap(lambda r: 2.0 * math.pi * r * cx2(r))

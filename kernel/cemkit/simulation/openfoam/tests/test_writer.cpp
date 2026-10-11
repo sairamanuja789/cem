@@ -96,9 +96,8 @@ TEST_CASE("mesh quality uses OpenFOAM's default limits through checkMesh -meshQu
   REQUIRE(files.has_value());
   CHECK(has(files->text.at("system/meshQualityDict"),
             "#includeEtc \"caseDicts/mesh/generation/meshQualityDict.cfg\""));
-  const auto check = std::ranges::find_if(files->steps, [](const auto& s) {
-    return s.name == "checkMesh";
-  });
+  const auto check =
+      std::ranges::find_if(files->steps, [](const auto& s) { return s.name == "checkMesh"; });
   REQUIRE(check != files->steps.end());
   CHECK(check->argv == std::vector<std::string>{"checkMesh", "-meshQuality"});
 }

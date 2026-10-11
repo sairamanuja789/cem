@@ -38,7 +38,7 @@ template <class F>
 std::pair<double, double> bisect(F&& f, double lo, double hi) {
   while (true) {
     const double mid = 0.5 * (lo + hi);
-    if (!(lo < mid && mid < hi)) {
+    if (mid <= lo || mid >= hi) {
       return {lo, hi};
     }
     if (f(mid)) {
@@ -56,7 +56,12 @@ class Equilibrium {
     const double h = (r_tip - r_hub) / static_cast<double>(k_intervals);
     for (std::size_t j = 0; j <= k_intervals; ++j) {
       const double r = r_hub + (static_cast<double>(j) * h);
-      const double weight = (j == 0 || j == k_intervals) ? 1.0 : ((j % 2 != 0) ? 4.0 : 2.0);
+      double weight = 2.0;  // composite Simpson: 1, 4, 2, 4, ..., 4, 1
+      if (j == 0 || j == k_intervals) {
+        weight = 1.0;
+      } else if (j % 2 != 0) {
+        weight = 4.0;
+      }
       nodes_.push_back(r);
       weights_.push_back((h / 3.0) * weight);
       a_.push_back(work_term(r));
@@ -138,7 +143,7 @@ core::Result<FreeVortexDesign> vortex_design(const FreeVortexInputs& in, double 
     return std::unexpected{std::move(ok).error()};
   }
   const double n = vortex_exponent;
-  if (!(std::isfinite(n) && n >= -1.0 && n <= 1.0)) {
+  if (!std::isfinite(n) || n < -1.0 || n > 1.0) {
     return invalid("the vortex exponent must be in [-1, 1]", n, "[-1, 1]");
   }
   const double rh = m(in.r_hub);

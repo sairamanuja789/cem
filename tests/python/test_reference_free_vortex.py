@@ -124,7 +124,8 @@ def test_each_station_satisfies_euler_and_the_arc_geometry(a: dict[str, Any]) ->
         assert s.camber_angle > 0.0
         # The arc's end tangents make theta/2 with its chord: R = c / (2 sin(theta/2)).
         big_r = s.chord / (2.0 * math.sin(s.camber_angle / 2.0))
-        assert s.camber == pytest.approx(big_r * (1.0 - math.cos(s.camber_angle / 2.0)))
+        # 1 - cos(x) = 2 sin^2(x / 2), without cancellation at small camber angles
+        assert s.camber == pytest.approx(big_r * 2.0 * math.sin(s.camber_angle / 4.0) ** 2)
         assert s.recipe_stagger == pytest.approx(-s.stagger_from_axis)
 
 

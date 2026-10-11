@@ -68,6 +68,7 @@ def assess(
     solver_failed: bool,
     resource_limit: str | None,
     mesh_ok: bool,
+    mesh_failures: Sequence[str] = (),
     residuals: Mapping[str, float],
     inflow: float,
     outflow: float,
@@ -86,8 +87,10 @@ def assess(
             "SOLVER_FAILED", (Check("solver", False, None, None, "a solver step failed"),)
         )
     if not mesh_ok:
+        detail = "; ".join(mesh_failures) or "checkMesh did not report Mesh OK"
         return Assessment(
-            "MESH_INVALID", (Check("mesh_quality", False, None, None, "checkMesh did not pass"),)
+            "MESH_INVALID",
+            (Check("mesh_quality", False, None, None, f"checkMesh failed: {detail}"),),
         )
     checks: list[Check] = []
     for name, limit in sorted(thresholds.residuals.items()):

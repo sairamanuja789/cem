@@ -2,6 +2,18 @@
 
 This document tracks items that require human owner action, verification, or review.
 
+## Priority order (agreed 2026-10-11)
+
+1. Owner measures the reference fan (HI-025, HI-030): geometry, motor, and a rough duty test.
+2. Set the real target duty in the spec from that measurement; the 18 Pa TRIAL duty may be out of
+   reach for a 120 mm rotor at 2000 rpm.
+3. CFD credibility check (Gate 1): model the reference fan's measured blades, simulate them with the
+   existing CFD, and compare with its datasheet or rig curve before trusting CFD for design.
+4. HI-027 (Carter deviation, Lieblein loss) once the owner gives the pages; HI-026 de Haller limit.
+5. Design search against the real duty; regenerate the design package.
+6. Print the best trusted rotor; rig test (first L3 point, AX-017).
+7. Owner sign-off at any time: hand calculations to `verified/`, ADR-001/016/017/018, HI-031 pages.
+
 | ID | Item | Origin | Notes / Action Required |
 |---|---|---|---|
 | HI-001 | Update `status: proposed` to `status: verified` in `tests/hand_calcs/verified/l0_001`..`l0_009` | T06 | Folder `tests/hand_calcs/verified/` is protected from AI modification. Owner must edit metadata in-place. |

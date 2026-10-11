@@ -251,7 +251,7 @@ The compiler rejects a spec when static versus total pressure is not stated, whe
 | Hub-to-tip ratio | ν | 0.30–0.60 | Higher ratio supports higher pressure |
 | Blade count | Z | 3–11 (integer) | Interacts with solidity and noise tones |
 | Solidity at hub, mid, tip | σ = cZ/(2πr) | 0.4–1.5 | Three control points, smooth spline |
-| Design vortex exponent | n | 0 (free vortex) to 1 (forced) | Sets spanwise work distribution |
+| Design vortex exponent | n | −1 (free vortex) to 1 (forced vortex); c_θ2 = K rⁿ (ADR-018) | Sets spanwise work distribution; n ≠ −1 needs radial equilibrium |
 | Blade angle offset | Δβ | ±10° | Trims the whole blade |
 | Camber profile | — | Circular arc or NACA 65 family | Chosen per plugin version |
 | Thickness ratio | t/c | 6–12%, floored by printer minimum wall | |

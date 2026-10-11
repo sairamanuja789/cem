@@ -53,6 +53,7 @@ class Station:
     de_haller_ratio: float  # W2 / W1 (reported only: a limit on it is empirical, UNSOURCED)
     reaction: float  # R = 1 - c_theta2 / (2 U)
     embedded: bool  # the root station inside the hub (repeats the hub section)
+    outlet_axial_velocity: float  # c_x2 (= c_x for the free vortex)
 
 
 @dataclass(frozen=True)
@@ -85,6 +86,56 @@ def _section(
     return (u, c_theta2, beta1, beta2, theta, xi, camber, w2 / w1, reaction, chord, thickness)
 
 
+def check_sections(
+    chord_hub: float,
+    chord_tip: float,
+    thickness: float,
+    stations: int,
+    embed_depth: float,
+    r_hub: float,
+    model: str,
+) -> Error | None:
+    """The section validity checks shared by the free and general vortex models (fixed order,
+    PHY-005)."""
+    for subject, value in (
+        ("chord_hub", chord_hub),
+        ("chord_tip", chord_tip),
+        ("thickness", thickness),
+        ("embed_depth", embed_depth),
+    ):
+        failure = require_positive(subject, value, model)
+        if failure is not None:
+            return failure
+    if stations < 3:
+        return error(
+            "out_of_validity",
+            "at least 3 blade stations are needed",
+            "stations",
+            value=str(stations),
+            bounds="[3, inf)",
+            model=model,
+        )
+    if not embed_depth < r_hub:
+        return error(
+            "out_of_validity",
+            "the embed depth must be less than the hub radius",
+            "embed_depth",
+            value=format_number(embed_depth),
+            bounds=f"(0, {format_number(r_hub)})",
+            model=model,
+        )
+    if not (thickness < chord_hub and thickness < chord_tip):
+        return error(
+            "out_of_validity",
+            "the blade thickness must be less than every chord",
+            "thickness",
+            value=format_number(thickness),
+            bounds=f"(0, {format_number(min(chord_hub, chord_tip))})",
+            model=model,
+        )
+    return None
+
+
 def free_vortex_design(
     flow: float,
     pressure: FanTotalPressure,
@@ -102,42 +153,9 @@ def free_vortex_design(
     line = mean_line(flow, pressure, omega, r_tip, r_hub, air)
     if isinstance(line, Error):
         return line
-    for subject, value in (
-        ("chord_hub", chord_hub),
-        ("chord_tip", chord_tip),
-        ("thickness", thickness),
-        ("embed_depth", embed_depth),
-    ):
-        failure = require_positive(subject, value, MODEL)
-        if failure is not None:
-            return failure
-    if stations < 3:
-        return error(
-            "out_of_validity",
-            "at least 3 blade stations are needed",
-            "stations",
-            value=str(stations),
-            bounds="[3, inf)",
-            model=MODEL,
-        )
-    if not embed_depth < r_hub:
-        return error(
-            "out_of_validity",
-            "the embed depth must be less than the hub radius",
-            "embed_depth",
-            value=format_number(embed_depth),
-            bounds=f"(0, {format_number(r_hub)})",
-            model=MODEL,
-        )
-    if not (thickness < chord_hub and thickness < chord_tip):
-        return error(
-            "out_of_validity",
-            "the blade thickness must be less than every chord",
-            "thickness",
-            value=format_number(thickness),
-            bounds=f"(0, {format_number(min(chord_hub, chord_tip))})",
-            model=MODEL,
-        )
+    failure = check_sections(chord_hub, chord_tip, thickness, stations, embed_depth, r_hub, MODEL)
+    if failure is not None:
+        return failure
 
     c_x = line.axial_velocity
     out: list[Station] = []
@@ -162,6 +180,7 @@ def free_vortex_design(
                 de_haller_ratio=s[7],
                 reaction=s[8],
                 embedded=False,
+                outlet_axial_velocity=c_x,
             )
         )
     hub = out[0]

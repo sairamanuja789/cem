@@ -1,0 +1,115 @@
+id: l1_003
+title: General vortex (c_theta2 = K r^n) with simple radial equilibrium at n = -1 and n = 0, TRIAL duty
+requirements: [PHY-001, PHY-005, PHY-007]
+model: fans.axial.vortex@0.1.0
+status: proposed
+source: >
+  Swirl c_theta2 = K r^n with c_theta1 = 0 (n = -1 free vortex, 0 constant swirl, 1 forced) and
+  simple radial equilibrium behind the rotor with loss-free Euler work h02 - h01 = U c_theta2 and a
+  uniform inlet (Dixon & Hall, Fluid Mechanics and Thermodynamics of Turbomachinery, 7th ed.,
+  three-dimensional flows in axial turbomachines; pages to be confirmed by the owner, HI-031):
+  d(c_x2^2/2)/dr = d(omega K r^(n+1))/dr - (c_theta2/r) d(r c_theta2)/dr. Reaction
+  R = 1 - (c_x2^2 - c_x1^2 + c_theta2^2)/(2 U c_theta2) (rotor static over total enthalpy rise,
+  c_theta1 = 0; Dixon & Hall, reaction; to be confirmed). Sections as l1_002.
+inputs_note: >
+  TRIAL duty (ADR-016), not a requirement: Q = 0.028 m3/s, dp_t = 21.6 Pa, omega = 2000 rpm,
+  r_tip = 0.0595 m, chords 20 mm (hub) and 16 mm (tip), thickness 1.2 mm, 3 stations, embed 3 mm,
+  rho = 1.18 kg/m3. Case A: n = -1, r_hub = 0.020 m (must reproduce l1_002). Case B: n = 0,
+  r_hub = 0.028 m (placeholder; with r_hub = 0.020 m, n = 0 cannot reach the duty, case C).
+working: |
+  Integrating the equilibrium from the hub, with A = c_x2^2(r_hub):
+    c_x2^2(r) = A + 2 omega K (r^(n+1) - r_hub^(n+1)) - 2 (n+1) K^2 I(r),
+    I(r) = (r^(2n) - r_hub^(2n)) / (2n)  (n != 0),   I(r) = ln(r / r_hub)  (n = 0).
+  Unknowns A and K from two conditions:
+    continuity   Q    = integral_{r_hub}^{r_tip} 2 pi r c_x2 dr
+    duty         dp_t = rho omega K integral r^(n+1) c_x2 2 pi r dr / Q   (mass-averaged Euler rise)
+
+  Case A, n = -1: (n+1) = 0 and r^0 - r_hub^0 = 0, so c_x2^2 = A everywhere. Continuity gives
+  c_x2 = Q / (pi (r_tip^2 - r_hub^2)) = c_x1 = 2.838206134 m/s, and the duty gives
+  dp_t = rho omega K, K = 21.6 / 247.1386221 = 0.08740034163 m2/s: exactly the free vortex of
+  l1_002, so every station equals l1_002's (hub values repeated below).
+
+  Case B, n = 0, r_hub = 0.028 m:
+    c_x1 = 0.028 / (pi (0.0595^2 - 0.028^2)) = 0.028 / 0.008659 = 3.233624241 m/s
+    c_x2^2(r) = A + 2 omega K (r - 0.028) - 2 K^2 ln(r / 0.028)
+  Solved by an independent script (trapezoid rule, 20000 intervals; secant on A for continuity
+  inside a secant on K for the duty; tests/hand_calcs working only, not the reference algorithm):
+    K = 1.816663947 m/s (constant swirl),  A = 0.9432456230 m2/s2 (c_x2 hub = 0.9712 m/s)
+    check: continuity 0.028000 m3/s, mass-averaged rise 21.600 Pa.
+  Hub, r = 0.028, c = 0.020: U = 5.864306287; c_x2 = sqrt(0.9432456) = 0.9712083314
+    beta1 = atan2(5.864306287, 3.233624241) = 1.066872912 rad
+    beta2 = atan2(5.864306287 - 1.816663947, 0.9712083314) = atan2(4.047642340, 0.971208331)
+          = 1.335304101 rad
+    theta = 1.066872912 - 1.335304101 = -0.2684311888 rad   (NEGATIVE camber)
+    h = 0.010 tan(-0.0671078) = -0.0006720871802 m
+    W1 = hypot(3.233624, 5.864306) = 6.696707; W2 = hypot(0.971208, 4.047642) = 4.162531
+    W2/W1 = 0.6215749339;  R = 1 - (0.943246 - 10.456326 + 3.300268) / (2 x 5.864306 x 1.816664)
+          = 1 - (-6.212812 / 21.306886) = 1.291586215
+  Mid, r = 0.04375, c = 0.018: c_x2 = 3.159536305, beta2 = 1.164626928, theta = 0.06691251714 rad,
+    h = 0.0001505672083 m, W2/W1 = 0.8229998283, R = 0.9150966341
+  Tip, r = 0.0595, c = 0.016: c_x2 = 4.465228317, beta2 = 1.173620892, theta = 0.1432888671 rad,
+    h = 0.0002867003789 m, W2/W1 = 0.8966327479, R = 0.7176904023
+
+  Note: moving work outward (n = 0) removes swirl at the hub, but radial equilibrium then drops the
+  hub axial velocity from 3.23 to 0.97 m/s. The hub W2/W1 stays 0.62 (free vortex at this hub:
+  0.633), and the hub section needs negative camber with reaction above 1. The model reports
+  these; it applies no limit (de Haller limit: HI-026).
+
+  Case C, n = 0, r_hub = 0.020 m: the largest K that keeps c_x2^2 > 0 at every radius gives about
+  12 Pa, below 21.6 Pa, so the model returns out_of_validity (reverse flow needed). Case D:
+  n = 1.5 is outside the search range [-1, 1].
+checks:
+  - function: vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.003, vortex_exponent: -1.0}
+    expected:
+      axial_velocity: 2.83820613427152
+      swirl_constant: 0.08740034163012558
+      stations:
+        - {radius: 0.017, embedded: true, camber: 0.0026576671733706658}
+        - {radius: 0.02, blade_speed: 4.1887902047863905, outlet_swirl: 4.370017081506279,
+           relative_inlet_angle: 0.9752819627563539, relative_outlet_angle: -0.0637660452291582,
+           camber_angle: 1.0390480079855122, recipe_stagger: -0.45575795876359787,
+           camber: 0.0026576671733706658, de_haller_ratio: 0.5620769960178094,
+           reaction: 0.4783676350616932, outlet_axial_velocity: 2.83820613427152}
+        - {radius: 0.03975, relative_inlet_angle: 1.2422364014281697,
+           relative_outlet_angle: 1.1369625029361965, camber: 0.00023692097619392274,
+           de_haller_ratio: 0.7676421262042015, reaction: 0.8679463970726964}
+        - {radius: 0.0595, outlet_swirl: 1.4689133047079932, relative_inlet_angle: 1.3468609711392965,
+           relative_outlet_angle: 1.3181251541697687, camber: 5.747262264778856e-05,
+           recipe_stagger: -1.3324930626545326, de_haller_ratio: 0.8883049548512303}
+    rel_tol: 1.0e-8
+  - function: vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.028, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.003, vortex_exponent: 0.0}
+    expected:
+      axial_velocity: 3.233624240597239
+      swirl_constant: 1.816663947148875
+      stations:
+        - {radius: 0.025, embedded: true, camber: -0.0006720871802210726}
+        - {radius: 0.028, blade_speed: 5.8643062867009474, outlet_swirl: 1.816663947148875,
+           outlet_axial_velocity: 0.9712083313850651, relative_inlet_angle: 1.0668729122620502,
+           relative_outlet_angle: 1.3353041010910103, camber_angle: -0.2684311888289601,
+           recipe_stagger: -1.2010885066765302, camber: -0.0006720871802210726,
+           de_haller_ratio: 0.6215749338938548, reaction: 1.2915862150994055}
+        - {radius: 0.04375, outlet_axial_velocity: 3.159536304525872,
+           relative_outlet_angle: 1.164626927699715, camber_angle: 0.06691251714430524,
+           camber: 0.00015056720825952228, de_haller_ratio: 0.8229998283160161,
+           reaction: 0.915096634098999}
+        - {radius: 0.0595, outlet_axial_velocity: 4.46522831720305,
+           relative_outlet_angle: 1.173620892161506, camber_angle: 0.14328886705939214,
+           camber: 0.0002867003789030297, de_haller_ratio: 0.8966327478945902,
+           reaction: 0.7176904023231572}
+    rel_tol: 1.0e-5
+  - function: vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.003, vortex_exponent: 0.0}
+    expected_error: {code: out_of_validity, subject: vortex_exponent}
+  - function: vortex_design
+    args: {flow: 0.028, fan_total_pressure: 21.6, omega: 209.43951023931953, r_tip: 0.0595,
+           r_hub: 0.020, chord_hub: 0.020, chord_tip: 0.016, thickness: 0.0012, stations: 3,
+           embed_depth: 0.003, vortex_exponent: 1.5}
+    expected_error: {code: out_of_validity, subject: vortex_exponent}

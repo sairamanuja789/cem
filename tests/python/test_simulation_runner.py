@@ -69,3 +69,46 @@ def test_mesh_failures_are_read_from_the_checkmesh_log(tmp_path: Path) -> None:
         "Max skewness = 7.7328652, 4 highly skew faces detected which may impair",
     )
     assert openfoam.mesh_failures(tmp_path / "missing") == ("no checkMesh log",)
+
+
+DATA = Path(__file__).parent / "data"
+
+
+@pytest.mark.req("TRUST-004")
+def test_boundary_skewness_up_to_the_meshqualitydict_limit_passes(tmp_path: Path) -> None:
+    """HI-028, on real checkMesh -meshQuality v2512 output (the fine trial mesh): generic checkMesh
+    flags one face at skewness 4.03, but no face is in error under OpenFOAM's default
+    meshQualityDict (internal 4, boundary 20), so the mesh passes."""
+    text = (DATA / "checkmesh_quality_pass.log").read_text(encoding="utf-8")
+    (tmp_path / "log.checkMesh").write_text(text, encoding="utf-8")
+    assert openfoam.mesh_ok(tmp_path)
+    assert openfoam.faces_in_error(text) is not None
+    assert len(openfoam.faces_in_error(text) or {}) == openfoam.QUALITY_CHECKS
+
+
+@pytest.mark.req("TRUST-004")
+def test_faces_in_error_under_meshqualitydict_fail_the_mesh(tmp_path: Path) -> None:
+    """Real output with faces in error (the same mesh checked against maxNonOrtho 30 to force a
+    failure): the mesh fails and the failure names the check and the face count."""
+    text = (DATA / "checkmesh_quality_fail.log").read_text(encoding="utf-8")
+    (tmp_path / "log.checkMesh").write_text(text, encoding="utf-8")
+    assert not openfoam.mesh_ok(tmp_path)
+    assert "non-orthogonality > 30 degrees: 7673 (meshQualityDict)" in openfoam.mesh_failures(
+        tmp_path
+    )
+
+
+@pytest.mark.req("TRUST-004")
+def test_another_failure_or_an_incomplete_quality_section_fails_the_mesh(tmp_path: Path) -> None:
+    text = (DATA / "checkmesh_quality_pass.log").read_text(encoding="utf-8")
+    log = tmp_path / "log.checkMesh"
+    log.write_text(text.replace("Face pyramids OK.", " ***Error in face pyramids"), "utf-8")
+    assert not openfoam.mesh_ok(tmp_path)
+    # A zero-count line in an unexpected format must not hide the checks after it (A1).
+    lines = text.splitlines()
+    garbled = [("    faces with concavity: unknown" if "concavity" in x else x) for x in lines]
+    log.write_text("\n".join(garbled), encoding="utf-8")
+    assert not openfoam.mesh_ok(tmp_path)
+    no_section = text[: text.index("Checking faces in error")] + "Failed 1 mesh checks.\n"
+    log.write_text(no_section, encoding="utf-8")
+    assert not openfoam.mesh_ok(tmp_path)

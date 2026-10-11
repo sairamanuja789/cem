@@ -6,7 +6,7 @@ Every line in `data/`, `kernel/`, `python/` and `schemas/` (tests excluded) with
 the UNSOURCED marker (CLAUDE.md rule 7). Some lines define or explain the marker;
 the rest are values or models still waiting for a cited source.
 
-30 line(s) in 16 file(s).
+26 line(s) in 16 file(s).
 
 ## `data/fans/family_ranges.yaml`
 
@@ -27,14 +27,6 @@ the rest are values or models still waiting for a cited source.
 - `inline constexpr std::string_view k_unsourced = "UNSOURCED";`
 - `// A default without a source is rejected; "UNSOURCED..." is accepted and reported.`
 - `// Names of parameters whose default is marked UNSOURCED, in parameter order (rule 7: reported).`
-
-## `kernel/cemkit/simulation/openfoam/writer.cpp`
-
-- `// UNSOURCED with every assessment (docs/models/platform/openfoam-rotor-sector.md, ADR-017), except`
-- `constexpr double k_residual = 1e-4;  // UNSOURCED: final initial residual of every field`
-- `constexpr double k_flatness = 0.01;      // UNSOURCED: relative range of each monitor there`
-- `.sources = {"residuals 1e-4: UNSOURCED (template choice)",`
-- `"flatness 1% relative range: UNSOURCED (template choice); pressure rise "`
 
 ## `kernel/cemkit/simulation/port/case.hpp`
 
@@ -79,6 +71,10 @@ the rest are values or models still waiting for a cited source.
 
 - `(a hydraulic efficiency below 1); no efficiency or loss value is sourced (UNSOURCED), so none is`
 - `de_haller_ratio: float  # W2 / W1 (reported only: any limit on it is empirical, UNSOURCED)`
+
+## `python/cemkit/reference/fans/axial/vortex.py`
+
+- `incidence and zero deviation (UNSOURCED, HI-027) as in free_vortex.py; reaction`
 
 ## `python/cemkit/reference/fans/common/feasibility.py`
 

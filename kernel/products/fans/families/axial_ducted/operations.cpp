@@ -8,6 +8,7 @@
 #include "products/fans/families/axial_ducted/free_vortex.hpp"
 #include "products/fans/families/axial_ducted/geometry.hpp"
 #include "products/fans/families/axial_ducted/mean_line.hpp"
+#include "products/fans/families/axial_ducted/vortex.hpp"
 
 namespace cemkit::fans::axial_ducted {
 
@@ -56,8 +57,9 @@ core::Result<Json> mean_line_case(const Json& c, const product::OperationContext
 // chord_hub, chord_tip, thickness, embed_depth (m) and stations; air as for the L0 functions. With
 // an optional "geometry" member (blade_count, hub_length, duct_inner_radius, duct_wall,
 // duct_length, m) the value also carries "geometry_args", the ducted_fan_geometry request args
-// that build these sections.
-core::Result<Json> free_vortex_case(const Json& c, const product::OperationContext& /*context*/) {
+// that build these sections. "vortex_design" takes the same args plus "vortex_exponent" n in
+// [-1, 1] (c_theta2 = K r^n, simple radial equilibrium; vortex.hpp).
+core::Result<Json> design_case(const Json& c, bool general) {
   const Json& a = product::member(c, "args");
   const auto length = [&](const char* key) { return number(a, key) * isq::length[si::metre]; };
   const Json& count = product::member(a, "stations");
@@ -76,7 +78,9 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
       .thickness = length("thickness"),
       .stations = count.get<std::size_t>(),
       .embed_depth = length("embed_depth")};
-  const auto d = free_vortex_design(in, product::air_of(c, "air"));
+  const auto air = product::air_of(c, "air");
+  const auto d =
+      general ? vortex_design(in, number(a, "vortex_exponent"), air) : free_vortex_design(in, air);
   if (!d) {
     return std::unexpected(d.error());
   }
@@ -94,20 +98,22 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
   Json stations = Json::array();
   Json sections = Json::array();
   for (const auto& s : d->stations) {
-    stations.push_back(Json{{"radius", metres(s.radius)},
-                            {"blade_speed", s.blade_speed.numerical_value_in(ms)},
-                            {"outlet_swirl", s.outlet_swirl.numerical_value_in(ms)},
-                            {"relative_inlet_angle", rad(s.relative_inlet_angle)},
-                            {"relative_outlet_angle", rad(s.relative_outlet_angle)},
-                            {"camber_angle", rad(s.camber_angle)},
-                            {"stagger_from_axis", rad(s.stagger_from_axis)},
-                            {"recipe_stagger", rad(s.recipe_stagger)},
-                            {"chord", metres(s.chord)},
-                            {"camber", metres(s.camber)},
-                            {"thickness", metres(s.thickness)},
-                            {"de_haller_ratio", one(s.de_haller_ratio)},
-                            {"reaction", one(s.reaction)},
-                            {"embedded", s.embedded}});
+    stations.push_back(
+        Json{{"radius", metres(s.radius)},
+             {"blade_speed", s.blade_speed.numerical_value_in(ms)},
+             {"outlet_swirl", s.outlet_swirl.numerical_value_in(ms)},
+             {"relative_inlet_angle", rad(s.relative_inlet_angle)},
+             {"relative_outlet_angle", rad(s.relative_outlet_angle)},
+             {"camber_angle", rad(s.camber_angle)},
+             {"stagger_from_axis", rad(s.stagger_from_axis)},
+             {"recipe_stagger", rad(s.recipe_stagger)},
+             {"chord", metres(s.chord)},
+             {"camber", metres(s.camber)},
+             {"thickness", metres(s.thickness)},
+             {"de_haller_ratio", one(s.de_haller_ratio)},
+             {"reaction", one(s.reaction)},
+             {"embedded", s.embedded},
+             {"outlet_axial_velocity", s.outlet_axial_velocity.numerical_value_in(ms)}});
     sections.push_back(Json{{"radius", metres(s.radius)},
                             {"chord", metres(s.chord)},
                             {"stagger", rad(s.recipe_stagger)},
@@ -116,6 +122,9 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
   }
   const MeanLine& ml = d->mean_line;
   Json value{{"axial_velocity", d->axial_velocity.numerical_value_in(ms)},
+             {"vortex_exponent", d->vortex_exponent},
+             {"swirl_constant", d->swirl_constant},
+             {"hub_axial_velocity_squared", d->hub_axial_velocity_squared},
              {"mean_line",
               {{"mean_radius", metres(ml.mean_radius)},
                {"blade_speed", ml.blade_speed.numerical_value_in(ms)},
@@ -140,6 +149,14 @@ core::Result<Json> free_vortex_case(const Json& c, const product::OperationConte
               {"model", core::to_string(d->model)}};
 }
 
+core::Result<Json> free_vortex_case(const Json& c, const product::OperationContext& /*context*/) {
+  return design_case(c, false);
+}
+
+core::Result<Json> vortex_case(const Json& c, const product::OperationContext& /*context*/) {
+  return design_case(c, true);
+}
+
 }  // namespace
 
 core::Status register_operations(product::Operations& operations) {
@@ -152,13 +169,19 @@ core::Status register_operations(product::Operations& operations) {
   if (auto ok = operations.add("free_vortex_design", free_vortex_case); !ok) {
     return ok;
   }
+  if (auto ok = operations.add("vortex_design", vortex_case); !ok) {
+    return ok;
+  }
   if (auto ok = register_cfd_operation(operations); !ok) {
     return ok;
   }
   if (auto ok = operations.add_model(mean_line_model()); !ok) {
     return ok;
   }
-  return operations.add_model(free_vortex_model());
+  if (auto ok = operations.add_model(free_vortex_model()); !ok) {
+    return ok;
+  }
+  return operations.add_model(vortex_model());
 }
 
 }  // namespace cemkit::fans::axial_ducted

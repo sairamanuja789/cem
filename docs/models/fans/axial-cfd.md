@@ -1,4 +1,4 @@
-# Axial rotor CFD (L2): template cemkit.openfoam.rotor_sector_mrf@0.2.0
+# Axial rotor CFD (L2): template cemkit.openfoam.rotor_sector_mrf@0.3.0
 
 Kernel: case definition `kernel/cemkit/simulation/port/case.hpp` (`RotorSectorCase`), OpenFOAM
 writer `kernel/cemkit/simulation/openfoam/writer.cpp`, family operations `rotor_cfd_case` and
@@ -54,10 +54,10 @@ Each case gets exactly one status. Thresholds belong to the template version:
 
 | Check | Threshold | Source |
 | --- | --- | --- |
-| Final initial residual, every field | ≤ 1e-4 | UNSOURCED (template choice) |
-| Mass imbalance | ≤ 0.5% | docs/architecture.md acceptance criteria (proposed) |
-| Torque and total-pressure-rise monitors | relative range ≤ 1% over the last 20% of iterations | 20%: docs/architecture.md (proposed); 1%: UNSOURCED |
-| Mesh | checkMesh "Mesh OK" (OpenFOAM v2512 default quality criteria) | OpenFOAM |
+| Final initial residual, every field | ≤ 1e-4 | project decision (ADR-017, HI-028) |
+| Mass imbalance | ≤ 0.5% | project decision (ADR-017, HI-028) |
+| Torque and total-pressure-rise monitors | relative range ≤ 1% over the last 20% of iterations | project decision (ADR-017, HI-028) |
+| Mesh | `checkMesh -meshQuality`: "Mesh OK", or skewness is the only generic failure and no face is in error under meshQualityDict (internal skewness 4, boundary 20) | OpenFOAM v2512 `etc/caseDicts/mesh/generation/meshQualityDict.cfg`; accepting generic boundary skewness above 4 on the meshQualityDict metric is a project decision (ADR-017) |
 
 Numbers are reported only for CONVERGED (L2 simulated) and VERIFIED (L2 verified) results;
 any other status is `sim_untrusted`. VERIFIED needs a three-mesh study at the duty point with every

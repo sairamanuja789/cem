@@ -52,7 +52,7 @@ def test_simulate_fan_runs_three_points_and_a_mesh_study(tmp_path: Path) -> None
     # Identical synthetic monitors on all meshes: a converged study, so the fine case is verified.
     assert "fine_q100: VERIFIED" in out
     assert "[L2 verified, fans.axial.cfd_metrics@0.2.0]" in out
-    assert "UNSOURCED" in out  # the thresholds' sources are printed
+    assert "project decision (ADR-017, HI-028)" in out  # the thresholds' sources are printed
     case = tmp_path / "w" / "design_2" / "medium_q100"
     assert "volumetricFlowRate 0.004;" in (case / "0" / "U").read_text(encoding="utf-8")
 
@@ -154,6 +154,10 @@ def test_search_bounds_follow_the_architecture_design_variable_table() -> None:
     assert any(
         "hub-to-tip" in f for f in cli.search_bound_failures({**base, "r_hub": 0.040}, 0.0595)
     )
+    good = {**base, "chord_tip": 0.0267}
+    assert cli.search_bound_failures({**good, "vortex_exponent": 0.5}, 0.0595) == []
+    bad = cli.search_bound_failures({**good, "vortex_exponent": 1.5}, 0.0595)
+    assert bad == ["vortex exponent 1.5 outside [-1.0, 1.0]"]
 
 
 @pytest.mark.req("OPT-003")
